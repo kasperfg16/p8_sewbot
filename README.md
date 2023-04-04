@@ -1,15 +1,15 @@
 # p8_sewbot
 
 ### Install Docker:
-# $ sudo apt-get install docker.io
-# $ sudo apt-get install dockerd -> to get docker deamon. Might not be necessary
+- $ sudo apt-get install docker.io
+- $ sudo apt-get install dockerd -> to get docker deamon. Might not be necessary
 
 
 ## To test Ubuntu and ROS version;
-# $ cat /etc/os-release
-# $ roscore 
+- $ cat /etc/os-release
+- $ roscore 
 
-## To stop a docker image, $ sudo docker stop container_id.
+- To stop a docker image, $ sudo docker stop container_id.
 ## Rules
 
 - All files that only relates to your own pc should never be included in commits, make sure to add them to gitignore!.
