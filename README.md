@@ -41,8 +41,6 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 
 - All files that only relates to your own pc should never be included in commits, make sure to add them to gitignore!.
 
-- All custom environments should be added to gitignore.
-
 ## Prerequisites
 
 1. Install python
