@@ -3,11 +3,13 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 
 ### Install Docker:
 
-[Follow this guide "Set up the repository"](https://desktop.docker.com/linux/main/amd64/docker-desktop-4.17.0-amd64.deb?utm_source=docker&utm_medium=webreferral&utm_campaign=docs-driven-download-linux-amd64)
+[DEB package download link](https://desktop.docker.com/linux/main/amd64/docker-desktop-4.17.0-amd64.deb?utm_source=docker&utm_medium=webreferral&utm_campaign=docs-driven-download-linux-amd64)
+
+## To build and run this container in terminal
 
 ``` bash
-    sudo apt-get install docker.io
-    sudo apt-get install containerd.io
+    docker build -t p8_sewbot .
+    sudo docker run -it --rm p8_sewbot
 ```
 
 ## To test Ubuntu and ROS version;
@@ -15,13 +17,6 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 ``` bash
     cat /etc/os-release
     roscore 
-```
-
-## To build and run this container in terminal
-
-``` bash
-    docker build -t p8_sewbot .
-    sudo docker run -it --rm p8_sewbot
 ```
 
 - In VSCode, get extension Dev container//remote explorer. 
@@ -34,14 +29,6 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 - All files that only relates to your own pc should never be included in commits, make sure to add them to gitignore!.
 
 - All custom environments should be added to gitignore.
-
-## Recommmendations
-
-1. We recommend to read the project report for an understanding of the system. At least the "Prototype" section.
-
-2. This project is using ROS2 galactic on ubuntu 20.04. Other configurations are used at own dispare and misery
-
-3. We recommend using dualboot via USB: <https://www.youtube.com/watch?v=cHF1ByFKtZo&t=315s>. In this way you can transfer all files between systems on the go.
 
 ## Prerequisites
 
