@@ -22,8 +22,21 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 - In VSCode, get extension Dev container//remote explorer. 
 - In remote explorer, the running container should appear under Dev Containers. Right click and attach to container.
 
+- To stop a docker image; in terminal, 
+``` bash
+    exit
+```
 
-- To stop a docker image; in terminal, $ exit, in other terminal $ sudo docker stop container_id.
+- If you want to stop a docker image in another terminal:
+``` bash
+    sudo docker stop p8_sewbot
+```
+
+- If you want delete an image:
+``` bash
+    docker images -r p8_sewbot
+```
+
 ## Rules
 
 - All files that only relates to your own pc should never be included in commits, make sure to add them to gitignore!.
