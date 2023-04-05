@@ -1,11 +1,11 @@
-<mxfile host="app.diagrams.net" modified="2023-04-05T08:11:25.629Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="Ks66BbrPzuydZb4MhE9n" version="21.1.4" type="github">
+<mxfile host="app.diagrams.net" modified="2023-04-05T08:12:35.620Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="BBXB6gH-WIYLrEfapdpO" version="21.1.4" type="github">
   <diagram name="Side-1" id="D7HqKl3Z3gyon9UXmdIK">
     <mxGraphModel dx="1646" dy="1619" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="BgE7IZgjUEUOgsatIoda-2" value="KUKA kr 6 r700 sixx&lt;br&gt;&lt;font color=&quot;#ff0000&quot;&gt;Manipulation&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
-          <mxGeometry x="310" width="170" height="37" as="geometry" />
+          <mxGeometry x="310" y="-2" width="170" height="37" as="geometry" />
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-4" value="" style="group" vertex="1" connectable="0" parent="1">
           <mxGeometry x="-30" y="-120" width="220" height="280" as="geometry" />
@@ -94,7 +94,7 @@
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-49" value="Motor cable " style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="BgE7IZgjUEUOgsatIoda-10">
           <mxGeometry x="0.2484" y="-1" relative="1" as="geometry">
-            <mxPoint y="4" as="offset" />
+            <mxPoint y="3" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;dashed=1;endArrow=blockThin;endFill=1;startArrow=blockThin;startFill=1;" edge="1" parent="1" source="BgE7IZgjUEUOgsatIoda-22" target="BgE7IZgjUEUOgsatIoda-5">
@@ -169,7 +169,7 @@
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-51" value="Data cable " style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="BgE7IZgjUEUOgsatIoda-50">
           <mxGeometry x="0.2484" y="-1" relative="1" as="geometry">
-            <mxPoint y="4" as="offset" />
+            <mxPoint y="3" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-52" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;dashed=1;endArrow=blockThin;endFill=1;startArrow=none;startFill=0;fillColor=#d5e8d4;strokeColor=#82b366;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="BgE7IZgjUEUOgsatIoda-22" target="BgE7IZgjUEUOgsatIoda-5">
@@ -183,7 +183,7 @@
             <mxPoint x="-2" y="1" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="BgE7IZgjUEUOgsatIoda-54" value="Intel realsense&lt;br&gt;&lt;font color=&quot;#ff0000&quot;&gt;image acquisition&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+        <mxCell id="BgE7IZgjUEUOgsatIoda-54" value="Intel realsense&lt;br&gt;&lt;font color=&quot;#ff0000&quot;&gt;Image acquisition&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
           <mxGeometry x="310" y="-110" width="170" height="40" as="geometry" />
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;startArrow=blockThin;startFill=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" target="BgE7IZgjUEUOgsatIoda-54">
