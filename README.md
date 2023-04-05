@@ -63,6 +63,7 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
     pip install -r pip install -r requirements.txt 
     ```
 
+
 ### ROS packages
 
 Install extra ROS packages
@@ -72,96 +73,5 @@ Install extra ROS packages
     Install packages:
 
     ``` bash
-    sudo apt install ros-galactic-joint-state-publisher-gui
+    rosdep install --from-paths src --ignore-src -r -y
     ```
-
-    ``` bash
-    sudo apt install ros-galactic-xacro
-    ```
-
-    ``` bash
-    sudo apt install ros-galactic-ros2-control
-    ```
-
-    ``` bash
-    sudo apt install ros-galactic-ros2-controllers
-    ```
-
-    ``` bash
-    sudo apt install ros-galactic-gazebo-ros-pkgs
-    ```
-
-    ``` bash
-    sudo apt install ros-galactic-ros-core ros-galactic-geometry2
-    ```
-
-    ``` bash
-    sudo apt-get install ros-galactic-turtle-tf2-py ros-galactic-tf2-tools ros-galactic-tf-transformations
-    ```
-
-    ``` bash
-    sudo apt install ros-galactic-robot-localization
-    ```
-
-    ``` bash
-    sudo apt install ros-galactic-tf2-geometry-msgs
-    ```
-
-    ``` bash
-    pip install transformations
-    ```
-
-    ``` bash
-    sudo apt install ros-galactic-gazebo-ros-pkgs
-    ```
-
-## General setup
-
-1. In a terminal:
-
-    - a)
-
-        Create a workspace folder with a **PATH** of your choice. Remember/write down the **PATH** for later:
-
-        ``` bash
-        mkdir PATH
-        ```
-
-    - b)
-
-        Clone the reposetory:
-
-        ``` bash
-        git clone https://github.com/kasperfg16/p6-swarm.git
-        ```
-
-    - c)
-
-        Go into the workspace folder and build the package:
-
-        ``` bash
-        cd PATH
-        mkdir config launch maps meshes models params rviz worlds
-        colcon build
-        ```
-
-    - d)
-
-        Add some commands to .bashrc file, so you don't have to source the project every time.
-
-        ``` bash
-        echo 'source /opt/ros/galactic/setup.bash' >> ~/.bashrc
-        echo 'source ~/ros2_galactic/install/local_setup.bash' >> ~/.bashrc
-        ```
-
-        In this command remember to change **"PATH"** to the **PATH** where you cloned to reposetory to:
-
-        ``` bash
-        echo 'source PATH/install/setup.bash' >> ~/.bashrc
-        ```
-
-        Now everytime you open a terminal in root it automaticly sources the project.
-
-## System Diagram
-
-[![Test Embedding draw.io](./system_architecturedrawio.svg)](https://app.diagrams.net/#Hkasperfg16%2Fp8_sewbot%2Fmain%2Fsrc%2FUnavngivet%20diagram.drawio.svg)
