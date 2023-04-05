@@ -8,7 +8,8 @@ FROM ros:kinetic
 RUN apt-get update && apt-get install -y build-essential git libjpeg-dev &&\
     apt-get install -y vim nano git tmux wget curl net-tools iputils-ping  -y &&\
     apt-get install wget && \    
-    apt-get install -y git python3-pip 
+    apt-get install -y git python3-pip\
+    rosdep install --from-paths src --ignore-src -r -y
     
 ENV SEWBOT_WS=/root/sewbot_ws
 RUN git clone https://github.com/kasperfg16/p8_sewbot.git $SEWBOT_WS
