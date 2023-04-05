@@ -1,11 +1,11 @@
-<mxfile host="app.diagrams.net" modified="2023-04-05T07:19:00.608Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="M60UJcBC3RXjLnAUe-kV" version="21.1.4" type="github">
+<mxfile host="app.diagrams.net" modified="2023-04-05T07:22:46.454Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="e-V09JlNOqQqQYK8g0FY" version="21.1.4" type="github">
   <diagram name="Side-1" id="D7HqKl3Z3gyon9UXmdIK">
     <mxGraphModel dx="1646" dy="1619" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="BgE7IZgjUEUOgsatIoda-2" value="KUKA kr 6 r700 sixx" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
-          <mxGeometry x="310" y="-90" width="170" height="50" as="geometry" />
+          <mxGeometry x="310" y="-60" width="170" height="50" as="geometry" />
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-4" value="" style="group" vertex="1" connectable="0" parent="1">
           <mxGeometry x="-30" y="-120" width="220" height="280" as="geometry" />
@@ -70,7 +70,7 @@
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-49" value="Motor cable " style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="BgE7IZgjUEUOgsatIoda-10">
           <mxGeometry x="0.2484" y="-1" relative="1" as="geometry">
-            <mxPoint y="6" as="offset" />
+            <mxPoint y="4" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;dashed=1;endArrow=blockThin;endFill=1;startArrow=blockThin;startFill=1;" edge="1" parent="1" source="BgE7IZgjUEUOgsatIoda-22" target="BgE7IZgjUEUOgsatIoda-5">
@@ -145,7 +145,7 @@
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-51" value="Data cable " style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="BgE7IZgjUEUOgsatIoda-50">
           <mxGeometry x="0.2484" y="-1" relative="1" as="geometry">
-            <mxPoint y="6" as="offset" />
+            <mxPoint y="4" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-52" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;dashed=1;endArrow=blockThin;endFill=1;startArrow=none;startFill=0;fillColor=#d5e8d4;strokeColor=#82b366;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="BgE7IZgjUEUOgsatIoda-22" target="BgE7IZgjUEUOgsatIoda-5">
@@ -157,6 +157,36 @@
         <mxCell id="BgE7IZgjUEUOgsatIoda-53" value="Joint corrections" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="BgE7IZgjUEUOgsatIoda-52">
           <mxGeometry x="0.1139" y="1" relative="1" as="geometry">
             <mxPoint x="-2" y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BgE7IZgjUEUOgsatIoda-54" value="Intel realsense" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="310" y="-120" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="BgE7IZgjUEUOgsatIoda-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;endArrow=blockThin;endFill=1;startArrow=blockThin;startFill=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="CZUTxU8bprXu9WcHHYoL-2" target="BgE7IZgjUEUOgsatIoda-54">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="30" y="-140" as="sourcePoint" />
+            <mxPoint x="230" y="-140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BgE7IZgjUEUOgsatIoda-57" value="USB cable" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="BgE7IZgjUEUOgsatIoda-56">
+          <mxGeometry x="0.1752" relative="1" as="geometry">
+            <mxPoint x="-7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BgE7IZgjUEUOgsatIoda-61" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;dashed=1;endArrow=blockThin;endFill=1;startArrow=none;startFill=0;fillColor=#d5e8d4;strokeColor=#82b366;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="BgE7IZgjUEUOgsatIoda-54" target="BgE7IZgjUEUOgsatIoda-23">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="230" y="-180" as="sourcePoint" />
+            <mxPoint x="30" y="-180" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="280" y="-95" />
+              <mxPoint x="280" y="-30" />
+              <mxPoint x="54" y="-30" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BgE7IZgjUEUOgsatIoda-62" value="Video" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="BgE7IZgjUEUOgsatIoda-61">
+          <mxGeometry x="0.1139" y="1" relative="1" as="geometry">
+            <mxPoint x="-11" y="-1" as="offset" />
           </mxGeometry>
         </mxCell>
       </root>
