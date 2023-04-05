@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y build-essential git libjpeg-dev &&\
     apt-get install -y git openssh-server
 
 ENV SEWBOT_WS=/root/sewbot_ws
-#ADD \PATH\P8_sewbot ${SEWBOT_WS}
+RUN git clone https://github.com/kasperfg16/p8_sewbot.git 
+#\    pip3 install -e /home/gymuser/isaac_rover_mars_gym/.
 
 WORKDIR /root/sewbot_ws
 
