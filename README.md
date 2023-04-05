@@ -3,7 +3,7 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 
 ### Install Docker:
 - $ sudo apt-get install docker.io
-- $ sudo apt-get install contnainerd.io -> to get docker deamon. Might not be necessary
+- $ sudo apt-get install containerd.io -> to get docker deamon
 
 
 ## To test Ubuntu and ROS version;
