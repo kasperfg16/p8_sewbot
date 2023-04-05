@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y build-essential git libjpeg-dev &&\
     apt-get install -y vim nano git tmux wget curl net-tools iputils-ping  -y &&\
     apt-get install wget && \    
     apt-get install -y git python3-pip 
-
+    
 ENV SEWBOT_WS=/root/sewbot_ws
 RUN git clone https://github.com/kasperfg16/p8_sewbot.git $SEWBOT_WS
 #\    pip3 install -e /home/gymuser/isaac_rover_mars_gym/.
