@@ -1,63 +1,66 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.1.0)
 project(kuka_rsi_hw_interface)
 
-# Default to C99
-if(NOT CMAKE_C_STANDARD)
-  set(CMAKE_C_STANDARD 99)
-endif()
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
+find_package(catkin REQUIRED COMPONENTS
+  cmake_modules
+  controller_manager
+  hardware_interface
+  joint_limits_interface
+  realtime_tools
+  roscpp
+  std_msgs
+)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
-find_package(ament_cmake REQUIRED)
-find_package(ament_cmake_python REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(kroshu_ros2_core REQUIRED)
-
-find_package(tinyxml_vendor REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 find_package(TinyXML REQUIRED)
 
-include_directories(include ${TinyXML2_INCLUDE_DIRS})
+
+catkin_package(
+  CATKIN_DEPENDS
+    controller_manager
+    hardware_interface
+    joint_limits_interface
+    roscpp
+    std_msgs
+  DEPENDS
+    TinyXML
+)
+
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+  ${TinyXML_INCLUDE_DIRS}
+)
 
 add_library(kuka_hardware_interface
   src/kuka_hardware_interface.cpp
 )
-ament_target_dependencies(kuka_hardware_interface rclcpp sensor_msgs)
-target_link_libraries(kuka_hardware_interface tinyxml)
 
-add_executable(robot_control_node
-  src/robot_control_node.cpp)
-ament_target_dependencies(robot_control_node rclcpp kroshu_ros2_core sensor_msgs)
-target_link_libraries(robot_control_node kuka_hardware_interface)
+target_link_libraries(kuka_hardware_interface
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${TinyXML_LIBRARIES}
+)
 
+add_executable(kuka_hardware_interface_node
+  src/kuka_hardware_interface_node.cpp
+)
 
-install(TARGETS kuka_hardware_interface robot_control_node
-  DESTINATION lib/${PROJECT_NAME})
+target_link_libraries(kuka_hardware_interface_node
+  kuka_hardware_interface
+)
 
-if(BUILD_TESTING)
-  find_package(ament_cmake_copyright REQUIRED)
-  find_package(ament_cmake_cppcheck REQUIRED)
-  find_package(ament_cmake_pep257 REQUIRED)
-  find_package(ament_cmake_flake8 REQUIRED)
-  find_package(ament_cmake_cpplint REQUIRED)
-  find_package(ament_cmake_lint_cmake REQUIRED)
-  find_package(ament_cmake_uncrustify REQUIRED)
-  find_package(ament_cmake_xmllint REQUIRED)
+install(
+  TARGETS kuka_hardware_interface
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
-  ament_cppcheck(--language=c++)
-  ament_pep257()
-  ament_flake8()
-  ament_cpplint()
-  ament_lint_cmake()
-  ament_uncrustify(--language=C++)
-  ament_xmllint(--exclude ros_rsi.rsi.xml)
-endif()
-
-ament_package()
+install(
+  TARGETS kuka_hardware_interface_node
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
