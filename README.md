@@ -15,7 +15,6 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 - $ sudo docker run -it --rm [container-id] # --rm for removing by exit
 - In VSCode, get extension Dev container//remote explorer. 
 - In remote explorer, the running container should appear under Dev Containers. Right click and attach to container.
-![image](https://user-images.githubusercontent.com/56471682/230016686-66b19d44-dc99-4a1f-a7ac-899c3db213c5.png)
 
 
 - To stop a docker image; in terminal, $ exit, in other terminal $ sudo docker stop container_id.
@@ -153,3 +152,7 @@ Install extra ROS packages
         ```
 
         Now everytime you open a terminal in root it automaticly sources the project.
+
+## System Diagram
+
+[![Test Embedding draw.io](.%2Fsrc%2FUnavngivet%20diagram.drawio.svg)](https://app.diagrams.net/#Hkasperfg16%2Fp8_sewbot%2Fmain%2Fsrc%2FUnavngivet%20diagram.drawio.svg)
