@@ -155,4 +155,4 @@ Install extra ROS packages
 
 ## Diagrams
 
-[![Test Embedding draw.io](./Test%20Embedding.drawio.svg)](https://app.diagrams.net/#Hkasperfg16%2Fp8_sewbot%2Fmain%2Fsrc%2FUnavngivet%20diagram.drawio)
+[![Test Embedding draw.io](./src/system.drawio.svg)](https://app.diagrams.net/#Hkasperfg16%2Fp8_sewbot%2Fmain%2Fsrc%2Fsystem.drawio.svg)
