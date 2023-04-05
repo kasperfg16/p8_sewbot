@@ -153,6 +153,6 @@ Install extra ROS packages
 
         Now everytime you open a terminal in root it automaticly sources the project.
 
-## Diagrams
+## System Diagram
 
 [![Test Embedding draw.io](.%2Fsrc%2FUnavngivet%20diagram.drawio.svg)](https://app.diagrams.net/#Hkasperfg16%2Fp8_sewbot%2Fmain%2Fsrc%2FUnavngivet%20diagram.drawio.svg)
