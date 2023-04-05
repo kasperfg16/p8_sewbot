@@ -2,17 +2,28 @@
 This reposotory builds on a Docker container, since the ros interface with KUKA is based on EOL ROS kinetic. Consequently, the Docker image is based on ubuntu 16.04 and ros kinetic
 
 ### Install Docker:
-- $ sudo apt-get install docker.io
-- $ sudo apt-get install containerd.io -> to get docker deamon
 
+[Follow this guide "Set up the repository"](https://desktop.docker.com/linux/main/amd64/docker-desktop-4.17.0-amd64.deb?utm_source=docker&utm_medium=webreferral&utm_campaign=docs-driven-download-linux-amd64)
+
+``` bash
+    sudo apt-get install docker.io
+    sudo apt-get install containerd.io
+```
 
 ## To test Ubuntu and ROS version;
-- $ cat /etc/os-release
-- $ roscore 
+
+``` bash
+    cat /etc/os-release
+    roscore 
+```
 
 ## To build and run this container in terminal
-- $ docker build -t p8_sewbot . # remember dot 
-- $ sudo docker run -it --rm [container-id] # --rm for removing by exit
+
+``` bash
+    docker build -t p8_sewbot .
+    sudo docker run -it --rm p8_sewbot
+```
+
 - In VSCode, get extension Dev container//remote explorer. 
 - In remote explorer, the running container should appear under Dev Containers. Right click and attach to container.
 
@@ -155,4 +166,4 @@ Install extra ROS packages
 
 ## System Diagram
 
-[![Test Embedding draw.io](.%2Fsrc%2FUnavngivet%20diagram.drawio.svg)](https://app.diagrams.net/#Hkasperfg16%2Fp8_sewbot%2Fmain%2Fsrc%2FUnavngivet%20diagram.drawio.svg)
+[![Test Embedding draw.io](./system_architecturedrawio.svg)](https://app.diagrams.net/#Hkasperfg16%2Fp8_sewbot%2Fmain%2Fsrc%2FUnavngivet%20diagram.drawio.svg)
