@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-04-05T08:12:59.852Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="24Yo1poL2zq9LidmMvLM" version="21.1.4" type="github">
+<mxfile host="app.diagrams.net" modified="2023-04-05T08:13:45.396Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="PcgzQkCrXR7k9f4FKbmw" version="21.1.4" type="github">
   <diagram name="Side-1" id="D7HqKl3Z3gyon9UXmdIK">
     <mxGraphModel dx="1646" dy="1619" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -16,10 +16,10 @@
         <mxCell id="BgE7IZgjUEUOgsatIoda-3" value="ROS" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;arcSize=4;" vertex="1" parent="BgE7IZgjUEUOgsatIoda-4">
           <mxGeometry x="-46.38" y="35" width="261" height="240" as="geometry" />
         </mxCell>
-        <mxCell id="BgE7IZgjUEUOgsatIoda-23" value="Neural network&amp;nbsp;&lt;font color=&quot;#ff0000&quot;&gt;motion planning&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="BgE7IZgjUEUOgsatIoda-4">
+        <mxCell id="BgE7IZgjUEUOgsatIoda-23" value="Neural network&amp;nbsp;&lt;font color=&quot;#ff0000&quot;&gt;Motion planning&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="BgE7IZgjUEUOgsatIoda-4">
           <mxGeometry x="-39.38235294117647" y="60" width="247" height="39" as="geometry" />
         </mxCell>
-        <mxCell id="BgE7IZgjUEUOgsatIoda-22" value="UDP server &lt;font color=&quot;#ff0000&quot;&gt;communication&lt;/font&gt;&lt;br&gt;(kuka_rsi_hardware_interface)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="BgE7IZgjUEUOgsatIoda-4">
+        <mxCell id="BgE7IZgjUEUOgsatIoda-22" value="UDP server &lt;font color=&quot;#ff0000&quot;&gt;Communication&lt;/font&gt;&lt;br&gt;(kuka_rsi_hardware_interface)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="BgE7IZgjUEUOgsatIoda-4">
           <mxGeometry x="-39.38235294117647" y="220" width="247" height="50" as="geometry" />
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;dashed=1;endArrow=blockThin;endFill=1;startArrow=none;startFill=0;fillColor=#d5e8d4;strokeColor=#82b366;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="BgE7IZgjUEUOgsatIoda-4" source="BgE7IZgjUEUOgsatIoda-23" target="BgE7IZgjUEUOgsatIoda-66">
@@ -45,7 +45,7 @@
             <mxPoint x="-3" y="4" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="BgE7IZgjUEUOgsatIoda-66" value="MoveIt! &lt;font color=&quot;#ff0000&quot;&gt;motion planning&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="BgE7IZgjUEUOgsatIoda-4">
+        <mxCell id="BgE7IZgjUEUOgsatIoda-66" value="MoveIt! &lt;font color=&quot;#ff0000&quot;&gt;Motion planning&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="BgE7IZgjUEUOgsatIoda-4">
           <mxGeometry x="-39.382352941176464" y="140" width="247" height="39" as="geometry" />
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-68" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;dashed=1;endArrow=blockThin;endFill=1;startArrow=none;startFill=0;fillColor=#d5e8d4;strokeColor=#82b366;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="BgE7IZgjUEUOgsatIoda-4" source="BgE7IZgjUEUOgsatIoda-66" target="BgE7IZgjUEUOgsatIoda-23">
@@ -76,7 +76,7 @@
         <mxCell id="BgE7IZgjUEUOgsatIoda-1" value="KUKA krc4 compact" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="BgE7IZgjUEUOgsatIoda-6">
           <mxGeometry y="30" width="170" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="BgE7IZgjUEUOgsatIoda-5" value="KSS &lt;font color=&quot;#ff0000&quot;&gt;robot control&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="BgE7IZgjUEUOgsatIoda-6">
+        <mxCell id="BgE7IZgjUEUOgsatIoda-5" value="KSS &lt;font color=&quot;#ff0000&quot;&gt;Robot control&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="BgE7IZgjUEUOgsatIoda-6">
           <mxGeometry x="25" y="60" width="120" height="50" as="geometry" />
         </mxCell>
         <mxCell id="BgE7IZgjUEUOgsatIoda-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;endArrow=blockThin;endFill=1;startArrow=blockThin;startFill=1;" edge="1" parent="1" source="CZUTxU8bprXu9WcHHYoL-2">
