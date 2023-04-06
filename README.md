@@ -34,7 +34,7 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 
 - If you want delete an image:
 ``` bash
-    docker images -r p8_sewbot
+    docker image rm -f p8_sewbot
 ```
 
 ## Rules
