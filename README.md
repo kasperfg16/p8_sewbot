@@ -56,6 +56,7 @@ Then run this:
 ``` bash
     docker image rm -f p8_sewbot
 ```
+https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes
 
 ## Rules
 
