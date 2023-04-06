@@ -75,3 +75,5 @@ Install extra ROS packages
     ``` bash
     rosdep install --from-paths src --ignore-src -r -y
     ```
+
+[![System architecture](system_architecture.drawio.svg)](https://app.diagrams.net/#Hkasperfg16%2Fp8_sewbot%2Fmain%2Fsystem_architecturedrawio.svg)
