@@ -2,9 +2,24 @@
 
 This reposotory builds on a Docker container, since the ros interface with KUKA is based on EOL ROS kinetic. Consequently, the Docker image is based on ubuntu 16.04 and ros kinetic
 
+## Table of Contents
+
+- [Rules](#rules)
+- [Install Docker](#install-docker)
+  - [Build and run this container in terminal](#build-and-run-this-container-in-terminal)
+  - [To test Ubuntu and ROS version](#to-test-ubuntu-and-ros-version)
+- [Develop on container in VScode](#develop-on-container-in-vscode)
+- [Setup real robot](#setup-real-robot)
+- [Setup simulation robot](#setup-simulation-robot)
+    - [System architecture](#system-architecture)
+
+## Rules
+
+- All files that only relates to your own pc should never be included in commits, make sure to add them to gitignore!.
+
 ## Install Docker
 
-## Build and run this container in terminal
+### Build and run this container in terminal
 
 1. Follow this https://docs.docker.com/desktop/install/linux-install/
 
@@ -58,17 +73,11 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 
 https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes
 
-## Rules
-
-- All files that only relates to your own pc should never be included in commits, make sure to add them to gitignore!.
-
-### ROS packages
-
-Install extra ROS packages
+## Setup real robot
 
 1. In a terminal
 
-    Install packages:
+    Install kuka_experimental:
 
     ``` bash
         cd src
@@ -78,6 +87,16 @@ Install extra ROS packages
         catkin_make
         
     ```
+
+    We use the KR C4 controller for the kuka, therefore we follow this tutorial:
+
+    https://github.com/ros-industrial/kuka_experimental/tree/melodic-devel/kuka_rsi_hw_interface/krl/KR_C4
+
+## Setup simulation robot
+
+
+
+roslaunch kuka_rsi_simulator kuka_rsi_simulator.launch
 
 ### System architecture
 
