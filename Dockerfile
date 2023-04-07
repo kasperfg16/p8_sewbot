@@ -11,10 +11,12 @@ RUN apt-get update && apt-get install -y build-essential git libjpeg-dev &&\
     apt-get install -y git python3-pip 
 
 ENV SEWBOT_WS=/root/sewbot_ws
+WORKDIR $SEWBOT_WS
 RUN git clone https://github.com/kasperfg16/p8_sewbot.git $SEWBOT_WS \
-    mkdir -p /root/sewbot_ws/.mujoco \
+    && git checkout simulation \
+    && git pull origin simulation \
+    && cd src \
     && wget https://github.com/deepmind/mujoco/releases/download/2.3.3/mujoco-2.3.3-linux-aarch64.tar.gz -O mujoco.tar.gz \
-    && tar -xf mujoco.tar.gz -C /root/sewbot_ws/.mujoco \
+    && tar -xf mujoco.tar.gz \
     && rm mujoco.tar.gz
 
-WORKDIR /root/sewbot_ws
