@@ -94,9 +94,18 @@ https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-con
 
 ## Setup simulation robot
 
+``` bash
+    apt-get update
+    apt-get install -y dbus
+    dbus-uuidgen > /etc/machine-id
+    source devel/setup.bash
+    roslaunch kuka_rsi_simulator kuka_rsi_simulator.launch
+```
 
+``` bash
+    roslaunch kuka_kr6_support roslaunch_test_kr6r700sixx.xml
+```
 
-roslaunch kuka_rsi_simulator kuka_rsi_simulator.launch
 
 ### System architecture
 
