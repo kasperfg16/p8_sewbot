@@ -8,8 +8,8 @@ FROM ros:kinetic
 
 # install necessary extensions
 RUN apt-get update && apt-get install -y build-essential git libjpeg-dev &&\
-    set -xe && apt-get -yqq update && apt-get -yqq \
-	#install python3 python3-pip && pip3 install --upgrade pip &&\
+    set -xe && apt-get -yqq update \
+	#&& apt-get -yqq install python3 python3-pip && pip3 install --upgrade pip &&\
     apt-get install -y vim nano git tmux wget curl net-tools iputils-ping  -y \
 	wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py 
     #apt-get install wget python3-retrying 
