@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 
 # Start your image with a node base image. We use ubuntu 16.04 as OS
-FROM ubuntu:16.04
+FROM nvidia/cuda:8.0-cudnn5-runtime-ubuntu16.04
+#FROM ubuntu:16.04
 FROM ros:kinetic
 
 # install necessary extensions

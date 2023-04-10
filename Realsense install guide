@@ -1,0 +1,94 @@
+not docker install
+
+// 1. librealsense
+
+sudo apt-get install apt-utils
+
+(https://github.com/IntelRealSense/librealsense/blob/development/doc/installation.md)
+
+sudo apt-get install --install-recommends linux-generic-lts-xenial xserver-xorg-core-lts-xenial xserver-xorg-lts-xenial xserver-xorg-video-all-lts-xenial xserver-xorg-input-all-lts-xenial libwayland-egl1-mesa-lts-xenial
+
+sudo apt-get install git
+
+git clone https://github.com/IntelRealSense/librealsense.git
+
+cd librealsense
+
+sudo apt-get install libssl-dev libusb-1.0-0-dev libudev-dev pkg-config libgtk-3-dev cmake
+
+sudo apt-get install libglfw3-dev
+
+sudo apt-get install libudev-dev
+
+./scripts/setup_udev_rules.sh
+
+// 2. For add-apt-repository error
+
+(https://linuxconfig.org/sudo-apt-add-repository-command-not-found)
+
+sudo apt install software-properties-common
+
+// 3. 
+
+sudo apt-get -y install apt-transport-https
+
+// 4. 
+
+sudo apt-get install apt-utils
+
+// 5.
+
+(https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md)
+
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
+
+sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo xenial main" -u
+
+sudo apt-get install librealsense2-dkms
+
+sudo apt-get install librealsense2-utils
+
+sudo apt-get install librealsense2-dev
+
+sudo apt-get install librealsense2-dbg
+
+// 6. 
+
+sudo apt-get install ros-kinetic-realsense2-camera
+
+// 7. 
+
+sudo apt install ros-kinetic-rviz
+
+// 8. 
+
+sudo apt install ros-kinetic-ddynamic-reconfigure
+
+// 9. 
+
+ros-kinetic-rosbash
+
+
+
+
+
+
+Pot: https://www.youtube.com/watch?v=IcCUyybZmAE
+
+
+
+Test: https://dev.intelrealsense.com/docs/ros-wrapper || realsense-viewer
+
+maybe also: http://zdome.net/wiki/index.php/Intel_RealSense_Utilities_Install_Ubuntu_20.04_Focal_20210518
+
+
+
+NOTE: NEED display
+
+rosrun rviz rviz --gives--> QXcbConnection: Could not connect to display 
+
+
+---------docker install -----------
+//1. 
+
+
