@@ -54,8 +54,9 @@ RUN git clone https://github.com/kasperfg16/p8_sewbot.git $SEWBOT_WS \
 ####################################################################
 # MuJoCo & OpenAI Gymnasium
 ####################################################################
-RUN	wget https://github.com/deepmind/mujoco/releases/download/2.3.3-linux-x86_64.tar.gz -O mujoco.tar.gz \
-    && tar -xf mujoco.tar.gz \
+RUN	mkdir -p /root/sewbot_ws/.mujoco \
+    && wget https://github.com/deepmind/mujoco/releases/download/2.3.3-linux-x86_64.tar.gz -O mujoco.tar.gz \
+    && tar -xf mujoco.tar.gz -C /root/sewbot_ws/.mujoco \
     && rm mujoco.tar.gz \
 	pip install gymnasium[mujoco] 
 
