@@ -58,5 +58,5 @@ RUN	mkdir -p /root/sewbot_ws/.mujoco \
     && wget https://github.com/deepmind/mujoco/releases/download/2.3.3/mujoco-2.3.3-linux-x86_64.tar.gz -O mujoco.tar.gz 
 RUN tar -xf mujoco.tar.gz -C /root/sewbot_ws/.mujoco \
     && rm mujoco.tar.gz 
-RUN pip install gymnasium[mujoco] 
+RUN pip3 install gymnasium[mujoco] 
 
