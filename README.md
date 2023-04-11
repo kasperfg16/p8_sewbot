@@ -25,12 +25,40 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 
 2. In a terminal run this to build the docker container:
 
+    Open docker desktop to start the docker engine. It is requred to go through some configurations before the docker engine starts.
+
+    ``` bash
+        systemctl --user start docker-desktop
+    ```
+
+    Then run this:
+
     ``` bash
         cd "$(find . -type d -name 'p8_sewbot' -print -quit)"
-        docker build -t p8_sewbot .
+        sudo docker build -t p8_sewbot .
     ```
 
     Start the docker container (First start docker-desktop)
+
+    Start docker-desktop:
+
+    ``` bash
+        systemctl --user start docker-desktop
+    ```
+
+    Run this to test if a container can be created with the image
+
+    ``` bash
+        sudo docker run -it --rm p8_sewbot
+    ```
+
+    Exit the docker again
+
+    ``` bash
+        exit
+    ```
+
+    Open docker desktop and do the following
 
     1. Open Docker Preferences by clicking on the Docker icon in the system tray and selecting "Preferences...".
     2. Go to the "Resources" tab.
@@ -39,33 +67,26 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
     Click "Apply & Restart" to apply the changes and restart Docker.
 
 3. Follow this:
-    [Nvidia toolkit install](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#:~:text=the%20requested%20devices.-,Docker,%EF%83%81,-For%20installing%20Docker)
+    [Nvidia toolkit install](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#setting-up-nvidia-container-toolkit)
 
 4. In a terminal run this:
 
     ``` bash
         sudo ldconfig
     ```
-    
+
     ``` bash
         systemctl --user start docker-desktop
     ```
 
 5. In a terminal run this:
 
-docker run -it --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix p8_sewbot
-
     ``` bash
         xhost +
-
-        sudo docker run -e DISPLAY=$DISPLAY -it --rm --privileged --net=host --env=NVIDIA_VISIBLE_DEVICES=all --env=NVIDIA_DRIVER_CAPABILITIES=all --env=DISPLAY --env=QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix p8_sewbot /bin/bash
     ```
 
-6. In the same terminal run this:
-
     ``` bash
-        rosdep install --from-paths src --ignore-src -y
-        catkin_make
+        sudo docker run -e DISPLAY=$DISPLAY -it --rm --privileged --net=host --env=NVIDIA_VISIBLE_DEVICES=all --env=NVIDIA_DRIVER_CAPABILITIES=all --env=DISPLAY --env=QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix --name en_syg_container p8_sewbot /bin/bash
     ```
 
 ### To test Ubuntu and ROS version
@@ -107,23 +128,15 @@ docker run -it --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix p8_sewb
         docker image rm -f p8_sewbot
     ```
 
-xhost +
-docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY --network=host --gpus=all --name=en_syg_container p8_sewbot /bin/bash
+- To delete everything related to docker images, volumes, and containers. but not docker itself:
 
-xhost - fi
-
-https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes
+    ``` bash
+        sudo docker system prune -a
+    ```
 
 ## Setup real robot
 
 1. In a terminal
-
-    Install kuka_experimental:
-
-    ``` bash
-        rosdep install --from-paths src --ignore-src -y
-        catkin_make
-    ```
 
     We use the KR C4 controller for the kuka, therefore we follow this tutorial:
 
@@ -131,18 +144,13 @@ https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-con
 
 ## Setup simulation robot
 
-
-docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY --network=host p8_sewbot /bin/bash #11. bash docker/run.sh DISPLAYPORT -e DISPLAY=:0
-
 ``` bash
-    apt-get update
-    apt-get install -y dbus
-    dbus-uuidgen > /etc/machine-id
     source devel/setup.bash
     roslaunch kuka_rsi_simulator kuka_rsi_simulator.launch
 ```
 
 ``` bash
+    sudo docker exec -it en_syg_container bash
     roslaunch kuka_kr6_support roslaunch_test_kr6r700sixx.xml
 ```
 
