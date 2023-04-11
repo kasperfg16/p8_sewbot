@@ -8,20 +8,25 @@ FROM ros:kinetic
 # FROM tensorflow/tensorflow:nightly-gpu
 
 # install necessary extensions
-RUN apt-get update && apt-get install -y build-essential git kmod libjpeg-dev libssl-dev \
-	libncurses5-dev libsqlite3-dev libreadline-dev libtk8.6 libgdm-dev libdb4o-cil-dev libpcap-dev &&\
-	apt-get install -y vim nano git tmux wget curl net-tools iputils-ping &&\
+RUN apt-get update && apt-get install -y build-essential kmod libjpeg-dev libssl-dev mesa-common-dev \
+	libncurses5-dev libsqlite3-dev libreadline-dev libtk8.6 libgdm-dev libdb4o-cil-dev libpcap-dev\
+	# libgl1-mesa-dev libgl1-mesa-glx libglew-dev libosmesa6-dev software-properties-common net-tools 
+	vim nano git tmux wget curl net-tools iputils-ping \
+	# Sim shit
+	xorg-dev libglfw3 libglfw3-dev	&&\ 
+
     cd /opt && wget https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz &&\
 	tar -xvf Python-3.8.1.tgz &&\
 	cd Python-3.8.1 && ./configure &&\
 	apt-get install zlib1g-dev -y &&\
 	make && make install &&\
 	pip3 install --upgrade pip 
-# Dependencies for GLFW (not required for this example)
-#RUN apt-get update && apt-get install build-base libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev \
-    #libxi-dev mesa-dev
-	#&& mesa-dri-gallium xvfb-run
 
+
+# RUN rm root/usr/lib/x86_64-linux-gnu/libEGL_mesa.so.0 root/usr/lib/x86_64-linux-gnu/libEGL_mesa.so.0.0.0 root/usr/share/glvnd/egl_vendor.d/50_mesa.json
+# COPY docker/nvidia_icd.json /usr/share/vulkan/icd.d/nvidia_icd.json
+# COPY docker/10_nvidia.json /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+# ENV NVIDIA_VISIBLE_DEVICES=all NVIDIA_DRIVER_CAPABILITIES=all
 ####################################################################
 # P8 SEWBOT Repository
 ####################################################################

@@ -1,0 +1,11 @@
+<mujoco>
+  <mesh name="kuka_link_0_mesh" file="base_link.stl"/>
+  <mesh name="kuka_link_1_mesh" file="link_1.stl"/>
+  <mesh name="kuka_link_2_mesh" file="link_2.stl"/>
+  <mesh name="kuka_link_3_mesh" file="link_3.stl"/>
+  <mesh name="kuka_link_4_mesh" file="link_4.stl"/>
+  <mesh name="kuka_link_5_mesh" file="link_5.stl"/>
+  <mesh name="kuka_link_6_mesh" file="link_6.stl"/>
+  <material name="kuka_orange" rgba="1.0 0.423529411765 0.0392156862745 1.0"/>
+  <material name="kuka_grey" rgba="0.4 0.4 0.4 1.0"/>
+</mujoco>
