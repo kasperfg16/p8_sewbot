@@ -35,5 +35,5 @@ RUN echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 RUN . /opt/ros/kinetic/setup.sh && \
     catkin build
 
-RUN sudo apt-get install ros-distro*joint-trajectory-controller* -y && \
-    sudo apt-get install ros-indigo-joint-state-controller
+RUN apt-get install ros-kinetic*joint-trajectory-controller* -y && \
+    apt-get install ros-kinetic-joint-state-controller
