@@ -33,4 +33,4 @@ RUN apt-get install python3-catkin-tools -y
 RUN echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 
 RUN . /opt/ros/kinetic/setup.sh && \
-    catkin_make
+    catkin build

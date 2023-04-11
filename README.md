@@ -154,7 +154,6 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
     roslaunch kuka_kr6_support roslaunch_test_kr6r700sixx.xml
 ```
 
-
 ### System architecture
 
 [![System architecture](system_architecture.drawio.svg)](https://app.diagrams.net/#Hkasperfg16%2Fp8_sewbot%2Fmain%2Fsystem_architecturedrawio.svg)
