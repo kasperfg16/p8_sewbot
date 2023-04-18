@@ -8,6 +8,8 @@ sudo apt-get install apt-utils
 
 sudo apt-get install --install-recommends linux-generic-lts-xenial xserver-xorg-core-lts-xenial xserver-xorg-lts-xenial xserver-xorg-video-all-lts-xenial xserver-xorg-input-all-lts-xenial libwayland-egl1-mesa-lts-xenial
 
+for 18.04 and up use: sudo apt-get update && sudo apt-get upgrade && sudo apt-get dist-upgrade 
+
 sudo apt-get install git
 
 git clone https://github.com/IntelRealSense/librealsense.git
@@ -44,6 +46,8 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A
 
 sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo xenial main" -u
 
+For ubuntu 20.04: sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u
+
 sudo apt-get install librealsense2-dkms
 
 sudo apt-get install librealsense2-utils
@@ -69,6 +73,11 @@ sudo apt install ros-kinetic-ddynamic-reconfigure
 ros-kinetic-rosbash
 
 
+
+
+
+
+NOTE: Might have to do this in every terminal: source /opt/ros/noetic/setup.bash
 
 
 
