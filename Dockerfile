@@ -55,7 +55,8 @@ RUN apt-get install ros-kinetic*joint-trajectory-controller* -y && \
     apt-get install ros-kinetic-roslint && \
     apt-get install ros-kinetic-object-recognition-msgs && \
     apt-get install ros-kinetic-transmission-interface && \
-    apt-get install ros-kinetic-controller-manager
+    apt-get install ros-kinetic-controller-manager && \
+    apt-get install ros-kinetic-joint-limits-interface
 
 RUN apt update && \
     apt install python3-venv python3-pip -y && \
@@ -72,6 +73,8 @@ RUN pip install mujoco && pip install gymnasium[mujoco] \
 RUN cd src && \
     git clone https://github.com/ipa-lth/weiss_gripper_ieg76.git
 
+RUN cd src && \
+    git clone https://github.com/ros-industrial/kuka_experimental.git
 RUN . /opt/ros/kinetic/setup.sh && \
     catkin build
 
