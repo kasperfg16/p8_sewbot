@@ -54,7 +54,8 @@ RUN apt-get install ros-kinetic*joint-trajectory-controller* -y && \
     apt-get install ros-kinetic-joint-state-controller && \
     apt-get install ros-kinetic-roslint && \
     apt-get install ros-kinetic-object-recognition-msgs && \
-    apt-get install ros-kinetic-transmission-interface
+    apt-get install ros-kinetic-transmission-interface && \
+    apt-get install ros-kinetic-controller-manager
 
 RUN apt update && \
     apt install python3-venv python3-pip -y && \
