@@ -102,10 +102,16 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 
 - In VSCode, get extension Dev container//remote explorer.
 
+- Run this in a terminal to enable docker desktop and thereby also VScode to see images and containers created with 'sudo' docker:
+
+    ``` bash
+        docker context use default
+    ```
+
 - Then run this in a terminal to start the docker container:
 
     ``` bash
-        sudo docker run -it --rm p8_sewbot
+        docker run -it --rm p8_sewbot
     ```
 
 - In remote explorer, the running container should appear under Dev Containers. Right click and attach to container.
