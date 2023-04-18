@@ -75,3 +75,6 @@ RUN . /opt/ros/kinetic/setup.sh && \
     catkin build
 
 RUN git clone https://github.com/gamleksi/mujoco_ros_control.git
+
+RUN cd src && \
+    git clone https://github.com/shadow-robot/mujoco_ros_pkgs.git
