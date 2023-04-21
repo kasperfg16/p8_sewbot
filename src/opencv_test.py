@@ -2,7 +2,8 @@
 import cv2 as cv
 #print(cv.__version__)
 
-img = cv.imread('src/Lena.jpeg')
+img = cv.imread('src/Tex1.jpg') 
+#Size should be reduced for texile images
 #cv.imshow('original', img)
 
 img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
