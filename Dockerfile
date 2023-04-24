@@ -1,6 +1,9 @@
 # Start your image with a node base image. We use ubuntu 20.04 as OS
 FROM ubuntu:22.04
 
+ENV DIRPATH=/sewbot_ws
+WORKDIR $DIRPATH
+
 # Install ROS 2
 RUN locale && \
     apt-get update && apt-get install locales && \
@@ -28,6 +31,6 @@ RUN apt-get install software-properties-common -y && \
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python3 get-pip.py
 
-RUN pip install mujoco
+RUN pip install mujoco gymnasium[mujoco]
 
 RUN apt-get install ros-humble-ur-robot-driver -y
