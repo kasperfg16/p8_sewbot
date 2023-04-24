@@ -12,13 +12,16 @@ img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 img_gray_blur = cv.GaussianBlur(img_gray, (3,3), 0) #Fingure out which kernel size is best
 cv.imshow('blurred', img_gray_blur)
 
-img_sobel =  cv.Sobel(src=img_gray_blur, ddepth=cv.CV_64F, dx=1, dy=1, ksize=3)
+img_sobel =  cv.Sobel(src=img_gray_blur, ddepth=cv.CV_64F, dx=1, dy=1, ksize=13)
 cv.imshow('sobel', img_sobel)
 
-img_canny = cv.Canny(image=img_gray_blur, threshold1=100, threshold2=200)
+img_canny = cv.Canny(image=img_gray_blur, threshold1=200, threshold2=275)
 cv.imshow('canny', img_canny)
 
 #Maybe implement non maximum suppression if sobel method is chosen
 
 cv.waitKey()
+
+cv.imwrite('pics/tex1_canny.jpg', img_canny)
+
 print('success')
