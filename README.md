@@ -151,8 +151,7 @@ This reposotory builds on a Docker container, since the ros interface with KUKA 
 ## Setup simulation robot
 
 ``` bash
-    source devel/setup.bash
-    roslaunch kuka_rsi_simulator kuka_rsi_simulator.launch
+    ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur3e robot_ip:=yyy.yyy.yyy.yyy use_fake_hardware:=true launch_rviz:=true
 ```
 
 ``` bash

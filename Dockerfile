@@ -1,10 +1,10 @@
 # Start your image with a node base image. We use ubuntu 20.04 as OS
 FROM ubuntu:22.04
 
-ENV DIRPATH=/sewbot_ws
-WORKDIR $DIRPATH
+ENV SEWBOT_WS=/root/sewbot_ws
+WORKDIR $SEWBOT_WS
 
-# Install ROS 2
+# Install ROS 2 Humble
 RUN locale && \
     apt-get update && apt-get install locales && \
     locale-gen en_US en_US.UTF-8 && \
@@ -12,11 +12,11 @@ RUN locale && \
     export LANG=en_US.UTF-8 && \
     locale
 
-# Set Timezone
+## Set Timezone
 ARG TZ="Europe/London"
 ENV TZ ${TZ}
 
-# Setup Environment
+## Setup Environment
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get install software-properties-common -y && \
@@ -28,9 +28,18 @@ RUN apt-get install software-properties-common -y && \
     apt-get dist-upgrade -y && \
     apt-get install ros-humble-desktop -y
 
+# Install pip
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python3 get-pip.py
 
+# Install mujoco and gymnasium
 RUN pip install mujoco gymnasium[mujoco]
 
+# Install the ur-robot-driver
 RUN apt-get install ros-humble-ur-robot-driver -y
+
+# Make the terminal automatically source the /opt/ros/humble/setup.bash file every time you open a new terminal window
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+
+RUN apt-get -y update && \
+    apt-get -y install git
