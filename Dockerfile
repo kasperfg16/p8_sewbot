@@ -28,9 +28,11 @@ RUN apt-get install software-properties-common -y && \
     apt-get dist-upgrade -y && \
     apt-get install ros-humble-desktop -y
 
-# Install pip
+# Install pip & git
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python3 get-pip.py
+    python3 get-pip.py && \
+    apt-get -y update && \
+    apt-get -y install git
 
 # Install mujoco and gymnasium
 RUN pip install mujoco gymnasium[mujoco]
@@ -41,5 +43,16 @@ RUN apt-get install ros-humble-ur-robot-driver -y
 # Make the terminal automatically source the /opt/ros/humble/setup.bash file every time you open a new terminal window
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
-RUN apt-get -y update && \
-    apt-get -y install git
+# Install buid tools (catkin)
+RUN pip3 install -U catkin_tools && \
+    apt install python3-colcon-common-extensions -y
+
+WORKDIR $SEWBOT_WS/src
+
+RUN git clone https://github.com/saga0619/mujoco_ros_sim.git
+
+# Information:
+# https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#the-ros-domain-id-variable
+# https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#the-ros-localhost-only-variable
+RUN echo "export ROS_DOMAIN_ID=42" >> ~/.bashrc && \
+    echo "export ROS_LOCALHOST_ONLY=1" >> ~/.bashrc
