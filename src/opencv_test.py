@@ -1,6 +1,7 @@
 #Documentation: https://docs.opencv.org/3.4/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1
 import cv2 as cv
 import numpy as np
+import sys
 #print(cv.__version__)
 
 img = cv.imread('src/Tex1_square.jpg') 
@@ -18,7 +19,7 @@ resize_down = cv.resize(img, down_points, interpolation=cv.INTER_LINEAR)
 img_gray = cv.cvtColor(resize_down, cv.COLOR_BGR2GRAY)
 #cv.imshow('gray', img_gray)
 
-img_gray_blur = cv.GaussianBlur(img_gray, (3,3), 0) #Fingure out which kernel size is best
+img_gray_blur = cv.GaussianBlur(img_gray, (5,5), 0) #Fingure out which kernel size is best
 cv.imshow('blurred', img_gray_blur)
 
 #img_sobel =  cv.Sobel(src=img_gray_blur, ddepth=cv.CV_64F, dx=1, dy=1, ksize=13)
@@ -27,8 +28,12 @@ cv.imshow('blurred', img_gray_blur)
 img_canny_blur = cv.Canny(image=img_gray_blur, threshold1=200, threshold2=275)
 cv.imshow('canny_blur', img_canny_blur)
 
-img_canny_clean = cv.Canny(image=img_gray, threshold1=200, threshold2=275)
+img_canny_clean = cv.Canny(image=img_gray, threshold1=200, threshold2=275) # numpy.ndarray
 cv.imshow('canny_clean', img_canny_clean)
+
+#with np.printoptions(threshold=sys.maxsize):
+#    print(img_canny_clean)
+np.savetxt('img_canny_clean.txt', img_canny_clean)
 
 kernel = cv.getStructuringElement(cv.MORPH_RECT, (5,5))
 
@@ -48,24 +53,39 @@ for i in range(14):
 img_combine = img_canny_clean_dilate - cv.bitwise_not(img_canny_blur_dilate)
 cv.imshow('img_combine', img_combine)
 
-for i in range(1):
+for i in range(2):
     img_combine = cv.morphologyEx(img_combine, cv.MORPH_ERODE, kernel)
 cv.imshow('img_combine_erode', img_combine)
 
-#corner detectiong
-img_canny_clean_blur = cv.GaussianBlur(img_canny_clean, (21,21), 0) #Fingure out which kernel size is best
-cv.imshow('img_canny_clean_blur', img_canny_clean_blur)
+#corner detection
+img_canny_blur_float = np.float32(img_canny_blur)
+corn0 = cv.cornerHarris(img_canny_blur_float, 2, 3, 0.04) 
+corn0 = cv.dilate(corn0, None)
+cv.imshow('corn0', corn0) # best so far
+
+
+
 
 img_canny_clean_float = np.float32(img_canny_clean)
 corn = cv.cornerHarris(img_canny_clean_float, 2, 3, 0.04) 
 corn = cv.dilate(corn, None)
 cv.imshow('corn', corn)
 
+img_canny_clean_blur = cv.GaussianBlur(img_canny_clean, (21,21), 0) #Fingure out which kernel size is best
+cv.imshow('img_canny_clean_blur', img_canny_clean_blur)
 
 img_canny_clean_blur_float = np.float32(img_canny_clean_blur)
 corn2 = cv.cornerHarris(img_canny_clean_blur_float, 2, 3, 0.04) 
 corn2 = cv.dilate(corn2, None)
 cv.imshow('corn2', corn2)
+
+
+
+img_gray_float = np.float32(img_gray)
+cornx = cv.cornerHarris(img_gray_float, 2, 3, 0.04) 
+cornx = cv.dilate(cornx, None)
+cv.imshow('cornx', cornx)
+
 
 
 #img_combine_float = np.float32(img_combine)
