@@ -3,7 +3,7 @@ import cv2 as cv
 import numpy as np
 #print(cv.__version__)
 
-img = cv.imread('src/Tex6.jpg') 
+img = cv.imread('src/Tex1_square.jpg') 
 #Size should be reduced for texile images
 #cv.imshow('original', img)
 
@@ -30,8 +30,6 @@ cv.imshow('canny_blur', img_canny_blur)
 img_canny_clean = cv.Canny(image=img_gray, threshold1=200, threshold2=275)
 cv.imshow('canny_clean', img_canny_clean)
 
-####
-
 kernel = cv.getStructuringElement(cv.MORPH_RECT, (5,5))
 
 img_canny_clean_dilate = img_canny_clean
@@ -50,13 +48,34 @@ for i in range(14):
 img_combine = img_canny_clean_dilate - cv.bitwise_not(img_canny_blur_dilate)
 cv.imshow('img_combine', img_combine)
 
-kernel2 = cv.getStructuringElement(cv.MORPH_RECT, (5,5))
-
-for i in range(2):
-    img_combine = cv.morphologyEx(img_combine, cv.MORPH_ERODE, kernel2)
+for i in range(1):
+    img_combine = cv.morphologyEx(img_combine, cv.MORPH_ERODE, kernel)
 cv.imshow('img_combine_erode', img_combine)
 
-#corner detection
+#corner detectiong
+img_canny_clean_blur = cv.GaussianBlur(img_canny_clean, (21,21), 0) #Fingure out which kernel size is best
+cv.imshow('img_canny_clean_blur', img_canny_clean_blur)
+
+img_canny_clean_float = np.float32(img_canny_clean)
+corn = cv.cornerHarris(img_canny_clean_float, 2, 3, 0.04) 
+corn = cv.dilate(corn, None)
+cv.imshow('corn', corn)
+
+
+img_canny_clean_blur_float = np.float32(img_canny_clean_blur)
+corn2 = cv.cornerHarris(img_canny_clean_blur_float, 2, 3, 0.04) 
+corn2 = cv.dilate(corn2, None)
+cv.imshow('corn2', corn2)
+
+
+#img_combine_float = np.float32(img_combine)
+#dst = cv.cornerHarris(img_combine_float, 2, 3, 0.04)
+#dst = cv.dilate(dst, None)
+
+
+
+#cv.imshow('dst', dst)
+cv.imshow('corn', corn)
 
 
 
