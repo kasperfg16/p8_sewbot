@@ -62,4 +62,10 @@
       <motor name="wrist_2_motor"       joint="wrist_2_joint"       ctrllimited="true" ctrlrange="-0.9425 0.9425" /> 
       <motor name="wrist_3_motor"       joint="wrist_3_joint"       ctrllimited="true" ctrlrange="-0.9425 0.9425" /> 
     </actuator>
+
+    <!-- <camera>
+    <camera name="realsense" pos="10 10 10" quat="0 0 1 0" />
+    <image width="640" height="480" hfov="1.5708" format="RGB8" near="0.01" far="50.0"/>
+    </camera> -->
+
 </mujoco>

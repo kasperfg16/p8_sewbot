@@ -1,8 +1,15 @@
 import numpy as np
 import gymnasium as gym
+import mujoco as mj
+#reload(gym)
+import gymnasium as gym
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
+import os
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
 
 action_space = gym.spaces.Discrete(2)
 observation_space = gym.spaces.Discrete(2)
@@ -14,7 +21,17 @@ DEFAULT_CAMERA_CONFIG = {
     "elevation": -20.0,
 }
 
-class UR3Env(gym.Env):
+def find_file(filename, search_path):
+        """
+        Search for a file in the given search path.
+        Returns the full path to the file if found, or None otherwise.
+        """
+        for root, dir, files in os.walk(search_path):
+            if filename in files:
+                return os.path.abspath(os.path.join(root, filename))
+        return None
+
+class UR3Env(MujocoEnv, EzPickle):
     """
     ### Action space
     | Num | Action                | Control Min | Control Max | Name in XML file | Joint | Unit |
@@ -58,64 +75,100 @@ class UR3Env(gym.Env):
         "rgb_array",
         "depth_array",
     ],
-    "render_fps": 67,
+    "render_fps": 100,
     }
 
     def __init__(
         self,
-        model = 'src/gym_training/envs/mesh/ur3e.xml',
-        reset_noise_scale = 1e-2,
         **kwargs
+
     ):
-        
-        self.observation_space = spaces.Box(0, 1, shape=(2,))
-        #self.action_space = spaces.Discrete(2, seed=42)
-        
+        EzPickle.__init__(self,  **kwargs)
+        filename = "ur3e.xml"
+        search_path = "./"
+        model_path = find_file(filename, search_path)
+        if model_path is not None:
+            print(f"Found {filename} at {model_path}")
+        else:
+            print(f"{filename} not found in {search_path}")
+
         MujocoEnv.__init__(
             self,
-            model,
-            5,
-            observation_space=observation_space,
-            default_camera_config=DEFAULT_CAMERA_CONFIG,
-            **kwargs
+            model_path=model_path,
+            frame_skip=5,
+            observation_space=observation_space
+            # default_camera_config=DEFAULT_CAMERA_CONFIG,
+            # **kwargs,
         )
+
+        self.observation_space = spaces.Box(0, 5, shape=(6,), dtype=np.float64)
+        #self.action_space = spaces.Discrete(2, seed=42)
         
-        EzPickle.__init__(self, reset_noise_scale, **kwargs)
-
-        self._reset_noise_Scale = reset_noise_scale
-
     def step(self, action):
         # function for computing position 
-        # pos_before = compute_jointpos(self.model, self.data)
-        # self.do_simulation(action, self.frame_skip)
-        # pos_after = compute_jointpos(self.model, self.data)
+        obs = self._get_obs()
         self.do_simulation(action, self.frame_skip)
-        ctrl_cost = self.control_cost(action)
-        obs = observation_space.sample()
-        r = 0
-        done = False
-        return obs, r, done, {}
+        observation  = self._get_obs()
+        
+        ### Compute reward
+        #r = self.compute_reward()
+
+        ### Check if need for more training
+            ## Collision, succes, max. time steps
+        #done = self.check_collision()
+
+        self.render_mode = "human"
+        self.render()
+        
+        ## Create an Image object from the array
+        self.render_mode = "r"
+        self.render()
+        img = Image.fromarray(np_arr)
+
+        #plt.imshow(img)
+        #plt.show()
+        reward = 0
+        terminated = False
+        truncated = False
+        info = {}
+
+        return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):
-        return {"agent": self._agent_location, "target": self._target_location}
+        joint_pos = self.data.qpos.flat.copy()
+        self.render_mode = "rgb_array"
+        image = self.render()
 
+        return joint_pos #, image # Concatenate when multiple obs
+
+    
+    def check_collision():
+        # Define when coollision occurs
+        return False # bool for collision or not
+    
     def _set_action_space(self):
+        # Define a set of actions to execute in the simulation
         return super()._set_action_space()
     
     def compute_reward():# input i and i+1 state 
-        return None #return reward
+        # Define all the rewards possible
+        # Summarize all rewards 
+        return 1 #return reward
 
     def reset_model(self, *, seed: int or None = None):
-        noise_low = -self._reset_noise_scale
-        noise_high = self._reset_noise_scale
+        # noise_low = -self._reset_noise_scale
+        # noise_high = self._reset_noise_scale
         
-        qpos = self.init_qpos + self.np_random.uniform(
-            low=noise_low, high=noise_high, size=self.model.nq
-        )
-        qvel = self.init_qvel + self.np_random.uniform(
-            low=noise_low, high=noise_high, size=self.model.nv
-        )
-        self.set_state(qpos, qvel)
+        # qpos = self.init_qpos + self.np_random.uniform(
+        #     low=noise_low, high=noise_high, size=self.model.nq
+        # )
+        # qvel = self.init_qvel + self.np_random.uniform(
+        #     low=noise_low, high=noise_high, size=self.model.nv
+        # )
+        # self.set_state(qpos, qvel)
+        qp = self.init_qpos.copy()
+        qv = self.init_qvel.copy()
 
         observation = self._get_obs()
+
         return observation
