@@ -4,6 +4,7 @@ FROM ubuntu:22.04
 ENV SEWBOT_WS=/root/sewbot_ws
 WORKDIR $SEWBOT_WS
 
+ENV DISPLAY :1
 # Install ROS 2 Humble
 RUN locale && \
     apt-get update && apt-get install locales && \
