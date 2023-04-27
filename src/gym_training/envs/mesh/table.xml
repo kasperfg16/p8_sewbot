@@ -1,0 +1,6 @@
+<mujoco model="table">
+    <body pos="0 0 1">
+      <joint type="free"/>
+      <geom type="box" size="1 1 1" rgba="0 .9 0 1"/>
+    </body>
+</mujoco>

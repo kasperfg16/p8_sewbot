@@ -111,24 +111,24 @@ class UR3Env(MujocoEnv, EzPickle):
         observation  = self._get_obs()
         
         ### Compute reward
-        #r = self.compute_reward()
+        #reward = self.compute_reward()
 
         ### Check if need for more training
             ## Collision, succes, max. time steps
         #done = self.check_collision()
 
-        self.render_mode = "human"
-        self.render()
+        #self.render_mode = "human"
+        #self.render()
         
         ## Create an Image object from the array
-        self.render_mode = "r"
-        self.render()
-        img = Image.fromarray(np_arr)
+        #self.render_mode = "r"
+        #self.render()
+        #img = Image.fromarray(np_arr)
 
         #plt.imshow(img)
         #plt.show()
-        reward = 0
-        terminated = False
+        reward = self.compute_reward()
+        terminated = False # Check for collision or success
         truncated = False
         info = {}
 
@@ -150,10 +150,19 @@ class UR3Env(MujocoEnv, EzPickle):
         # Define a set of actions to execute in the simulation
         return super()._set_action_space()
     
-    def compute_reward():# input i and i+1 state 
-        # Define all the rewards possible
+    def compute_reward(self):# Define all the rewards possible
+        # Grasp reward 1 for open, 0 for close
+        # 
+        # Coverage reward
+        # if >90% coverage, call terminate
+        # Reward for standing in a certain position
+        goal_pos = [0, -1.5, 1.5, 0, 0, 0] # Home pos ish
+        position = self.data.qpos.flat.copy()
+        error_pos = sum( abs(np.subtract(goal_pos, position)))
         # Summarize all rewards 
-        return 1 #return reward
+        total_reward = 10 - error_pos
+
+        return total_reward #return reward
 
     def reset_model(self, *, seed: int or None = None):
         # noise_low = -self._reset_noise_scale
