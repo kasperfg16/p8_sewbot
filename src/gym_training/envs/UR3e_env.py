@@ -87,10 +87,10 @@ class UR3Env(MujocoEnv, EzPickle):
         filename = "ur3e.xml"
         search_path = "./"
         model_path = find_file(filename, search_path)
-        if model_path is not None:
-            print(f"Found {filename} at {model_path}")
-        else:
-            print(f"{filename} not found in {search_path}")
+        # if model_path is not None:
+        #     print(f"Found {filename} at {model_path}")
+        # else:
+        #     print(f"{filename} not found in {search_path}")
 
         MujocoEnv.__init__(
             self,
@@ -117,8 +117,8 @@ class UR3Env(MujocoEnv, EzPickle):
             ## Collision, succes, max. time steps
         #done = self.check_collision()
 
-        #self.render_mode = "human"
-        #self.render()
+        self.render_mode = "human"
+        self.render()
         
         ## Create an Image object from the array
         #self.render_mode = "r"
@@ -135,7 +135,7 @@ class UR3Env(MujocoEnv, EzPickle):
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):
-        joint_pos = self.data.qpos.flat.copy()
+        joint_pos = self.data.xpos.flat.copy()
         self.render_mode = "rgb_array"
         image = self.render()
 
@@ -157,7 +157,7 @@ class UR3Env(MujocoEnv, EzPickle):
         # if >90% coverage, call terminate
         # Reward for standing in a certain position
         goal_pos = [0, -1.5, 1.5, 0, 0, 0] # Home pos ish
-        position = self.data.qpos.flat.copy()
+        position = self.data.qpos[:6]
         error_pos = sum( abs(np.subtract(goal_pos, position)))
         # Summarize all rewards 
         total_reward = 1 - error_pos
@@ -165,16 +165,6 @@ class UR3Env(MujocoEnv, EzPickle):
         return total_reward #return reward
 
     def reset_model(self, *, seed: int or None = None):
-        # noise_low = -self._reset_noise_scale
-        # noise_high = self._reset_noise_scale
-        
-        # qpos = self.init_qpos + self.np_random.uniform(
-        #     low=noise_low, high=noise_high, size=self.model.nq
-        # )
-        # qvel = self.init_qvel + self.np_random.uniform(
-        #     low=noise_low, high=noise_high, size=self.model.nv
-        # )
-        # self.set_state(qpos, qvel)
         qp = self.init_qpos.copy()
         qv = self.init_qvel.copy()
 
