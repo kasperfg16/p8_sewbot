@@ -32,8 +32,8 @@ img_canny_clean = cv.Canny(image=img_gray, threshold1=200, threshold2=275) # num
 #cv.imshow('canny_clean', img_canny_clean)
 
 #with np.printoptions(threshold=sys.maxsize):
-#    print(img_canny_clean)
-np.savetxt('img_canny_clean.txt', img_canny_clean)
+#    print(img_canny_clean)print('index: ', vector_list.index(123))
+#np.savetxt('img_canny_clean.txt', img_canny_clean)
 
 print('Length: ', len(img_canny_clean))
 count = 0
@@ -42,11 +42,18 @@ count3 = 0
 flag = False
 white_pixel_list = []
 class pixel_class:
+#    def __init__(self, x, y, val, vector_to_next_x, vector_to_next_y):
+#        self.x = x
+#        self.y = y
+#        self.val = val
+#        self.vector_to_next_x = vector_to_next_x
+#        self.vector_to_next_y = vector_to_next_y
     x = 0
     y = 0
     val = 0
     vector_to_next_x = 0
     vector_to_next_y = 0
+
 
 for i in range(len(img_canny_clean)):
     #print('i: ', len(i))
@@ -60,6 +67,7 @@ for i in range(len(img_canny_clean)):
         #print('count2: ', count)
         pixel = img_canny_clean[i][j]
         if pixel > 0:
+#            white_pixel = pixel_class(i, j, pixel, 0, 0)
             white_pixel = pixel_class()
             white_pixel.x = i
             white_pixel.y = j
@@ -71,32 +79,27 @@ for i in range(len(img_canny_clean)):
     if flag == True:
         break
 
-
 vector_list = []
 
-for i in range(len(white_pixel_list)): # error: making vector to next white pixel, which might be in next row/col
+for i in range(len(white_pixel_list)):
     if i < len(white_pixel_list)-1:
         point1 = white_pixel_list[i]
         point2 = white_pixel_list[i+1]
-        vector = pixel_class
+        vector = pixel_class()
         vector.vector_to_next_x = point2.x - point1.x
         vector.vector_to_next_y = point2.y - point1.y
-#        print('vector_to_next_x: ', vector.vector_to_next_x)
-#        print('vector_to_next_y: ', vector.vector_to_next_y)
         vector_list.append(vector)
-#        print('i: ', i)
 
+vector_list_reduced = []
 for i in range(len(vector_list)):
     vector_len = np.sqrt(vector_list[i].vector_to_next_x**2 + vector_list[i].vector_to_next_y**2)
-    print('vector_to_next_x: ', vector_list[i].vector_to_next_x)
-    print('vector_to_next_y: ', vector_list[i].vector_to_next_y) # something is rotten here
-    #print('vector len: ', vector_len) #seems unlikely that they are all length 1
-    if vector_len > 5:
-        vector_list.pop(i)
+    if vector_len < 5:
+        vector_list_reduced.append(vector_list[i])
 
 
 print('vector_list len: ', len(vector_list)) #=1634
 print('pixel_list: ', len(white_pixel_list)) #=1635
+print('vector_list_reduced len: ', len(vector_list_reduced)) #=836
 
 #print('index: ', img_canny_clean.index(255))
 
