@@ -47,6 +47,7 @@ class pixel_class:
     val = 0
     vector_to_next_x = 0
     vector_to_next_y = 0
+    corner_bool = False
 #    vector_len = np.sqrt(vector_to_next_x**2 + vector_to_next_y**2)
 
 
@@ -74,8 +75,6 @@ for i in range(len(img_canny_clean)):
         break
 
 vector_list = []
-
-#Compare all pixels with each other create vector list with only vectors over e.g. 5
 print('Creating Vectors, please wait')
 for i in range(len(white_pixel_list)):
     for j in range(len(white_pixel_list)):
@@ -83,14 +82,71 @@ for i in range(len(white_pixel_list)):
             point1 = white_pixel_list[i]
             point2 = white_pixel_list[j]
             vector = pixel_class()
+            vector.x = white_pixel_list[i].x
+            vector.y = white_pixel_list[i].y
             vector.vector_to_next_x = point2.x - point1.x
             vector.vector_to_next_y = point2.y - point1.y
             vector_len = np.sqrt(vector.vector_to_next_x**2 + vector.vector_to_next_y**2)
-            if vector_len < 5:
+            if vector_len <= 1: #This number can be changed for faster but maybe less precise corners 
                 vector_list.append(vector)
 
 
+####################
 
+def unit_vector(vector):
+    #""" Returns the unit vector of the vector.  """
+    return vector / np.linalg.norm(vector)
+
+def angle_between(v1x, v1y, v2x, v2y):
+#    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+#            >>> angle_between((1, 0, 0), (0, 1, 0))
+#            1.5707963267948966
+#            >>> angle_between((1, 0, 0), (1, 0, 0))
+#            0.0
+#            >>> angle_between((1, 0, 0), (-1, 0, 0))
+#            3.141592653589793
+#    """
+    v1 = (v1x, v1y)
+    v2 = (v2x, v2y)
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+#####################3
+
+#might have to remove redundency vectors for speed
+
+print('vector_list len: ', len(vector_list)) #=2671590 now 13922(better)
+
+print('Calculating angles for corners, hold on!')
+interest_point_list = []
+for i in range(len(vector_list)): # Best:4:21 Prev:4:38
+    #print('Still Calculating... Round: ', i, 'of ', len(vector_list))
+    for j in range(len(vector_list)):
+        if i != j:
+            vector1x = vector_list[i].vector_to_next_x
+            vector1y = vector_list[i].vector_to_next_y
+            vector2x = vector_list[j].vector_to_next_x
+            vector2y = vector_list[j].vector_to_next_y
+            angle = angle_between(vector1x, vector1y, vector2x, vector2y)
+        
+            if angle >= np.deg2rad(80) and angle <= np.deg2rad(100): # or angle <= np.deg2rad(-80) and angle >= np.deg2rad(-100):
+                if vector_list[i].x == vector_list[j].x and vector_list[i].y == vector_list[j].y:
+                    #print('angle: ', np.rad2deg(angle))        
+                    #print('vector1x: ', vector_list[i].x)
+                    #print('vector1y: ', vector_list[i].y)
+                    #print('vector2x: ', vector_list[j].x)
+                    #print('vector2y: ', vector_list[j].y)
+                
+                    interest_point_list.append(vector_list[i])
+                    break
+            
+
+        #First check for othrogonaltity
+        #use start of vector for corner point
+
+print('interest_point_list len: ', len(interest_point_list)) #= 8920 at range 3
 print('vector_list len: ', len(vector_list)) #=2671590 now 13922(better)
 print('pixel_list: ', len(white_pixel_list)) #=1635
 #print('vector_list_reduced len: ', len(vector_list_reduced)) #=836 
