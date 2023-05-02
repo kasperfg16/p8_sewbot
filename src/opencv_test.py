@@ -29,7 +29,7 @@ img_canny_blur = cv.Canny(image=img_gray_blur, threshold1=200, threshold2=275)
 #cv.imshow('canny_blur', img_canny_blur)
 
 img_canny_clean = cv.Canny(image=img_gray, threshold1=200, threshold2=275) # numpy.ndarray
-#cv.imshow('canny_clean', img_canny_clean)
+cv.imshow('canny_clean', img_canny_clean)
 
 #with np.printoptions(threshold=sys.maxsize):
 #    print(img_canny_clean)print('index: ', vector_list.index(123))
@@ -145,33 +145,38 @@ for i in range(len(vector_list)): # Best:4:21 Prev:4:38
 
         #First check for othrogonaltity
         #use start of vector for corner point
-#point_in_list = []
+point_in_list = []
+point_list = []
 point_list_x = []
 point_list_y = []
 
 for i in range(len(interest_point_list)):
-#    point_in_list = []
-#    point_in_list.append(interest_point_list[i].x)
-#    point_in_list.append(interest_point_list[i].y)
-    point_list_x.append(interest_point_list[i].x)
-    point_list_y.append(interest_point_list[i].y)
+    point_in_list = []
+    point_in_list.append(interest_point_list[i].x)
+    point_in_list.append(interest_point_list[i].y)
+    point_list.append(point_in_list)
+    #point_list_x.append(interest_point_list[i].x)
+    #point_list_y.append(interest_point_list[i].y)
 
-print('point_listx: ', point_list_x)
-print('point_listy: ', point_list_y)
+#print('point_list: ', point_list)
+#print('point_listx: ', point_list_x)
+#print('point_listy: ', point_list_y)
 
 print('Drawing corners')
 img_corner = img_canny_clean.copy() # Copy img_canny_clean into img_corner
 for i in range(len(img_canny_clean)):
     for j in range(len(img_canny_clean[i])):
         img_corner[i][j] = 0
-        if i in point_list_x and j in point_list_y: # kan man ikke. lige nu kigger den på om der er en x-værdi der passer anywhere i listen, men den passer ikke nødvedigvis med y-værdien. dumt lavet
+        check_point = [i, j]
+        if check_point in point_list: # kan man ikke. lige nu kigger den på om der er en x-værdi der passer anywhere i listen, men den passer ikke nødvedigvis med y-værdien. dumt lavet
             img_corner[i][j] = 255
 
-#cv.imshow('img_corner', img_corner)
+img_corner = cv.dilate(img_corner, None) # only for visual aid 
+cv.imshow('img_corner', img_corner) 
 
-print('interest_point_list len: ', len(interest_point_list)) #= 8920 at range 3
-print('vector_list len: ', len(vector_list)) #=2671590 now 13922(better)
-print('pixel_list: ', len(white_pixel_list)) #=1635
+#print('interest_point_list len: ', len(interest_point_list)) #= 8920 at range 3
+#print('vector_list len: ', len(vector_list)) #=2671590 now 13922(better)
+#print('pixel_list: ', len(white_pixel_list)) #=1635
 #print('vector_list_reduced len: ', len(vector_list_reduced)) #=836 
 
 #print('index: ', img_canny_clean.index(255))
@@ -210,8 +215,8 @@ for i in range(2):
 #corner detection
 img_canny_blur_float = np.float32(img_canny_blur)
 corn0 = cv.cornerHarris(img_canny_blur_float, 2, 3, 0.04) 
-corn0 = cv.dilate(corn0, None)
-#cv.imshow('corn0', corn0) # best so far
+corn0 = cv.dilate(corn0, None) #Only for visual aid
+cv.imshow('corn0', corn0) # best so far
 
 
 
