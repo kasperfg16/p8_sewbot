@@ -48,7 +48,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
 
-env = gym.vector.make("UR3e", num_envs=30, asynchronous=True)
+env = gym.vector.make("UR3e", num_envs=50, asynchronous=True)
 
 env = wrap_env(env)
 
@@ -96,7 +96,7 @@ agent_ddpg = DDPG(models=models_ddpg,
                   device=device)
 
 # Configure and instantiate the RL trainer
-cfg_trainer = {"timesteps": 15000, "headless": True}
+cfg_trainer = {"timesteps": 20000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
 
 # start training

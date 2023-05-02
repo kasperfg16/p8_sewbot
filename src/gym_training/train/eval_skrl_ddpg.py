@@ -48,8 +48,8 @@ models_ddpg["policy"] = DeterministicActor(env.observation_space, env.action_spa
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
 cfg_ddpg["random_timesteps"] = 0
-# logging to TensorBoard each 300 timesteps and ignore checkpoints
-cfg_ddpg["experiment"]["write_interval"] = 300
+# logging to TensorBoard each "write_interval" timesteps and ignore checkpoints
+cfg_ddpg["experiment"]["write_interval"] = 100
 cfg_ddpg["experiment"]["checkpoint_interval"] = 0
 
 agent_ddpg = DDPG(models=models_ddpg,
@@ -60,7 +60,7 @@ agent_ddpg = DDPG(models=models_ddpg,
                   device=device)
 
 # load checkpoint
-agent_ddpg.load("./runs/23-04-26_16-04-55-477563_DDPG/checkpoints/agent_15000.pt")
+agent_ddpg.load("./runs/23-04-27_16-56-38-469063_DDPG/checkpoints/best_agent.pt")
 
 # Configure and instantiate the RL trainer
 cfg_trainer = {"timesteps": 15000, "headless": True}

@@ -166,7 +166,7 @@ class UR3Env(MujocoEnv, EzPickle):
         position = self.data.qpos[:6]
         error_pos = sum( abs(np.subtract(goal_pos, position)))
         # Summarize all rewards 
-        total_reward = 10 - error_pos
+        total_reward = 1 - error_pos
 
         return total_reward #return reward
 
