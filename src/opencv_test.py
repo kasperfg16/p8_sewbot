@@ -145,6 +145,29 @@ for i in range(len(vector_list)): # Best:4:21 Prev:4:38
 
         #First check for othrogonaltity
         #use start of vector for corner point
+#point_in_list = []
+point_list_x = []
+point_list_y = []
+
+for i in range(len(interest_point_list)):
+#    point_in_list = []
+#    point_in_list.append(interest_point_list[i].x)
+#    point_in_list.append(interest_point_list[i].y)
+    point_list_x.append(interest_point_list[i].x)
+    point_list_y.append(interest_point_list[i].y)
+
+print('point_listx: ', point_list_x)
+print('point_listy: ', point_list_y)
+
+print('Drawing corners')
+img_corner = img_canny_clean.copy() # Copy img_canny_clean into img_corner
+for i in range(len(img_canny_clean)):
+    for j in range(len(img_canny_clean[i])):
+        img_corner[i][j] = 0
+        if i in point_list_x and j in point_list_y: # kan man ikke. lige nu kigger den på om der er en x-værdi der passer anywhere i listen, men den passer ikke nødvedigvis med y-værdien. dumt lavet
+            img_corner[i][j] = 255
+
+#cv.imshow('img_corner', img_corner)
 
 print('interest_point_list len: ', len(interest_point_list)) #= 8920 at range 3
 print('vector_list len: ', len(vector_list)) #=2671590 now 13922(better)
