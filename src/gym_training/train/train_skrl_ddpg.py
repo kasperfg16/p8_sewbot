@@ -54,7 +54,7 @@ env = wrap_env(env)
 
 # See the used grafics card
 device = torch.cuda.current_device()
-print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
+#print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
 
 device = env.device
 

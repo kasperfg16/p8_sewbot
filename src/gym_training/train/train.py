@@ -12,7 +12,7 @@ search_path = "./"
 
 # model = mj.MjModel.from_xml_path(model_path)
 
-env = gym.make('UR3e')
+env = gym.make('UR5')
 observation= env.reset()
 #env.render(mode="rgb_array")
 

@@ -1,7 +1,6 @@
 import numpy as np
 import gymnasium as gym
-import mujoco as mj
-#reload(gym)
+from gym_training.controller.UR3e_contr import UR3e_controller
 import gymnasium as gym
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium import spaces
@@ -10,6 +9,12 @@ import os
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+
+
+##############
+### Get camera to work!!!
+#############
+
 
 action_space = gym.spaces.Discrete(2)
 observation_space = gym.spaces.Discrete(2)
@@ -101,18 +106,19 @@ class UR3Env(MujocoEnv, EzPickle):
             # **kwargs,
         )
 
-        self.observation_space = spaces.Box(0, 5, shape=(6,), dtype=np.float64)
-        #self.action_space = spaces.Discrete(2, seed=42)
+        self.observation_space = spaces.Box(0.0, 134.0, shape=(135, ), dtype=np.float64)
+        self.action_space = spaces.Discrete(6, seed=42)
+        self.controller = UR3e_controller(self.model, self.data, self.render)
         
     def step(self, action):
         # function for computing position 
-        obs = self._get_obs()
+        #obs = self._get_obs()
         self.do_simulation(action, self.frame_skip)
         observation  = self._get_obs()
-        
+
         ### Compute reward
         #reward = self.compute_reward()
-
+        self.controller.get_image_data(width=1000, height=1000)
         ### Check if need for more training
             ## Collision, succes, max. time steps
         #done = self.check_collision()
@@ -131,19 +137,17 @@ class UR3Env(MujocoEnv, EzPickle):
         terminated = False # Check for collision or success
         truncated = False
         info = {}
-
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):
         joint_pos = self.data.xpos.flat.copy()
-        self.render_mode = "rgb_array"
-        image = self.render()
-
+        #print(len(self.data.ctrl))
         return joint_pos #, image # Concatenate when multiple obs
 
     
-    def check_collision():
+    def check_collision(self):
         # Define when coollision occurs
+
         return False # bool for collision or not
     
     def _set_action_space(self):
@@ -153,8 +157,10 @@ class UR3Env(MujocoEnv, EzPickle):
     def compute_reward(self):# Define all the rewards possible
         # Grasp reward 1 for open, 0 for close
         # 
-        # Coverage reward
-        # if >90% coverage, call terminate
+        # Coverage reward if >90% coverage, call terminate
+        self.render(width=200, height=200)
+        # Contact/collision penalty
+        collision = self.check_collision()
         # Reward for standing in a certain position
         goal_pos = [0, -1.5, 1.5, 0, 0, 0] # Home pos ish
         position = self.data.qpos[:6]

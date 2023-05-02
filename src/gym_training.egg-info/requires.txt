@@ -1,3 +1,4 @@
-gymnasium==0.28.1
+gymnasium
+mujoco
 numpy
-mujoco==2.3.3
+skrl

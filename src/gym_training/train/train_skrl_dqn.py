@@ -12,18 +12,18 @@ import torch
 # Load and wrap the Gymnasium environment.
 # Note: the environment version may change depending on the gymnasium version
 
-env = gym.make("UR3e")
+env = gym.make("UR5")
 
 env = wrap_env(env)
 
 # See the used grafics card
 device = torch.cuda.current_device()
-print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
+#print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
 
 device = env.device
 
 # Instantiate a RandomMemory (without replacement) as experience replay memory
-memory = RandomMemory(memory_size=50000, num_envs=env.num_envs, device=device, replacement=False)
+memory = RandomMemory(memory_size=5000, num_envs=env.num_envs, device=device, replacement=False)
 
 # Instantiate the agent's models (function approximators) using the model instantiator utility
 # DQN requires 2 models, visit its documentation for more details
