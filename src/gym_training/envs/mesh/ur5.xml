@@ -86,11 +86,11 @@
         <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1" /> -->
 
         <light name="lightdefault" diffuse=".3 .3 .3" pos="0 0 3" dir="0 0 -1" />
-
+        <camera name="RealSense" mode="fixed" pos="-0.3 1.2 1.0" euler="-0.7 0 3.14 " fovy="42.5"/>
         <geom name='floor' material="floor_mat" pos='0 0 0' size='2.5 2.5 0.1'  type='plane' />
          <!-- table  -->
         <body name="table" pos="0 0 0">
-            <geom type="box" size="0.5 .5 .1" rgba="1 1 1 1"/>
+            <geom type="box" size="0.7 .7 .1" rgba="1 1 1 1"/>
 
             <body name="base_link" pos="0 0 0.1">
                 <geom name="link0" type="mesh" mesh="link0" pos="0 0 0"/>
@@ -158,7 +158,7 @@
             </body>
         </body>
                 <!-- cloth -->
-        <body name="B3_5" pos="0.25 0.25 0.1">
+        <body name="B3_5" pos="-0.2 0.6 0.1">
             <freejoint/>
             <composite type="cloth" count="6 6" spacing="0.05" flatinertia="0.01">
                 <joint kind="main" damping="0.001"/>
@@ -169,7 +169,7 @@
     </worldbody>
 
     <actuator>
-        <motor name="joint0_motor" joint="joint0"/>
+        <motor name="joint0_motor" joint="joint0" />
         <motor name="joint1_motor" joint="joint1"/>
         <motor name="joint2_motor" joint="joint2"/>
         <motor name="joint3_motor" joint="joint3"/>
