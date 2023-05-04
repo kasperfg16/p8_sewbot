@@ -138,8 +138,8 @@ class UR5Env(MujocoEnv, EzPickle):
 
     
     def check_collision(self):
-        # Define when coollision occurs
-
+        # Define when collision occurs
+        
         return False # bool for collision or not
     
     def get_coverage(self, image):
@@ -147,24 +147,24 @@ class UR5Env(MujocoEnv, EzPickle):
         clotharea = 14433.5
         tol = 0.005
 
-        # make continuous background subtraction (or something) to keep history of cloth location behind manipulator
-        self.img_stack.insert(0, image)
-        sequence = np.median(self.img_stack, axis=0).astype(dtype=np.uint8)
-        new = cv2.subtract(self.im_background, sequence)
-        imgray = cv2.cvtColor(new, cv2.COLOR_BGR2GRAY)
+        # # make continuous background subtraction (or something) to keep history of cloth location behind manipulator
+        # self.img_stack.insert(0, image)
+        # sequence = np.median(self.img_stack, axis=0).astype(dtype=np.uint8)
+        # new = cv2.subtract(self.im_background, sequence)
+        # imgray = cv2.cvtColor(new, cv2.COLOR_BGR2GRAY)
 
-        edged = cv2.Canny(imgray, 30, 200)
-        cv2.waitKey(0)
-        contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # edged = cv2.Canny(imgray, 30, 200)
+        # cv2.waitKey(0)
+        # contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        new = cv2.drawContours(new, contours, -1, (0,255,0), 3)
-        currentarea = cv2.contourArea(contours[0])
-        self.area_stack.insert(0, currentarea)
-        ## compare with ground truth and previous area
-        coverageper = (self.area_stack[0] - self.area_stack[1]) + 100 - (clotharea - currentarea)/clotharea
-        #print(coverageper)
-        if (clotharea - currentarea)/clotharea > 0.9:
-            goalcoverage = True
+        # new = cv2.drawContours(new, contours, -1, (0,255,0), 3)
+        # currentarea = cv2.contourArea(contours[0])
+        # self.area_stack.insert(0, currentarea)
+        # ## compare with ground truth and previous area
+        # coverageper = (self.area_stack[0] - self.area_stack[1]) + 100 - (clotharea - currentarea)/clotharea
+        # #print(coverageper)
+        # if (clotharea - currentarea)/clotharea > 0.9:
+        #     goalcoverage = True
         # return coverage percentage
         return 0.9
     
