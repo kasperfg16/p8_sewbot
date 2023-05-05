@@ -114,9 +114,12 @@ class UR5Env(MujocoEnv, EzPickle):
         #print(self.stepcount)
 
         # Render scene
-        # self.render_mode = "human"
-        # self.render()
+        self.render_mode = "human"
+        self.render()
 
+        pos_delta = np.array([0.000001, 0.0, 0])
+        self.data.mocap_pos[:] = self.data.mocap_pos + pos_delta
+        #print(self.data.mocap_pos[:])
         # function for computing position 
         #obs = self._get_obs()
         self.do_simulation(action, self.frame_skip)
@@ -139,7 +142,7 @@ class UR5Env(MujocoEnv, EzPickle):
     
     def check_collision(self):
         # Define when collision occurs
-        
+
         return False # bool for collision or not
     
     def get_coverage(self, image):
