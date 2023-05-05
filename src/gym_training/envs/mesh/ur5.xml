@@ -96,8 +96,9 @@
         <light name="lightdefault" diffuse=".3 .3 .3" pos="0 0 3" dir="0 0 -1" />
         <camera name="RealSense" mode="fixed" pos="-0.3 1.2 1.0" euler="-0.7 0 3.14" fovy="42.5"/>
         <geom name='floor' material="floor_mat" pos='0 0 0' size='2.5 2.5 0.1'  type='plane' />
-                        <!-- cloth -->
-        <body name="B3_5" pos="-0.2 0.6 0.1" mocap="true">
+        
+        <!-- cloth -->
+        <body name="B3_5" pos="-0.2 0.6 0.18" mocap="true">
             <composite type="cloth" count="6 6" spacing="0.05" flatinertia="0.01">
                 <joint kind="main" damping="0.001"/>
                 <skin material="matdenim" texcoord="true" inflate="0.005" subgrid="2"/>
@@ -173,22 +174,15 @@
                                                 <body name="left_finger" pos="-0.0068 0.02 0" > 
                                                     <inertial pos="0 0 0" mass="0.0045" diaginertia="0.1 0.1 0.1" />
                                                     <geom name="left_finger" type="mesh" material="silver2" mesh="MHZ2-20D_mhz2-prong" />
-                                                    <joint name="joint_lf" class="GRIPPER" pos="0 0 0" axis="0 1 0" limited="true" range="-1 1" />
+                                                    <geom name="left_hat" type="mesh" material="white" mesh="gripper_hat" pos="-0.0112 0.0026 0" euler="1.57 0 1.57"/>
+                                                    <joint name="joint_lf" class="GRIPPER" type="slide" pos="0 0 0" axis="0 1 0" limited="true" range="-0.008 0" />
                                                 </body>
-                                                    <body name="left_hat" pos="-0.0145 0.022 0" quat="-180 -180 180 -180" >
-                                                        <inertial pos="0 0 0" mass="0.000724255" diaginertia="0.1 0.1 0.1" />
-                                                        <geom name="left_hat" type="mesh" material="white" mesh="gripper_hat" />
-                                                    </body>
-
-                                                <body name="right_finger" pos="0 -0.02 0" quat="0 360 0 0">
+                                                <body name="right_finger" pos="-0.0068 -0.02 0" quat="0 360 0 0">
                                                     <inertial pos="0 0 0" mass="0.0045" diaginertia="0.1 0.1 0.1" />
                                                     <geom name="right_finger" type="mesh" material="silver2" mesh="MHZ2-20D_mhz2-prong" />
-                                                    <joint name="right_finger" class="GRIPPER" pos="0 0 0" axis="0 1 0" limited="true" range="-1 1" />
-                                                </body>
-                                                    <body name="right_hat" pos="-0.0145 -0.022 0" >
-                                                        <inertial pos="0 0 0" mass="0.000724255" diaginertia="0.1 0.1 0.1" />
-                                                        <geom name="gripper_hat" type="mesh" material="black" mesh="gripper_hat" />
-                                                    </body>
+                                                    <geom name="gripper_hat" type="mesh" material="black" mesh="gripper_hat" pos="-0.0112 0.0026 0" euler="1.57 0 1.57" />
+                                                    <joint name="joint_rf" class="GRIPPER" type="slide" pos="0 0 0" axis="0 1 0" limited="true" range="-0.008 0" />
+                                                </body>                                                    
                                             </body>
                                     </body>
                                 </body>
@@ -208,6 +202,8 @@
         <position name="joint3_motor" joint="joint3" ctrllimited="true" ctrlrange="-500 500" />
         <position name="joint4_motor" joint="joint4" ctrllimited="true" ctrlrange="-500 500" />
         <position name="joint5_motor" joint="joint5" ctrllimited="true" ctrlrange="-500 500" />
+        <general name="joint6_lf" joint="joint_lf" />
+        <general name="joint7_rf" joint="joint_rf" />
     </actuator>
 
 </mujoco>

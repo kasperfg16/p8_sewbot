@@ -4,11 +4,12 @@ import gymnasium as gym
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
+from gym_training.controller.UR5_contr import URController
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
-from gym_training.controller.mujoco_controller import MJ_Controller
+#from gym_training.controller.mujoco_controller import MJ_Controller
 
 
 ##############
@@ -105,7 +106,8 @@ class UR5Env(MujocoEnv, EzPickle):
             # **kwargs,
         )
 
-        self.controller = MJ_Controller()
+        #self.controller = URController()
+        #self.controller = MJ_Controller()
 
         self.step_counter = 0
         self.observation_space = spaces.Box(0.0, 134.0, shape=(138, ), dtype=np.float64)
@@ -132,17 +134,17 @@ class UR5Env(MujocoEnv, EzPickle):
 
         ### Compute reward
         #reward = self.compute_reward()
-        #self.controller.get_image_data(width=1000, height=1000)
         ### Check if need for more training
             ## Collision, succes, max. time steps
         #done = self.check_collision()
-
+        #self.controller.inverse_kinematics()
         # Render scene
         self.render_mode = "human"
         self.render()
 
-        pos_delta = np.array([0.000001, 0.0, 0])
-        self.data.mocap_pos[:] = self.data.mocap_pos + pos_delta
+        # pos_delta = np.array([0.000001, 0.0, 0])
+        # self.data.mocap_pos[:] = self.data.mocap_pos + pos_delta
+
         #print(self.data.mocap_pos[:])
         # function for computing position 
         #obs = self._get_obs()

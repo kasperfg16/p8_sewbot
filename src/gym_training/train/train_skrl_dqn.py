@@ -1,5 +1,4 @@
 import gymnasium as gym
-from gymnasium.wrappers.human_rendering import HumanRendering
 import gym_training
 
 

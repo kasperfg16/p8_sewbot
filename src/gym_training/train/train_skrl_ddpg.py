@@ -54,7 +54,7 @@ if display:
 else:
     render_mode = None
 
-env = gym.vector.make("UR5", num_envs=10, asynchronous=True, render_mode=render_mode)
+env = gym.vector.make("UR5_ddpg", num_envs=1, asynchronous=True, render_mode=render_mode)
 
 env = wrap_env(env)
 
@@ -87,7 +87,7 @@ for model in models_ddpg.values():
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
 cfg_ddpg["exploration"]["noise"] = OrnsteinUhlenbeckNoise(theta=0.15, sigma=0.1, base_scale=1.0, device=device)
-cfg_ddpg["batch_size"] = 100
+cfg_ddpg["batch_size"] = 128
 cfg_ddpg["random_timesteps"] = 100
 cfg_ddpg["learning_starts"] = 100
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
