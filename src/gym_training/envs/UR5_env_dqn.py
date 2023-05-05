@@ -8,6 +8,12 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
+from gym_training.controller.mujoco_controller import MJ_Controller
+
+
+##############
+### Get camera to work!!!
+#############
 
 action_space = gym.spaces.Discrete(2)
 observation_space = gym.spaces.Discrete(2)
@@ -99,7 +105,10 @@ class UR5Env(MujocoEnv, EzPickle):
             # **kwargs,
         )
 
-        self.observation_space = spaces.Box(0.0, 137.0, shape=(138, ), dtype=np.float64)
+        self.controller = MJ_Controller()
+
+        self.step_counter = 0
+        self.observation_space = spaces.Box(0.0, 134.0, shape=(138, ), dtype=np.float64)
         self.action_space = spaces.Discrete(6, seed=42)
         #self.controller = UR3e_controller(self.model, self.data, self.render
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
@@ -112,6 +121,21 @@ class UR5Env(MujocoEnv, EzPickle):
     def step(self, action):
         self.stepcount = self.stepcount +1
         #print(self.stepcount)
+        # function for computing position 
+        #obs = self._get_obs()
+        self.do_simulation(action, self.frame_skip)
+        observation  = self._get_obs()
+
+        terminated = False # Check for collision or success
+        truncated = False
+        info = {}
+
+        ### Compute reward
+        #reward = self.compute_reward()
+        #self.controller.get_image_data(width=1000, height=1000)
+        ### Check if need for more training
+            ## Collision, succes, max. time steps
+        #done = self.check_collision()
 
         # Render scene
         self.render_mode = "human"
@@ -129,6 +153,15 @@ class UR5Env(MujocoEnv, EzPickle):
         terminated = False # Check for collision or successs
         truncated = False
         info = {}
+        #plt.imshow(img)
+        #plt.show()
+        self.step_counter += 1
+        if self.step_counter >= 200:
+            truncated = True
+            self.step_counter = 0
+
+        
+        reward = self.compute_reward()
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):

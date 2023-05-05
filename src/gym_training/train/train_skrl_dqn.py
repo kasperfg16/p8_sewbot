@@ -18,8 +18,15 @@ def report_gpu():
    torch.cuda.empty_cache()
 # Load and wrap the Gymnasium environment.
 # Note: the environment version may change depending on the gymnasium version
+display = False
 
-env = gym.make("UR5")
+if display:
+    render_mode = 'human'
+else:
+    render_mode = None
+
+env = gym.vector.make("UR5", num_envs=10, asynchronous=True, render_mode=render_mode)
+
 env = wrap_env(env)
 
 # See the used grafics card

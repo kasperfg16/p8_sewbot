@@ -1,59 +1,85 @@
-# Start your image with a node base image. We use ubuntu 20.04 as OS
-FROM ubuntu:22.04
+# This is an auto generated Dockerfile for ros:ros-core
+# generated from docker_images/create_ros_core_image.Dockerfile.em
+FROM ros:noetic
 
 ENV SEWBOT_WS=/root/sewbot_ws
 WORKDIR $SEWBOT_WS
 
-ENV DISPLAY :1
-# Install ROS 2 Humble
-RUN locale && \
-    apt-get update && apt-get install locales && \
-    locale-gen en_US en_US.UTF-8 && \
-    update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 && \
-    export LANG=en_US.UTF-8 && \
-    locale
+# RUN apt-get update
 
-## Set Timezone
-ARG TZ="Europe/London"
-ENV TZ ${TZ}
+# RUN apt-get install software-properties-common -y
 
-## Setup Environment
-ENV DEBIAN_FRONTEND noninteractive
+# RUN add-apt-repository universe && \
+#     add-apt-repository multiverse && \
+#     apt-get update
 
-RUN apt-get install software-properties-common -y && \
-    add-apt-repository universe && \
-    apt-get update && apt-get install curl -y && \
-    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null &&\
-    apt-get update && \
-    apt-get dist-upgrade -y && \
-    apt-get install ros-humble-desktop -y
+# RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 
-# Install pip & git
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python3 get-pip.py && \
-    apt-get -y update && \
-    apt-get -y install git
+# RUN apt-get update
 
-# Install mujoco and gymnasium
-RUN pip install mujoco gymnasium[mujoco]
+# RUN apt-get update
 
-# Install the ur-robot-driver
-RUN apt-get install ros-humble-ur-robot-driver -y
+# RUN apt-get install gnupg -y
 
-# Make the terminal automatically source the /opt/ros/humble/setup.bash file every time you open a new terminal window
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+# RUN apt-get install curl -y && \
+#     curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 
-# Install buid tools (catkin)
-RUN pip3 install -U catkin_tools && \
-    apt install python3-colcon-common-extensions -y
+# RUN apt-get update
+
+# RUN apt install ros-noetic-desktop-full
 
 WORKDIR $SEWBOT_WS/src
 
-RUN git clone https://github.com/saga0619/mujoco_ros_sim.git
+RUN apt-get update && \
+    apt-get install git-all -y
 
-# Information:
-# https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#the-ros-domain-id-variable
-# https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#the-ros-localhost-only-variable
-RUN echo "export ROS_DOMAIN_ID=42" >> ~/.bashrc && \
-    echo "export ROS_LOCALHOST_ONLY=1" >> ~/.bashrc
+RUN apt-get install ros-noetic-catkin
+
+RUN apt-get update && apt-get install -y \
+    python3-pip
+
+RUN pip3 install git+https://github.com/catkin/catkin_tools.git
+
+RUN echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+
+RUN apt-get install -y \
+    ros-noetic-object-recognition-msgs \
+    ros-noetic-controller-manager \
+    ros-noetic-control-toolbox \
+    ros-noetic-transmission-interface \
+    ros-noetic-joint-limits-interface \
+    ros-noetic-roslint \
+    ros-noetic-angles \
+    ros-noetic-eigen-conversions \
+    ros-noetic-tf
+
+RUN git clone https://github.com/shadow-robot/mujoco_ros_pkgs.git
+
+RUN apt-get install -y libglfw3-dev build-essential libgl1-mesa-dev
+
+RUN apt-get install -y xorg-dev libglu1-mesa-dev
+
+RUN apt-get install -y libglfw3-dev xorg-dev libglu1-mesa-dev -y
+
+RUN mkdir include && \
+    cd include && \
+    git clone https://github.com/shadow-robot/mujoco_ros_pkgs.git
+
+#RUN cmake include/mujoco/
+
+# RUN cmake --build .
+
+# RUN cmake --install .
+
+#############################################
+# RUN pip3 install mujoco
+
+# RUN apt-get install libgl-dev -y
+
+# RUN git clone https://github.com/saga0619/mujoco_ros_sim.git
+
+# RUN catkin build
+
+# /root/sewbot_ws/include/mujoco/include/mujoco
+# /root/sewbot_ws/include/mujoco/include
+# /root/sewbot_ws/include/glfw/include/GLFW
