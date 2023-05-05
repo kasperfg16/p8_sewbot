@@ -9,12 +9,12 @@ import os
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+from gym_training.controller.mujoco_controller import MJ_Controller
 
 
 ##############
 ### Get camera to work!!!
 #############
-
 
 action_space = gym.spaces.Discrete(2)
 observation_space = gym.spaces.Discrete(2)
@@ -106,7 +106,10 @@ class UR5Env(MujocoEnv, EzPickle):
             # **kwargs,
         )
 
-        self.observation_space = spaces.Box(0.0, 134.0, shape=(135, ), dtype=np.float64)
+        self.controller = MJ_Controller()
+
+        self.step_counter = 0
+        self.observation_space = spaces.Box(0.0, 134.0, shape=(138, ), dtype=np.float64)
         self.action_space = spaces.Discrete(6, seed=42)
         #self.controller = UR3e_controller(self.model, self.data, self.render)
         
@@ -115,6 +118,10 @@ class UR5Env(MujocoEnv, EzPickle):
         #obs = self._get_obs()
         self.do_simulation(action, self.frame_skip)
         observation  = self._get_obs()
+
+        terminated = False # Check for collision or success
+        truncated = False
+        info = {}
 
         ### Compute reward
         #reward = self.compute_reward()
@@ -133,10 +140,13 @@ class UR5Env(MujocoEnv, EzPickle):
 
         #plt.imshow(img)
         #plt.show()
+        self.step_counter += 1
+        if self.step_counter >= 200:
+            truncated = True
+            self.step_counter = 0
+
+        
         reward = self.compute_reward()
-        terminated = False # Check for collision or success
-        truncated = False
-        info = {}
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):

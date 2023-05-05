@@ -47,8 +47,14 @@ class DeterministicCritic(DeterministicMixin, Model):
 
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
+display = True
 
-env = gym.vector.make("UR3e", num_envs=50, asynchronous=True)
+if display:
+    render_mode = 'human'
+else:
+    render_mode = None
+
+env = gym.vector.make("UR5", num_envs=10, asynchronous=True, render_mode=render_mode)
 
 env = wrap_env(env)
 
