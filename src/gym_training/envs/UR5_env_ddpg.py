@@ -1,6 +1,7 @@
 import numpy as np
 import gymnasium as gym
 #from gym_training.controller.UR3e_contr import UR3e_controller
+import gymnasium as gym
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
@@ -10,9 +11,13 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from gym_training.controller.mujoco_py_controller import MJ_Controller
 
+
 ##############
 ### Get camera to work!!!
 #############
+
+action_space = gym.spaces.Discrete(2)
+observation_space = gym.spaces.Discrete(2)
 
 DEFAULT_CAMERA_CONFIG = {
     "trackbodyid": 1,
@@ -32,7 +37,7 @@ def find_file(filename, search_path):
             return os.path.abspath(os.path.join(root, filename))
     return None
 
-class UR5Env_dqn(MujocoEnv, EzPickle):
+class UR5Env_ddpg(MujocoEnv, EzPickle):
     """
     ### Action space
     | Num | Action                | Control Min | Control Max | Name in XML file | Joint | Unit |
@@ -92,35 +97,29 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         else:
             print(f"{filename} not found in {search_path}")
 
-        self.observation_space = gym.spaces.Box(low=-1.0, high=2.0, shape=(6, ), dtype=np.float32)
-        
         MujocoEnv.__init__(
             self,
             model_path=model_path,
             frame_skip=5,
-            observation_space=self.observation_space
+            observation_space=observation_space
             # default_camera_config=DEFAULT_CAMERA_CONFIG,
             # **kwargs,
         )
 
-        #self.controller = MJ_Controller(model=self.model)
-        #self.controller.show_model_info()
-
         self.step_counter = 0
+        self.observation_space = spaces.Box(0.0, 134.0, shape=(6, ), dtype=np.float64)
+        #self.action_space = spaces.Discrete(6, seed=42, dtype=np.float64)
+        #self.controller = UR3e_controller(self.model, self.data, self.render)
         
     def step(self, action):
         # function for computing position 
         #obs = self._get_obs()
-        #print('action', action)
         self.do_simulation(action, self.frame_skip)
         observation  = self._get_obs()
 
         terminated = False # Check for collision or success
         truncated = False
         info = {}
-
-        # joint_angles = [1, 1, 1, 1, 1]
-        # result = self.controller.move_group_to_joint_target(group="Arm", target=joint_angles)
 
         ### Compute reward
         #reward = self.compute_reward()
@@ -140,22 +139,17 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         #plt.imshow(img)
         #plt.show()
         self.step_counter += 1
-        if self.step_counter >= 20000:
+        if self.step_counter >= 2000:
             truncated = True
             self.step_counter = 0
 
         
         reward = self.compute_reward()
+        #print(np.max(observation))
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):
-        joint_pos = self.data.qpos[:6].astype(np.float32)
-        #print('joint_pos', joint_pos)
-        # Define the size of the image
-
-        # !!!Has to be changed!!! Generate a random 3D array of values between 0 and 1
-        #img_array = np.random.rand(self.img_width, self.img_height).astype(np.uint8)
-
+        joint_pos = self.data.qpos[:6]
         #print(len(self.data.ctrl))
         return joint_pos #, image # Concatenate when multiple obs
 
@@ -173,7 +167,7 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         # Grasp reward 1 for open, 0 for close
         # 
         # Coverage reward if >90% coverage, call terminate
-        # self.render()
+        self.render()
         # Contact/collision penalty
         collision = self.check_collision()
         # Reward for standing in a certain position

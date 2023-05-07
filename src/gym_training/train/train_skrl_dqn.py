@@ -8,17 +8,18 @@ from skrl.agents.torch.dqn import DQN, DQN_DEFAULT_CONFIG
 from skrl.trainers.torch import SequentialTrainer
 from skrl.envs.torch import wrap_env
 import torch
+from gym.wrappers import FlattenObservation
 
 # Load and wrap the Gymnasium environment.
 # Note: the environment version may change depending on the gymnasium version
-display = False
+display = True
 
 if display:
     render_mode = 'human'
 else:
     render_mode = None
 
-env = gym.vector.make("UR5", num_envs=10, asynchronous=True, render_mode=render_mode)
+env = gym.vector.make("Pendulum-v1", num_envs=1, asynchronous=False, render_mode=render_mode)
 
 env = wrap_env(env)
 
@@ -26,6 +27,7 @@ env = wrap_env(env)
 device = torch.cuda.current_device()
 #print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
 
+env.device = 'cpu'
 device = env.device
 
 # Instantiate a RandomMemory (without replacement) as experience replay memory
@@ -80,7 +82,7 @@ agent_dqn = DQN(models=models_dqn,
                 device=device)
 
 # Configure and instantiate the RL trainer
-cfg_trainer = {"timesteps": 50000, "headless": True}
+cfg_trainer = {"timesteps": 500, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_dqn)
 
 # start training
