@@ -1,10 +1,5 @@
 import numpy as np
 import gymnasium as gym
-<<<<<<< HEAD
-#from gym_training.controller.UR3e_contr import UR3e_controller
-=======
-
->>>>>>> c2210466c65b75b850615a9605344758e1992164
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
@@ -12,26 +7,14 @@ from gym_training.controller.UR5_contr import URController
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-<<<<<<< HEAD
-from gym_training.controller.mujoco_py_controller import MJ_Controller
-=======
 import cv2
 #from gym_training.controller.mujoco_controller import MJ_Controller
 
->>>>>>> c2210466c65b75b850615a9605344758e1992164
 
 ##############
 ### Get camera to work!!!
 #############
 
-<<<<<<< HEAD
-DEFAULT_CAMERA_CONFIG = {
-    "trackbodyid": 1,
-    "distance": 4.0,
-    "lookat": np.array((0.0, 0.0, 2.0)),
-    "elevation": -20.0,
-}
-=======
 action_space = gym.spaces.Discrete(2)
 observation_space = gym.spaces.Discrete(2)
 
@@ -41,7 +24,6 @@ observation_space = gym.spaces.Discrete(2)
 #     "lookat": np.array((0.0, 0.0, 2.0)),
 #     "elevation": -20.0,
 # }
->>>>>>> c2210466c65b75b850615a9605344758e1992164
 
 def find_file(filename, search_path):
     """
@@ -190,7 +172,6 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):
-<<<<<<< HEAD
         joint_pos = self.data.qpos[:6].astype(np.float32)
         #print('joint_pos', joint_pos)
         # Define the size of the image
@@ -198,12 +179,6 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         # !!!Has to be changed!!! Generate a random 3D array of values between 0 and 1
         #img_array = np.random.rand(self.img_width, self.img_height).astype(np.uint8)
 
-=======
-        joint_pos = self.data.xpos.flat.copy()
-        # rgb = self.render.setBuffer(30, mjFB_OFFSCREEN) #(1920, 1080, depth=True, camera_name='RealSense', mode='offscreen')
-        # plt.imshow(image)
-        # plt.show()
->>>>>>> c2210466c65b75b850615a9605344758e1992164
         #print(len(self.data.ctrl))
         return joint_pos #, image # Concatenate when multiple obs
 
@@ -246,16 +221,11 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
     def compute_reward(self):# Define all the rewards possible
         # Grasp reward 1 for open, 0 for close
         # 
-<<<<<<< HEAD
-        # Coverage reward if >90% coverage, call terminate
-        # self.render()
-=======
         ## Coverage reward if >90% coverage, call terminate
         ## Compute only coverage after a grasp - remember to change
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")         
         coverage = self.get_coverage(image) # output percentage
 
->>>>>>> c2210466c65b75b850615a9605344758e1992164
         # Contact/collision penalty
         collision = self.check_collision()
         # Reward for standing in a certain position
