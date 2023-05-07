@@ -3,7 +3,7 @@ import mujoco as mj
 import gym_training
 import os
 
-env = gym.make('UR5')
+env = gym.make('UR5_ddpg')
 observation= env.reset()
 #env.render(mode="rgb_array")
 

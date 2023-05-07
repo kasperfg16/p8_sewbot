@@ -116,9 +116,9 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
         filename = "table.png"
         search_path = "./"
-        self.im_background = cv2.imread(find_file(filename, search_path))
+        self.im_background = np.asarray(cv2.imread(find_file(filename, search_path)), np.float64)
         self.stepcount = 0
-        self.img_stack = []*20
+        self.img_stack = np.zeros([20, 480, 480, 3])
         self.goalcoverage = False
         self.area_stack = [0]*2
         
@@ -141,8 +141,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         #done = self.check_collision()
         #self.controller.inverse_kinematics()
         # #Render scene
-        self.render_mode = "human"
-        self.render()
+        # self.render_mode = "human"
+        # self.render()
 
         # pos_delta = np.array([0.000001, 0.0, 0])
         # self.data.mocap_pos[:] = self.data.mocap_pos + pos_delta
@@ -183,27 +183,29 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         return False # bool for collision or not
     
     def get_coverage(self, image):
-        # use area from ground truth
+        ## use area from ground truth
         clotharea = 14433.5
         tol = 0.005
+        ## make continuous background subtraction (or something) to keep history of cloth location behind manipulator
+        # np.delete(self.img_stack, 0)
+        # np.append(self.img_stack, image)
+        # sequence = np.median(self.img_stack, axis=0).astype(dtype='float64') # take median filter over the image stack
+        # new = cv2.subtract(self.im_background, sequence)
+        # imgray = cv2.cvtColor(new, cv2.COLOR_BGR2GRAY)
+        # edged = cv2.Canny(imgray, 30, 200)
+        # contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        # make continuous background subtraction (or something) to keep history of cloth location behind manipulator
-        self.img_stack.insert(0, image)
-        sequence = np.median(self.img_stack, axis=0).astype(dtype=np.uint8) # take median filter over the image stack
-        new = cv2.subtract(self.im_background, sequence)
-        imgray = cv2.cvtColor(new, cv2.COLOR_BGR2GRAY)
-        edged = cv2.Canny(imgray, 30, 200)
-        contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-        new = cv2.drawContours(new, contours, -1, (0,255,0), 3)
-        currentarea = cv2.contourArea(contours[0])
-        self.area_stack.insert(0, currentarea)
-        ## compare with ground truth and previous area
-        coverageper = (self.area_stack[0] - self.area_stack[1]) + 100 - (clotharea - currentarea)/clotharea
-        #print(coverageper)
-        if (clotharea - currentarea)/clotharea > 0.9:
-            goalcoverage = True
-        return coverageper
+        # new = cv2.drawContours(new, contours, -1, (0,255,0), 3)
+        # currentarea = cv2.contourArea(contours[0])
+        # self.area_stack.insert(0, currentarea)
+        # ## compare with ground truth and previous area
+        # coverageper = (self.area_stack[1] - self.area_stack[0]) + 100 - (clotharea - currentarea)/clotharea
+        # #print(coverageper)
+        # if (clotharea - currentarea)/clotharea > 0.9:
+        #     goalcoverage = True
+        # print(coverageper)
+        # return coverageper
+        return 0.2
         
     def _set_action_space(self):
         # Define a set of actions to execute in the simulation
