@@ -1,6 +1,7 @@
 import gymnasium as gym
 import gym_training
 
+
 # Import the skrl components to build the RL system
 from skrl.utils.model_instantiators import deterministic_model, Shape
 from skrl.memories.torch import RandomMemory
@@ -8,8 +9,12 @@ from skrl.agents.torch.dqn import DQN, DQN_DEFAULT_CONFIG
 from skrl.trainers.torch import SequentialTrainer
 from skrl.envs.torch import wrap_env
 import torch
-from gym.wrappers import FlattenObservation
+import gc
 
+def report_gpu():
+   print(torch.cuda.list_gpu_processes())
+   gc.collect()
+   torch.cuda.empty_cache()
 # Load and wrap the Gymnasium environment.
 # Note: the environment version may change depending on the gymnasium version
 display = True

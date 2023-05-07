@@ -2,15 +2,6 @@ import gymnasium as gym
 import mujoco as mj
 import gym_training
 import os
-filename = "cloth.xml"
-search_path = "./"
-
-# for root, dir, files in os.walk(search_path):
-#       if filename in files:
-#             model_path=os.path.abspath(os.path.join(root, filename))
-
-
-# model = mj.MjModel.from_xml_path(model_path)
 
 env = gym.make('UR5')
 observation= env.reset()

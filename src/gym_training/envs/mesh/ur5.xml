@@ -10,7 +10,9 @@
     <default class="UR5">
         <joint damping='45'/>
     </default>
-
+    <default class="GRIPPER">
+        <joint damping='5'/>
+    </default>
     <!-- <custom>
         <numeric name="START_ANGLES" data="0 -.67 -.67 0 0 0"/>
         <numeric name="N_GRIPPER_JOINTS" data="0" />
@@ -43,12 +45,18 @@
         <mesh file="link6.stl" />
         <mesh file="link6_connector.stl" />
 
+        <mesh file="MHZ2-20D_MHZ2-Body.STL" scale="0.0015 0.0015 0.0015" />
+        <mesh file="MHZ2-20D_mhz2-prong.STL" scale="0.0015 0.0015 0.0015" />
+        <mesh file="gripper_hat.STL" scale="0.0015 0.0015 0.0015" />
+
         <!-- <texture name="floor_tile" file="ur5/floor_tile.png" width="3000" height="3000" type="2d"/> -->
         <!-- <material name="tile" texture="floor_tile" specular="0" shininess="0" reflectance="0" emission="1" /> -->
-        <material name="silver" specular="1" shininess="0.5" reflectance="1" emission="0.25" rgba="0.82 0.82 0.82 1"/>
+        <material name="silver" specular="1" shininess="0.5" reflectance="1" emission="0.25" rgba="0.70 0.71 0.62 1"/>
+        <material name="silver2" specular="1" shininess="0.5" reflectance="1" emission="0.3" rgba="0.82 0.82 0.82 1"/>
         <material name="grey" specular="1" shininess="0.5" reflectance="1" emission="0.1" rgba="0.5 0.5 0.5 1"/>
         <material name="blue" specular="1" shininess="0.5" reflectance="1" emission="0" rgba="0.678 0.847 0.902 1"/>
         <material name="black" specular="1" shininess="0.5" reflectance="1" emission="0" rgba="0.2 0.2 0.2 1"/>
+        <material name="white" specular="1" shininess="0.3" reflectance="1" emission="0" rgba="0.9 0.9 0.9 1"/>
 
         <texture name="floor_tex"   type="2d"        builtin="checker" rgb1=".2 .3 .4" rgb2=".1 .2 .3" width="100" height="100" />
         <material name='floor_mat'      texture="floor_tex"  shininess="0.8" texrepeat="10 10" specular="0.7"  reflectance="0.5" />
@@ -86,11 +94,20 @@
         <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1" /> -->
 
         <light name="lightdefault" diffuse=".3 .3 .3" pos="0 0 3" dir="0 0 -1" />
-
+        <camera name="RealSense" mode="fixed" pos="-0.3 1.2 1.0" euler="-0.7 0 3.14" fovy="42.5"/>
         <geom name='floor' material="floor_mat" pos='0 0 0' size='2.5 2.5 0.1'  type='plane' />
+        
+        <!-- cloth -->
+        <body name="B3_5" pos="-0.2 0.6 0.18" mocap="true">
+            <composite type="cloth" count="6 6" spacing="0.05" flatinertia="0.01">
+                <joint kind="main" damping="0.001"/>
+                <skin material="matdenim" texcoord="true" inflate="0.005" subgrid="2"/>
+                <geom type="capsule" size="0.0015 0.001" rgba=".8 .2 .1 1"/>
+            </composite>
+        </body>
          <!-- table  -->
         <body name="table" pos="0 0 0">
-            <geom type="box" size="0.5 .5 .1" rgba="1 1 1 1"/>
+            <geom type="box" size="0.7 .7 .1" rgba="1 1 1 1"/>
 
             <body name="base_link" pos="0 0 0.1">
                 <geom name="link0" type="mesh" mesh="link0" pos="0 0 0"/>
@@ -149,6 +166,24 @@
                                         <geom name="link6" type="mesh" mesh="link6" pos="-0.008 0 0" material="silver"/>
 
                                         <body name="EE" pos="-0.04 0 0" euler="0 0 0"/>
+                                            <!--GRIPPER-->
+                                            <body name="gripper_body" pos="-0.12 0 0" quat="180 180 0 0" > 
+                                                <inertial pos="0 0 0"  mass="0.02" diaginertia="0.1 0.1 0.1" />
+                                                <geom name="gripper_body" type="mesh" mesh="MHZ2-20D_MHZ2-Body" material="silver" />
+
+                                                <body name="left_finger" pos="-0.0068 0.02 0" > 
+                                                    <inertial pos="0 0 0" mass="0.0045" diaginertia="0.1 0.1 0.1" />
+                                                    <geom name="left_finger" type="mesh" material="silver2" mesh="MHZ2-20D_mhz2-prong" />
+                                                    <geom name="left_hat" type="mesh" material="white" mesh="gripper_hat" pos="-0.0112 0.0026 0" euler="1.57 0 1.57"/>
+                                                    <joint name="joint_lf" class="GRIPPER" type="slide" pos="0 0 0" axis="0 1 0" limited="true" range="-0.008 0" />
+                                                </body>
+                                                <body name="right_finger" pos="-0.0068 -0.02 0" quat="0 360 0 0">
+                                                    <inertial pos="0 0 0" mass="0.0045" diaginertia="0.1 0.1 0.1" />
+                                                    <geom name="right_finger" type="mesh" material="silver2" mesh="MHZ2-20D_mhz2-prong" />
+                                                    <geom name="gripper_hat" type="mesh" material="black" mesh="gripper_hat" pos="-0.0112 0.0026 0" euler="1.57 0 1.57" />
+                                                    <joint name="joint_rf" class="GRIPPER" type="slide" pos="0 0 0" axis="0 1 0" limited="true" range="-0.008 0" />
+                                                </body>                                                    
+                                            </body>
                                     </body>
                                 </body>
                             </body>
@@ -157,15 +192,7 @@
                 </body>
             </body>
         </body>
-                <!-- cloth -->
-        <body name="B3_5" pos="0.25 0.25 0.1">
-            <freejoint/>
-            <composite type="cloth" count="6 6" spacing="0.05" flatinertia="0.01">
-                <joint kind="main" damping="0.001"/>
-                <skin material="matdenim" texcoord="true" inflate="0.005" subgrid="2"/>
-                <geom type="capsule" size="0.0015 0.001" rgba=".8 .2 .1 1"/>
-            </composite>
-        </body>
+
     </worldbody>
 
     <actuator>
@@ -175,6 +202,8 @@
         <position name="joint3_motor" joint="joint3" ctrllimited="true" ctrlrange="-500 500" />
         <position name="joint4_motor" joint="joint4" ctrllimited="true" ctrlrange="-500 500" />
         <position name="joint5_motor" joint="joint5" ctrllimited="true" ctrlrange="-500 500" />
+        <general name="joint6_lf" joint="joint_lf" />
+        <general name="joint7_rf" joint="joint_rf" />
     </actuator>
 
 </mujoco>
