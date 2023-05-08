@@ -54,7 +54,7 @@ if display:
 else:
     render_mode = None
 
-env = gym.vector.make("UR5_ddpg", num_envs=1, asynchronous=True, render_mode=render_mode)
+env = gym.vector.make("UR5_ddpg", num_envs=1, asynchronous=False, render_mode=render_mode)
 
 env = wrap_env(env)
 

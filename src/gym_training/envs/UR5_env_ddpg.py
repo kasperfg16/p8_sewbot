@@ -111,40 +111,33 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         #self.controller = UR3e_controller(self.model, self.data, self.render)
         
     def step(self, action):
-        # function for computing position 
-        #obs = self._get_obs()
-        self.do_simulation(action, self.frame_skip)
+        
         observation  = self._get_obs()
 
         terminated = False # Check for collision or success
         truncated = False
         info = {}
 
-        ### Compute reward
-        #reward = self.compute_reward()
-        #self.controller.get_image_data(width=1000, height=1000)
-        ### Check if need for more training
-            ## Collision, succes, max. time steps
-        #done = self.check_collision()
+        result_move = self.controller.move_group_to_joint_target(target=action, quiet=True)
 
-        self.render_mode = "human"
-        self.render()
-        
-        ## Create an Image object from the array
-        #self.render_mode = "r"
+        #self.render_mode = "human"
         #self.render()
-        #img = Image.fromarray(np_arr)
 
-        #plt.imshow(img)
-        #plt.show()
+        #self.do_simulation(action, self.frame_skip)
+        observation  = self._get_obs()
+        
+        ## Compute reward only after a pick and place operation
+        reward = self.compute_reward(result_move)
+        terminated = False # Check for collision or successs
+        truncated = False
+        info = {}
+
         self.step_counter += 1
-        if self.step_counter >= 2000:
+        if self.step_counter >= 5:
             truncated = True
             self.step_counter = 0
 
-        
         reward = self.compute_reward()
-        #print(np.max(observation))
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):
@@ -162,19 +155,22 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # Define a set of actions to execute in the simulation
         return super()._set_action_space()
     
-    def compute_reward(self):# Define all the rewards possible
+    def compute_reward(self, result_move):# Define all the rewards possible
         # Grasp reward 1 for open, 0 for close
         # 
         # Coverage reward if >90% coverage, call terminate
-        self.render()
+        #self.render()
         # Contact/collision penalty
+        if result_move == 'success':
+            move_complete_reward = 10
+        else:
+            move_complete_reward = -1
+
         collision = self.check_collision()
         # Reward for standing in a certain position
-        goal_pos = [0, -1.5, 1.5, 0, 0, 0] # Home pos ish
-        position = self.data.qpos[:6]
-        error_pos = np.sum( np.abs(np.subtract(goal_pos, position)))
+
         # Summarize all rewards 
-        total_reward = 10 - error_pos
+        total_reward = move_complete_reward
 
         return total_reward #return reward
 
