@@ -33,7 +33,7 @@ class MJ_Controller(object):
             self.model = model
         self.data = mujoco.MjData(self.model)
         self.Renderer = mujoco.Renderer(self.model)
-        self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
+        #self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
 
         self.create_lists()
         self.groups = defaultdict(list)
@@ -353,7 +353,7 @@ class MJ_Controller(object):
 
                 mujoco.mj_step(self.model, self.data)
                 mujoco.mj_forward(self.model, self.data)
-                self.viewer.sync()
+                #self.viewer.sync()
                 
                 #cv.imshow("rbg", cv.cvtColor(pixels, cv.COLOR_BGR2RGB))
                 steps += 1
