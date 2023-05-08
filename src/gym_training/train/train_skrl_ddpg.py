@@ -47,14 +47,14 @@ class DeterministicCritic(DeterministicMixin, Model):
 
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
-display = True
+display = False
 
 if display:
     render_mode = 'human'
 else:
     render_mode = None
 
-env = gym.vector.make("UR5_ddpg", num_envs=1, asynchronous=True, render_mode=render_mode)
+env = gym.vector.make("UR5_ddpg", num_envs=1, asynchronous=False, render_mode=render_mode)
 
 env = wrap_env(env)
 
@@ -91,8 +91,8 @@ cfg_ddpg["batch_size"] = 10
 cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 0
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
-cfg_ddpg["experiment"]["write_interval"] = 1000
-cfg_ddpg["experiment"]["checkpoint_interval"] = 1000
+cfg_ddpg["experiment"]["write_interval"] = 1
+cfg_ddpg["experiment"]["checkpoint_interval"] = 100
 
 agent_ddpg = DDPG(models=models_ddpg,
                   memory=memory,
