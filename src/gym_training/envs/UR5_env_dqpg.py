@@ -110,7 +110,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         #self.controller = MJ_Controller()
 
         self.step_counter = 0
-        self.action_space = spaces.Box(low=-150, high=150, shape=(8, ), dtype=np.float64)
+        self.action_space = spaces.Box(low=-150, high=150, shape=(7, ), dtype=np.float64)
         self.observation_space = spaces.Box(0, 5, shape=(147,), dtype=np.float64)
         #self.controller = UR3e_controller(self.model, self.data, self.render
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward

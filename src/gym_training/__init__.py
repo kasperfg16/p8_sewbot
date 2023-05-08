@@ -7,7 +7,7 @@ register(
 
 register(
     id='UR5_dqn',
-    entry_point='gym_training.envs:UR5Env'
+    entry_point='gym_training.envs:UR5Env_dqn'
 )
 
 register(

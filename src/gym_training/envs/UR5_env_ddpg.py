@@ -8,10 +8,9 @@ from gymnasium import spaces
 from gymnasium.utils import EzPickle
 import os
 import numpy as np
-import mujoco
 import cv2
-from collections import deque
-from gym_training.controller.mujoco_py_controller import MJ_Controller
+import matplotlib.pyplot as plt
+from gym_training.controller.mujoco_controller import MJ_Controller
 
 
 action_space = spaces.Box(low=-np.pi, high=np.pi, shape=(8, ), dtype=np.float64)
@@ -96,11 +95,13 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # else:
         #     print(f"{filename} not found in {search_path}")
 
+        
+        self.observation_space = spaces.Box(0.0, 134.0, shape=(6, ), dtype=np.float64)
         MujocoEnv.__init__(
             self,
             model_path=model_path,
             frame_skip=5,
-            observation_space=observation_space
+            observation_space=self.observation_space
             # default_camera_config=DEFAULT_CAMERA_CONFIG,
             # **kwargs,
         )
@@ -109,6 +110,9 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.step_counter = 0
         self.action_space = spaces.Box(low=-150, high=150, shape=(8, ), dtype=np.float64)
         self.observation_space = spaces.Box(0, 5, shape=(6,), dtype=np.float64)
+        self.controller = MJ_Controller(model=self.model)
+        self.step_counter = 0
+        #self.action_space = spaces.Discrete(6, seed=42, dtype=np.float64)
         #self.controller = UR3e_controller(self.model, self.data, self.render)
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
         filename = "table.png"

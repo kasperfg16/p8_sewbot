@@ -8,15 +8,12 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
-#from gym_training.controller.mujoco_controller import MJ_Controller
+from gym_training.controller.mujoco_controller import MJ_Controller
 
 
 ##############
 ### Get camera to work!!!
 #############
-
-action_space = gym.spaces.Discrete(2)
-observation_space = gym.spaces.Discrete(2)
 
 # DEFAULT_CAMERA_CONFIG = {
 #     "trackbodyid": 1,
@@ -96,83 +93,79 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         # else:
         #     print(f"{filename} not found in {search_path}")
 
-        self.observation_space = gym.spaces.Box(low=-1.0, high=2.0, shape=(6, ), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=-3.14159, high = 3.14159, shape=(7, ), dtype=np.float16)
         
         MujocoEnv.__init__(
             self,
             model_path=model_path,
             frame_skip=5,
             observation_space=self.observation_space
-            # default_camera_config=DEFAULT_CAMERA_CONFIG,
-            # **kwargs,
         )
 
-        #self.controller = URController()
-        #self.controller = MJ_Controller()
+        self.controller = MJ_Controller(self.model)
+        self.controller.show_model_info()
 
         self.step_counter = 0
-        self.observation_space = spaces.Box(0.0, 134.0, shape=(138, ), dtype=np.float64)
-        self.action_space = spaces.Discrete(6, seed=42)
-        #self.controller = UR3e_controller(self.model, self.data, self.render
+
+        low = np.array([-3.14159,
+                        -3.14159,
+                        -3.14159,
+                        -3.14159,
+                        -3.14159,
+                        -3.14159,
+                        -0.008])
+        
+        high = np.array([3.14159,
+                         3.14159,
+                         3.14159,
+                         3.14159,
+                         3.14159,
+                         3.14159,
+                         0])
+        
+        self.action_space = spaces.Box(low=low, high=high, shape=(7,), seed=42)
+        #self.action_space = spaces.Discrete(7)
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
-        self.im_background = cv2.imread('/home/marie/Desktop/p8_sewbot/src/gym_training/table.png')
+        #self.im_background = cv2.imread('/home/marie/Desktop/p8_sewbot/src/gym_training/table.png')
         self.stepcount = 0
         self.img_stack = []*20
         self.goalcoverage = False
         self.area_stack = [0]*2
         
     def step(self, action):
-        self.stepcount = self.stepcount +1
-        #print(self.stepcount)
-        # function for computing position 
-        #obs = self._get_obs()
-        #print('action', action)
-        self.do_simulation(action, self.frame_skip)
+        
+        print('action',action)
+
         observation  = self._get_obs()
 
         terminated = False # Check for collision or success
         truncated = False
         info = {}
 
-        # joint_angles = [1, 1, 1, 1, 1]
-        # result = self.controller.move_group_to_joint_target(group="Arm", target=joint_angles)
+        self.controller.move_group_to_joint_target(target=action)
 
-        ### Compute reward
-        #reward = self.compute_reward()
-        ### Check if need for more training
-            ## Collision, succes, max. time steps
-        #done = self.check_collision()
-        #self.controller.inverse_kinematics()
-        # Render scene
-        self.render_mode = "human"
-        self.render()
+        #self.render_mode = "human"
+        #self.render()
 
-        # pos_delta = np.array([0.000001, 0.0, 0])
-        # self.data.mocap_pos[:] = self.data.mocap_pos + pos_delta
-
-        #print(self.data.mocap_pos[:])
-        # function for computing position 
-        #obs = self._get_obs()
         self.do_simulation(action, self.frame_skip)
         observation  = self._get_obs()
+        
         ## Compute reward only after a pick and place operation
         reward = self.compute_reward()
         terminated = False # Check for collision or successs
         truncated = False
         info = {}
-        #plt.imshow(img)
-        #plt.show()
+
         self.step_counter += 1
         if self.step_counter >= 20000:
             truncated = True
             self.step_counter = 0
 
-        
         reward = self.compute_reward()
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):
-        joint_pos = self.data.qpos[:6].astype(np.float32)
+        joint_pos = self.data.qpos[:7].astype(np.float32)
         #print('joint_pos', joint_pos)
         # Define the size of the image
 
@@ -242,5 +235,6 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         qv = self.init_qvel.copy()
 
         observation = self._get_obs()
+        print(observation.shape)
 
         return observation
