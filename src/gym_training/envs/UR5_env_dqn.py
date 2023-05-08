@@ -93,7 +93,7 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         # else:
         #     print(f"{filename} not found in {search_path}")
 
-        self.observation_space = gym.spaces.Box(low=-3.14159, high = 3.14159, shape=(6, ), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=-3.14159, high = 3.14159, shape=(7, ), dtype=np.float16)
         
         MujocoEnv.__init__(
             self,
@@ -106,7 +106,25 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         self.controller.show_model_info()
 
         self.step_counter = 0
-        self.action_space = spaces.Box(low=-3.14159, high = 3.14159, shape=(7,), seed=42)
+
+        low = np.array([-3.14159,
+                        -3.14159,
+                        -3.14159,
+                        -3.14159,
+                        -3.14159,
+                        -3.14159,
+                        -0.008])
+        
+        high = np.array([3.14159,
+                         3.14159,
+                         3.14159,
+                         3.14159,
+                         3.14159,
+                         3.14159,
+                         0])
+        
+        self.action_space = spaces.Box(low=low, high=high, shape=(7,), seed=42)
+        #self.action_space = spaces.Discrete(7)
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
         #self.im_background = cv2.imread('/home/marie/Desktop/p8_sewbot/src/gym_training/table.png')
         self.stepcount = 0
@@ -147,7 +165,7 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):
-        joint_pos = self.data.qpos[:6].astype(np.float32)
+        joint_pos = self.data.qpos[:7].astype(np.float32)
         #print('joint_pos', joint_pos)
         # Define the size of the image
 

@@ -72,7 +72,7 @@ for model in models_dqn.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.dqn.html#configuration-and-hyperparameters
 cfg_dqn = DQN_DEFAULT_CONFIG.copy()
-cfg_dqn["learning_starts"] = 100
+cfg_dqn["learning_starts"] = 10
 cfg_dqn["exploration"]["final_epsilon"] = 0.04
 cfg_dqn["exploration"]["timesteps"] = 1500
 # logging to TensorBoard and write checkpoints each 1000 and 5000 timesteps respectively

@@ -47,21 +47,21 @@ class DeterministicCritic(DeterministicMixin, Model):
 
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
-display = False
+display = True
 
 if display:
     render_mode = 'human'
 else:
     render_mode = None
 
-env = gym.vector.make("UR5_dqn", num_envs=1, asynchronous=True, render_mode=render_mode)
+env = gym.vector.make("UR5_ddpg", num_envs=1, asynchronous=True, render_mode=render_mode)
 
 env = wrap_env(env)
 
 # See the used grafics card
 device = torch.cuda.current_device()
 #print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
-
+env.device  ='cpu'
 device = env.device
 
 # Instantiate a RandomMemory (without replacement) as experience replay memory
