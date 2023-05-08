@@ -24,7 +24,7 @@ if display:
 else:
     render_mode = None
 
-env = gym.vector.make("Pendulum-v1", num_envs=1, asynchronous=False, render_mode=render_mode)
+env = gym.vector.make("UR5_dqn", num_envs=1, asynchronous=False, render_mode=render_mode)
 
 env = wrap_env(env)
 

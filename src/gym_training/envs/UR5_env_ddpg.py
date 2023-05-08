@@ -9,15 +9,12 @@ import os
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-from gym_training.controller.mujoco_py_controller import MJ_Controller
+from gym_training.controller.mujoco_controller import MJ_Controller
 
 
 ##############
 ### Get camera to work!!!
 #############
-
-action_space = gym.spaces.Discrete(2)
-observation_space = gym.spaces.Discrete(2)
 
 DEFAULT_CAMERA_CONFIG = {
     "trackbodyid": 1,
@@ -96,56 +93,50 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             print(f"Found {filename} at {model_path}")
         else:
             print(f"{filename} not found in {search_path}")
+        
+        self.observation_space = spaces.Box(low=0.0, high=134.0, shape=(6, ), dtype=np.float64)
 
         MujocoEnv.__init__(
             self,
             model_path=model_path,
             frame_skip=5,
-            observation_space=observation_space
+            observation_space=self.observation_space
             # default_camera_config=DEFAULT_CAMERA_CONFIG,
             # **kwargs,
         )
 
         self.step_counter = 0
-        self.observation_space = spaces.Box(0.0, 134.0, shape=(6, ), dtype=np.float64)
-        #self.action_space = spaces.Discrete(6, seed=42, dtype=np.float64)
-        #self.controller = UR3e_controller(self.model, self.data, self.render)
+        self.controller = MJ_Controller(model=self.model)
         
     def step(self, action):
-        # function for computing position 
-        #obs = self._get_obs()
-        self.do_simulation(action, self.frame_skip)
+        print('action',action)
+
         observation  = self._get_obs()
 
         terminated = False # Check for collision or success
         truncated = False
         info = {}
 
-        ### Compute reward
-        #reward = self.compute_reward()
-        #self.controller.get_image_data(width=1000, height=1000)
-        ### Check if need for more training
-            ## Collision, succes, max. time steps
-        #done = self.check_collision()
+        self.controller.move_group_to_joint_target(target=action)
 
-        self.render_mode = "human"
-        self.render()
-        
-        ## Create an Image object from the array
-        #self.render_mode = "r"
+        #self.render_mode = "human"
         #self.render()
-        #img = Image.fromarray(np_arr)
 
-        #plt.imshow(img)
-        #plt.show()
+        self.do_simulation(action, self.frame_skip)
+        observation  = self._get_obs()
+        
+        ## Compute reward only after a pick and place operation
+        reward = self.compute_reward()
+        terminated = False # Check for collision or successs
+        truncated = False
+        info = {}
+
         self.step_counter += 1
-        if self.step_counter >= 2000:
+        if self.step_counter >= 20000:
             truncated = True
             self.step_counter = 0
 
-        
         reward = self.compute_reward()
-        #print(np.max(observation))
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):
@@ -167,7 +158,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # Grasp reward 1 for open, 0 for close
         # 
         # Coverage reward if >90% coverage, call terminate
-        self.render()
+        #self.render()
         # Contact/collision penalty
         collision = self.check_collision()
         # Reward for standing in a certain position
