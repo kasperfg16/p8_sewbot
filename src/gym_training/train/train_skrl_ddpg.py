@@ -102,7 +102,7 @@ agent_ddpg = DDPG(models=models_ddpg,
                   device=device)
 
 # Configure and instantiate the RL trainer
-cfg_trainer = {"timesteps": 20000, "headless": True}
+cfg_trainer = {"timesteps": 200000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
 
 # start training

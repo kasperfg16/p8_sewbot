@@ -186,26 +186,29 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         ## use area from ground truth
         clotharea = 14433.5
         tol = 0.005
+        w1 = 100 
+        w2 = 300
         ## make continuous background subtraction (or something) to keep history of cloth location behind manipulator
-        # np.delete(self.img_stack, 0)
-        # np.append(self.img_stack, image)
-        # sequence = np.median(self.img_stack, axis=0).astype(dtype='float64') # take median filter over the image stack
-        # new = cv2.subtract(self.im_background, sequence)
-        # imgray = cv2.cvtColor(new, cv2.COLOR_BGR2GRAY)
-        # edged = cv2.Canny(imgray, 30, 200)
-        # contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        np.delete(self.img_stack, 0)
+        np.append(self.img_stack, image)
+        sequence = np.median(self.img_stack, axis=0).astype(dtype='float64') # take median filter over the image stack
+        new = cv2.subtract(self.im_background, sequence)
+        imgray = cv2.cvtColor(new, cv2.COLOR_BGR2GRAY)
+        edged = cv2.Canny(imgray, 30, 200)
+        contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        # new = cv2.drawContours(new, contours, -1, (0,255,0), 3)
-        # currentarea = cv2.contourArea(contours[0])
-        # self.area_stack.insert(0, currentarea)
-        # ## compare with ground truth and previous area
-        # coverageper = (self.area_stack[1] - self.area_stack[0]) + 100 - (clotharea - currentarea)/clotharea
-        # #print(coverageper)
-        # if (clotharea - currentarea)/clotharea > 0.9:
-        #     goalcoverage = True
-        # print(coverageper)
-        # return coverageper
-        return 0.2
+        new = cv2.drawContours(new, contours, -1, (0,255,0), 3)
+        currentarea = cv2.contourArea(contours[0])
+        self.area_stack.insert(0, currentarea)
+        ## compare with ground truth and previous area
+        coverageper =  currentarea/clotharea
+        coveragereward =  w1 * coverageper + w2 * (self.area_stack[1] - self.area_stack[0])/clotharea 
+        
+        if coverageper > 0.9:
+            goalcoverage = True
+        
+        return coveragereward
+        #return 0.2
         
     def _set_action_space(self):
         # Define a set of actions to execute in the simulation
