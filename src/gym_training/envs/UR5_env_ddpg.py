@@ -3,7 +3,7 @@ import gymnasium as gym
 #from gym_training.controller.UR3e_contr import UR3e_controller
 import gymnasium as gym
 from gymnasium.envs.mujoco import MujocoEnv
-# from gymnasium.envs.mujoco import OffScreenViewer, BaseRender
+import mujoco
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
 import os
@@ -17,12 +17,12 @@ action_space = spaces.Box(low=-np.pi, high=np.pi, shape=(8, ), dtype=np.float64)
 observation_space = spaces.Box(0, 5, shape=(6,), dtype=np.float64)
 
 
-DEFAULT_CAMERA_CONFIG = {
-    "trackbodyid": 1,
-    "distance": 4.0,
-    "lookat": np.array((0.0, 0.0, 2.0)),
-    "elevation": -20.0,
-}
+# DEFAULT_CAMERA_CONFIG = {
+#     "trackbodyid": 1,
+#     "distance": 4.0,
+#     "lookat": np.array((0.0, 0.0, 2.0)),
+#     "elevation": -20.0,
+# }
 
 def find_file(filename, search_path):
     """
@@ -101,19 +101,17 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             self,
             model_path=model_path,
             frame_skip=5,
-            observation_space=self.observation_space
+            observation_space=self.observation_space,
             # default_camera_config=DEFAULT_CAMERA_CONFIG,
             # **kwargs,
         )
 
-        # self.cam = mujoco.MjvCamera()
         self.step_counter = 0
-        self.action_space = spaces.Box(low=-150, high=150, shape=(8, ), dtype=np.float64)
+        self.action_space = spaces.Box(low=-150, high=150, shape=(7, ), dtype=np.float64)
         self.observation_space = spaces.Box(0, 5, shape=(6,), dtype=np.float64)
         self.controller = MJ_Controller(model=self.model)
         self.step_counter = 0
-        #self.action_space = spaces.Discrete(6, seed=42, dtype=np.float64)
-        #self.controller = UR3e_controller(self.model, self.data, self.render)
+
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
         filename = "table.png"
         search_path = "./"
@@ -122,7 +120,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.img_stack = []#np.zeros([20, 480, 480, 3])
         self.goalcoverage = False
         self.area_stack = [0]*2
-        #self.cam = self.data.ca
+        
 
     def step(self, action):
         #self.stepcount = self.stepcount +1
@@ -135,15 +133,11 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         truncated = self.truncate()
         info = {}
 
-        #mujoco.mjr_setBuffer(mujoco.mjtFramebuffer.mjFB_WINDOW, self.con)
-        #self.render_mode = "human"
-        self.mujoco_renderer.render("human")
-
         self.step_counter += 1
         if self.step_counter >= 2000:
             truncated = True
             self.step_counter = 0
-        #print(np.max(observation))
+
         return observation, reward, terminated, truncated, info 
 
     def _get_obs(self):
@@ -161,7 +155,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         return False # bool for collision or not
     
     def get_coverage(self):
-        image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")  
+
         ## use area from ground truth
         clotharea = 14433.5
         w1 = 100 
@@ -183,9 +177,9 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
             new2 = cv2.drawContours(new, contours, -1, (0,255,0), 3)
 
-            cv2.imshow("sequence", sequence)
-            cv2.imshow("subtract", new)
-            cv2.waitKey(1)
+            # cv2.imshow("sequence", sequence)
+            # cv2.imshow("subtract", new)
+            # cv2.waitKey(1)
 
             currentarea = cv2.contourArea(contours[0])
             self.area_stack.insert(0, currentarea)
