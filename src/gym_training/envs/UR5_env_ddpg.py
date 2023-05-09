@@ -4,7 +4,6 @@ import gymnasium as gym
 import gymnasium as gym
 import mujoco
 from gymnasium.envs.mujoco import MujocoEnv
-# from gymnasium.envs.mujoco import OffScreenViewer, BaseRender
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
 import os
@@ -19,12 +18,12 @@ action_space = spaces.Box(low=-np.pi, high=np.pi, shape=(8, ), dtype=np.float64)
 observation_space = spaces.Box(0, 5, shape=(6,), dtype=np.float64)
 
 
-DEFAULT_CAMERA_CONFIG = {
-    "trackbodyid": 1,
-    "distance": 4.0,
-    "lookat": np.array((0.0, 0.0, 2.0)),
-    "elevation": -20.0,
-}
+# DEFAULT_CAMERA_CONFIG = {
+#     "trackbodyid": 1,
+#     "distance": 4.0,
+#     "lookat": np.array((0.0, 0.0, 2.0)),
+#     "elevation": -20.0,
+# }
 
 def find_file(filename, search_path):
     """
@@ -102,12 +101,11 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             self,
             model_path=model_path,
             frame_skip=5,
-            observation_space=self.observation_space
+            observation_space=self.observation_space,
             # default_camera_config=DEFAULT_CAMERA_CONFIG,
             # **kwargs,
         )
 
-        # self.cam = mujoco.MjvCamera()
         self.step_counter = 0
         
         # Action space (In this case joint limits)
@@ -135,11 +133,10 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.step_counter = 0
         self.max_steps = 1
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
-        filename = "table.png"
+        filename = "groundtruth.png"
         search_path = "./"
         self.im_background = np.asarray(cv2.imread(find_file(filename, search_path)), np.uint8)
         self.stepcount = 0
-        self.img_stack = []#np.zeros([20, 480, 480, 3])
         self.goalcoverage = False
         self.area_stack = [0]*2
         self.result_move = False
@@ -149,6 +146,9 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         #self.cam = self.data.c
 
     def step(self, action):
+        # if self.step_counter == 0: # extra function for getting GT
+        #     im =self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
+        #     cv2.imwrite("groundtruth.png", im )
 
         # init
         reward = 0
@@ -199,42 +199,30 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
     
     def get_coverage(self):
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")  
+        np_array = np.array(image).astype(dtype='float32')
         ## use area from ground truth
         clotharea = 14433.5
         w1 = 100 
         w2 = 300
-        stack=10
-        ## make continuous background subtraction (or something) to keep history of cloth location behind manipulator
-        self.img_stack.append(image)
-        #print(len(self.img_stack))
-        cv2.imshow("image", image)
 
-        if len(self.img_stack)>=stack:
-            self.img_stack.pop(0)
-            np_array = np.array(self.img_stack)
-            sequence = np.median(np_array, axis=0).astype(np.uint8) # take median filter over the image stack
-            new = cv2.subtract(self.im_background, sequence)
-            imgray = cv2.cvtColor(new, cv2.COLOR_RGB2GRAY)
-            imgrayCopy = np.uint8(imgray)
-            edged = cv2.Canny(imgrayCopy, 30, 200)
-            contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        new = cv2.subtract(self.im_background, np_array)
+        imgray = cv2.cvtColor(new, cv2.COLOR_RGB2GRAY)
+        imgrayCopy = np.uint8(imgray)
+        edged = cv2.Canny(imgrayCopy, 100, 250)
+        contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        new2 = cv2.drawContours(np_array, contours, -1, (0,255,0), 3)
+        # cv2.imshow("window", new2)
+        # cv2.waitKey(1)
 
-            new2 = cv2.drawContours(new, contours, -1, (0,255,0), 3)
+        currentarea = cv2.contourArea(contours[0])
+        self.area_stack.insert(0, currentarea)
+        ## compare with ground truth and previous area
+        coverageper =  currentarea/clotharea
+        
+        coveragereward =  w1 * coverageper + w2 * (self.area_stack[1] - self.area_stack[0])/clotharea 
 
-            #cv2.imshow("sequence", sequence)
-            cv2.imshow("subtract", new)
-            cv2.waitKey(1)
-
-            currentarea = cv2.contourArea(contours[0])
-            self.area_stack.insert(0, currentarea)
-            ## compare with ground truth and previous area
-            coverageper =  currentarea/clotharea
-            coveragereward =  w1 * coverageper + w2 * (self.area_stack[1] - self.area_stack[0])/clotharea 
-
-            if coverageper > 0.9:
-                self.goalcoverage = True
-        else:
-            coveragereward = 0
+        if coverageper > 0.9:
+            self.goalcoverage = True
 
         return coveragereward
 
@@ -247,6 +235,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         ## Coverage reward if >90% coverage, call terminate
         ## Compute only coverage after a grasp - remember to change        
         coveragereward = self.get_coverage() # output percentage
+        #print('coveragereward', coveragereward)
 
         # move complete reward (also acts as a contact/collision penalty)
         if self.result_move == 'success':
