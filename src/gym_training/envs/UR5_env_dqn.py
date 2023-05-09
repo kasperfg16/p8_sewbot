@@ -157,7 +157,7 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         info = {}
 
         self.step_counter += 1
-        if self.step_counter >= 20000:
+        if self.step_counter >= 20:
             truncated = True
             self.step_counter = 0
 

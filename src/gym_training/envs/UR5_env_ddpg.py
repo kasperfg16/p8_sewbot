@@ -2,6 +2,7 @@ import numpy as np
 import gymnasium as gym
 #from gym_training.controller.UR3e_contr import UR3e_controller
 import gymnasium as gym
+import mujoco
 from gymnasium.envs.mujoco import MujocoEnv
 # from gymnasium.envs.mujoco import OffScreenViewer, BaseRender
 from gymnasium import spaces
@@ -11,6 +12,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from gym_training.controller.mujoco_controller import MJ_Controller
+import mujoco.viewer
 
 
 action_space = spaces.Box(low=-np.pi, high=np.pi, shape=(8, ), dtype=np.float64)
@@ -108,63 +110,82 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # self.cam = mujoco.MjvCamera()
         self.step_counter = 0
         
-        # Action space
-        low = np.array([-3.14159,
-                        -3.14159,
-                        -3.14159,
-                        -3.14159,
-                        -3.14159,
-                        -3.14159,
+        # Action space (In this case joint limits)
+        low = np.array([-np.pi,
+                        -np.pi/2,
+                        -np.pi,
+                        -np.pi,
+                        -np.pi,
+                        -np.pi,
                         -0.008])
         
-        high = np.array([3.14159,
-                         3.14159,
-                         3.14159,
-                         3.14159,
-                         3.14159,
-                         3.14159,
+        high = np.array([np.pi,
+                         np.pi/2,
+                         np.pi,
+                         np.pi,
+                         np.pi,
+                         np.pi,
                          0])
         
-        self._reset_noise_scale=1
+        self.renderer = mujoco.Renderer(model=self.model)
+        self._reset_noise_scale=0
         self.action_space = spaces.Box(low=low, high=high, shape=(7,), seed=42)
-        self.observation_space = spaces.Box(0, 5, shape=(6,), dtype=np.float64)
-        self.controller = MJ_Controller(model=self.model)
+        self.observation_space = spaces.Box(0, 255, shape=(6,), dtype=np.int64)
+        self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
+        self.max_steps = 1
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
         filename = "table.png"
         search_path = "./"
-        self.im_background = np.asarray(cv2.imread(find_file(filename, search_path)), np.float32)
+        self.im_background = np.asarray(cv2.imread(find_file(filename, search_path)), np.uint8)
         self.stepcount = 0
         self.img_stack = []#np.zeros([20, 480, 480, 3])
         self.goalcoverage = False
         self.area_stack = [0]*2
         self.result_move = False
+        self.controller.show_model_info()
+        self.home_pose = [np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0]
+        self.quiet = False
         #self.cam = self.data.c
 
     def step(self, action):
 
-        self.result_move = self.controller.move_group_to_joint_target(target=action, quiet=True)
-
-        image = self.mujoco_renderer.render("human")
-
-        observation  = self._get_obs()
-        
-        ## Compute reward only after a pick and place operation
-        reward = self.compute_reward()
+        # init
+        reward = 0
         terminated = False
         truncated = False
         info = {}
 
+        # Check if cloth is already in good position
+        self.get_coverage()
+        if self.goalcoverage:
+            self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet)
+            reward = self.compute_reward()
+            terminated = True
+            return observation, reward, terminated, truncated, info
+
+        # Perform movements based on action guesses from agent
+        observation  = self._get_obs()
+
         self.step_counter += 1
-        if self.step_counter >= 20:
+
+        # Perform 'self.max_steps' movements based on action guesses from agent and then move to home pose
+        if not self.step_counter >= self.max_steps:
+            self.result_move = self.controller.move_group_to_joint_target(target=action, quiet=self.quiet)
+            self.controller.stay(10)
+        else:
+            self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet)
+            self.controller.stay(10)
             truncated = True
             self.step_counter = 0
+        
+        ## Compute reward after operation
+        reward = self.compute_reward()
 
         return observation, reward, terminated, truncated, info
 
     def _get_obs(self):
-        joint_pos = self.data.qpos[:6]
-        obs = joint_pos#np.concatenate(joint_pos, image)
+        obs = [1,1,1,1,1,1]
         return obs # Concatenate when multiple obs
 
     def truncate(self):
@@ -182,7 +203,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         clotharea = 14433.5
         w1 = 100 
         w2 = 300
-        stack=3
+        stack=10
         ## make continuous background subtraction (or something) to keep history of cloth location behind manipulator
         self.img_stack.append(image)
         #print(len(self.img_stack))
@@ -191,7 +212,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         if len(self.img_stack)>=stack:
             self.img_stack.pop(0)
             np_array = np.array(self.img_stack)
-            sequence = np.median(np_array, axis=0).astype(dtype='float32') # take median filter over the image stack
+            sequence = np.median(np_array, axis=0).astype(np.uint8) # take median filter over the image stack
             new = cv2.subtract(self.im_background, sequence)
             imgray = cv2.cvtColor(new, cv2.COLOR_RGB2GRAY)
             imgrayCopy = np.uint8(imgray)
@@ -200,9 +221,9 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
             new2 = cv2.drawContours(new, contours, -1, (0,255,0), 3)
 
-            cv2.imshow("sequence", sequence)
+            #cv2.imshow("sequence", sequence)
             cv2.imshow("subtract", new)
-            cv2.waitKey(10)
+            cv2.waitKey(1)
 
             currentarea = cv2.contourArea(contours[0])
             self.area_stack.insert(0, currentarea)
@@ -226,16 +247,17 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         ## Coverage reward if >90% coverage, call terminate
         ## Compute only coverage after a grasp - remember to change        
         coveragereward = self.get_coverage() # output percentage
-        print('coveragereward', coveragereward)
 
-        # Contact/collision penalty
+        # move complete reward (also acts as a contact/collision penalty)
         if self.result_move == 'success':
-            move_complete_reward = 10
+            move_complete_reward = 1
+            print('move_complete_reward')
         else:
             move_complete_reward = -1
 
-        collision = self.check_collision()
-        # Reward for standing in a certain position
+        if not self.quiet:
+            print('coveragereward: ', coveragereward)
+            print('move complete reward: ', coveragereward)
 
         # Summarize all rewards 
         total_reward = move_complete_reward + coveragereward
@@ -245,9 +267,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
     def reset_model(self):
         noise_low = -self._reset_noise_scale
         noise_high = self._reset_noise_scale
-
-        print(self.init_qpos)
-
 
         qpos = self.init_qpos + self.np_random.uniform(
             low=noise_low, high=noise_high, size=self.model.nq

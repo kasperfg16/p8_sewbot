@@ -24,16 +24,21 @@ class MJ_Controller(object):
     to perform tasks on an already instantiated simulation.
     """
 
-    def __init__(self, model=None, simulation=None, Renderer=None):
+    def __init__(self, model=None, data=None, mujoco_renderer=None):
         path = os.path.realpath(__file__)
         path = str(Path(path).parent.parent.parent)
         if model is None:
             self.model = mujoco.MjModel.from_xml_path(path + "/gym_training/envs/mesh/ur5.xml")
         else:
             self.model = model
-        self.data = mujoco.MjData(self.model)
-        self.Renderer = mujoco.Renderer(self.model)
-        #self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
+        if data is None:
+            self.data = mujoco.MjData(self.model)
+        else:
+            self.data = data
+        if mujoco_renderer is None:
+            self.mujoco_renderer = mujoco_renderer
+        else:
+            self.mujoco_renderer = mujoco_renderer
 
         self.create_lists()
         self.groups = defaultdict(list)
@@ -139,16 +144,16 @@ class MJ_Controller(object):
         self.controller_list = []
 
         # Values for training
-        sample_time = 0.0001
+        sample_time = 0.002
         # p_scale = 1
-        p_scale = 50
-        i_scale = 1
+        p_scale = 600
+        i_scale = 10000000000000
         i_gripper = 0
-        d_scale = 10
+        d_scale = 5000
         self.controller_list.append(
             PID(
                 7 * p_scale,
-                0.0 * i_scale,
+                0.1 * i_scale,
                 1.1 * d_scale,
                 setpoint=0,
                 output_limits=(self.model.actuator_ctrlrange[0][0], self.model.actuator_ctrlrange[0][1]),
@@ -157,8 +162,8 @@ class MJ_Controller(object):
         )  # Shoulder Pan Joint
         self.controller_list.append(
             PID(
-                10 * p_scale,
-                0.0 * i_scale,
+                13 * p_scale,
+                0.1 * i_scale,
                 1.0 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[1][0], self.model.actuator_ctrlrange[1][1]),
@@ -167,8 +172,8 @@ class MJ_Controller(object):
         )  # Shoulder Lift Joint
         self.controller_list.append(
             PID(
-                5 * p_scale,
-                0.0 * i_scale,
+                8 * p_scale,
+                0.1 * i_scale,
                 0.5 * d_scale,
                 setpoint=1.57,
                 output_limits=(self.model.actuator_ctrlrange[2][0], self.model.actuator_ctrlrange[2][1]),
@@ -178,8 +183,8 @@ class MJ_Controller(object):
         self.controller_list.append(
             PID(
                 7 * p_scale,
-                0.0 * i_scale,
-                0.1 * d_scale,
+                0.2 * i_scale,
+                0.5 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[3][0], self.model.actuator_ctrlrange[3][1]),
                 sample_time=sample_time,
@@ -188,8 +193,8 @@ class MJ_Controller(object):
         self.controller_list.append(
             PID(
                 5 * p_scale,
-                0.0 * i_scale,
-                0.1 * d_scale,
+                0.2 * i_scale,
+                0.6 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[4][0], self.model.actuator_ctrlrange[4][1]),
                 sample_time=sample_time,
@@ -198,8 +203,8 @@ class MJ_Controller(object):
         self.controller_list.append(
             PID(
                 5 * p_scale,
-                0.0 * i_scale,
-                0.1 * d_scale,
+                0.2 * i_scale,
+                0.2 * d_scale,
                 setpoint=0.0,
                 output_limits=(self.model.actuator_ctrlrange[5][0], self.model.actuator_ctrlrange[5][1]),
                 sample_time=sample_time,
@@ -207,7 +212,7 @@ class MJ_Controller(object):
         )  # Wrist 3 Joint
         self.controller_list.append(
             PID(
-                2.5 * p_scale,
+                0.025 * p_scale,
                 i_gripper,
                 0.00 * d_scale,
                 setpoint=0.0,
@@ -252,12 +257,12 @@ class MJ_Controller(object):
         self,
         group="All",
         target=None,
-        tolerance=0.1,
+        tolerance=0.01,
         max_steps=1000,
         plot=False,
         marker=False,
         render=True,
-        quiet=False,
+        quiet=False
     ):
         """
         Moves the specified joint group to a joint target.
@@ -353,9 +358,7 @@ class MJ_Controller(object):
 
                 mujoco.mj_step(self.model, self.data)
                 mujoco.mj_forward(self.model, self.data)
-                #self.viewer.sync()
-                
-                #cv.imshow("rbg", cv.cvtColor(pixels, cv.COLOR_BGR2RGB))
+                self.mujoco_renderer.render("human")
                 steps += 1
 
             self.last_movement_steps = steps
