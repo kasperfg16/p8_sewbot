@@ -3,7 +3,6 @@ import gymnasium as gym
 #from gym_training.controller.UR3e_contr import UR3e_controller
 import gymnasium as gym
 from gymnasium.envs.mujoco import MujocoEnv
-import mujoco
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
 import os
@@ -130,20 +129,22 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.controller = MJ_Controller(model=self.model)
         self.step_counter = 0
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
-        filename = "table.png"
+        filename = "groundtruth.png"
         search_path = "./"
         self.im_background = np.asarray(cv2.imread(find_file(filename, search_path)), np.float32)
         self.stepcount = 0
-        self.img_stack = []#np.zeros([20, 480, 480, 3])
         self.goalcoverage = False
         self.area_stack = [0]*2
         self.result_move = False
 
     def step(self, action):
+        # if self.step_counter == 0: # extra function for getting GT
+        #     im =self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
+        #     cv2.imwrite("groundtruth.png", im )
 
         self.result_move = self.controller.move_group_to_joint_target(target=action, quiet=True)
 
-        image = self.mujoco_renderer.render("human")
+        #image = self.mujoco_renderer.render("human")
 
         observation  = self._get_obs()
         
@@ -154,6 +155,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         info = {}
 
         self.step_counter += 1
+        
         if self.step_counter >= 20:
             truncated = True
             self.step_counter = 0
@@ -175,43 +177,31 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         return False # bool for collision or not
     
     def get_coverage(self):
-
+        image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")  
+        np_array = np.array(image).astype(dtype='float32')
         ## use area from ground truth
         clotharea = 14433.5
         w1 = 100 
         w2 = 300
-        stack=3
-        ## make continuous background subtraction (or something) to keep history of cloth location behind manipulator
-        self.img_stack.append(image)
-        #print(len(self.img_stack))
-        cv2.imshow("image", image)
 
-        if len(self.img_stack)>=stack:
-            self.img_stack.pop(0)
-            np_array = np.array(self.img_stack)
-            sequence = np.median(np_array, axis=0).astype(dtype='float32') # take median filter over the image stack
-            new = cv2.subtract(self.im_background, sequence)
-            imgray = cv2.cvtColor(new, cv2.COLOR_RGB2GRAY)
-            imgrayCopy = np.uint8(imgray)
-            edged = cv2.Canny(imgrayCopy, 30, 200)
-            contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        new = cv2.subtract(self.im_background, np_array)
+        imgray = cv2.cvtColor(new, cv2.COLOR_RGB2GRAY)
+        imgrayCopy = np.uint8(imgray)
+        edged = cv2.Canny(imgrayCopy, 100, 250)
+        contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        new2 = cv2.drawContours(np_array, contours, -1, (0,255,0), 3)
+        # cv2.imshow("window", new2)
+        # cv2.waitKey(1)
 
-            new2 = cv2.drawContours(new, contours, -1, (0,255,0), 3)
+        currentarea = cv2.contourArea(contours[0])
+        self.area_stack.insert(0, currentarea)
+        ## compare with ground truth and previous area
+        coverageper =  currentarea/clotharea
+        
+        coveragereward =  w1 * coverageper + w2 * (self.area_stack[1] - self.area_stack[0])/clotharea 
 
-            cv2.imshow("sequence", sequence)
-            cv2.imshow("subtract", new)
-            cv2.waitKey(10)
-
-            currentarea = cv2.contourArea(contours[0])
-            self.area_stack.insert(0, currentarea)
-            ## compare with ground truth and previous area
-            coverageper =  currentarea/clotharea
-            coveragereward =  w1 * coverageper + w2 * (self.area_stack[1] - self.area_stack[0])/clotharea 
-
-            if coverageper > 0.9:
-                self.goalcoverage = True
-        else:
-            coveragereward = 0
+        if coverageper > 0.9:
+            self.goalcoverage = True
 
         return coveragereward
 
@@ -224,7 +214,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         ## Coverage reward if >90% coverage, call terminate
         ## Compute only coverage after a grasp - remember to change        
         coveragereward = self.get_coverage() # output percentage
-        print('coveragereward', coveragereward)
+        #print('coveragereward', coveragereward)
 
         # Contact/collision penalty
         if self.result_move == 'success':
@@ -244,7 +234,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         noise_low = -self._reset_noise_scale
         noise_high = self._reset_noise_scale
 
-        print(self.init_qpos)
+        #print(self.init_qpos)
 
 
         qpos = self.init_qpos + self.np_random.uniform(
