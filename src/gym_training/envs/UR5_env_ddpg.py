@@ -126,7 +126,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self._reset_noise_scale=1
         self.action_space = spaces.Box(low=low, high=high, shape=(7,), seed=42)
         self.observation_space = spaces.Box(0, 5, shape=(6,), dtype=np.float64)
-        self.controller = MJ_Controller(model=self.model)
+        #self.controller = MJ_Controller(model=self.model)
         self.step_counter = 0
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
         filename = "groundtruth.png"
@@ -142,7 +142,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         #     im =self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
         #     cv2.imwrite("groundtruth.png", im )
 
-        self.result_move = self.controller.move_group_to_joint_target(target=action, quiet=True)
+        #self.result_move = self.controller.move_group_to_joint_target(target=action, quiet=True)
 
         #image = self.mujoco_renderer.render("human")
 
@@ -190,8 +190,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         edged = cv2.Canny(imgrayCopy, 100, 250)
         contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         new2 = cv2.drawContours(np_array, contours, -1, (0,255,0), 3)
-        # cv2.imshow("window", new2)
-        # cv2.waitKey(1)
 
         currentarea = cv2.contourArea(contours[0])
         self.area_stack.insert(0, currentarea)
@@ -203,18 +201,21 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         if coverageper > 0.9:
             self.goalcoverage = True
 
+        depth = self.mujoco_renderer.render("depth_array", camera_name="RealSense")  
+        zfar  = 10
+        znear = 0.001
+        depth_linear = (znear * zfar) / (zfar + depth * (znear - zfar))
+        cv2.imshow("window", depth_linear/np.max(depth_linear))
+        cv2.waitKey(1)
+
         return coveragereward
 
     def _set_action_space(self):
         # Define a set of actions to execute in the simulation
         return super()._set_action_space()
     
-    def compute_reward(self):# Define all the rewards possible
-        # Grasp reward 1 for open, 0 for close
-        ## Coverage reward if >90% coverage, call terminate
-        ## Compute only coverage after a grasp - remember to change        
-        coveragereward = self.get_coverage() # output percentage
-        #print('coveragereward', coveragereward)
+    def compute_reward(self):
+        coveragereward = self.get_coverage() 
 
         # Contact/collision penalty
         if self.result_move == 'success':
@@ -223,7 +224,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             move_complete_reward = -1
 
         collision = self.check_collision()
-        # Reward for standing in a certain position
+
 
         # Summarize all rewards 
         total_reward = move_complete_reward + coveragereward
@@ -250,3 +251,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         observation = self._get_obs()
 
         return observation
+    
+    def randomization(self):
+        pass

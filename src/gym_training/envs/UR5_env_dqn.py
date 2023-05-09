@@ -3,7 +3,6 @@ import gymnasium as gym
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
-from gym_training.controller.UR5_contr import URController
 import os
 import numpy as np
 import matplotlib.pyplot as plt
