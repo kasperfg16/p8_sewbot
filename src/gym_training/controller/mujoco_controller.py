@@ -44,7 +44,7 @@ class MJ_Controller(object):
         self.groups = defaultdict(list)
         self.groups["All"] = list(range(len(self.data.ctrl)))
         self.create_group("Arm", list(range(5)))
-        self.create_group("Gripper", [6])
+        self.create_group("Gripper", [6, 7])
         self.actuated_joint_ids = np.array([i[2] for i in self.actuators])
         self.reached_target = False
         self.current_output = np.zeros(len(self.data.ctrl))
@@ -147,83 +147,102 @@ class MJ_Controller(object):
         sample_time = 0.002
         # p_scale = 1
         p_scale = 600
-        i_scale = 10000000000000
+        i_scale = 0
         i_gripper = 0
-        d_scale = 5000
+        d_scale = 5500
+
+        # Shoulder Pan Joint
         self.controller_list.append(
             PID(
-                7 * p_scale,
+                10 * p_scale,
                 0.1 * i_scale,
-                1.1 * d_scale,
+                0.7 * d_scale,
                 setpoint=0,
                 output_limits=(self.model.actuator_ctrlrange[0][0], self.model.actuator_ctrlrange[0][1]),
                 sample_time=sample_time,
             )
-        )  # Shoulder Pan Joint
+        )
+        # Shoulder Lift Joint
         self.controller_list.append(
             PID(
-                13 * p_scale,
+                25 * p_scale,
                 0.1 * i_scale,
-                1.0 * d_scale,
+                0.9 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[1][0], self.model.actuator_ctrlrange[1][1]),
                 sample_time=sample_time,
             )
-        )  # Shoulder Lift Joint
+        )
+        # Elbow Joint
         self.controller_list.append(
             PID(
-                8 * p_scale,
+                18 * p_scale,
                 0.1 * i_scale,
-                0.5 * d_scale,
+                0.1 * d_scale,
                 setpoint=1.57,
                 output_limits=(self.model.actuator_ctrlrange[2][0], self.model.actuator_ctrlrange[2][1]),
                 sample_time=sample_time,
             )
-        )  # Elbow Joint
+        )
+        # Wrist 1 Joint
         self.controller_list.append(
             PID(
-                7 * p_scale,
+                10 * p_scale,
                 0.2 * i_scale,
-                0.5 * d_scale,
+                0.1 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[3][0], self.model.actuator_ctrlrange[3][1]),
                 sample_time=sample_time,
             )
-        )  # Wrist 1 Joint
+        )
+        # Wrist 2 Joint
         self.controller_list.append(
             PID(
-                5 * p_scale,
+                17 * p_scale,
                 0.2 * i_scale,
-                0.6 * d_scale,
+                0.9 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[4][0], self.model.actuator_ctrlrange[4][1]),
                 sample_time=sample_time,
             )
-        )  # Wrist 2 Joint
+        )
+        # Wrist 3 Joint
         self.controller_list.append(
             PID(
-                5 * p_scale,
+                4 * p_scale,
                 0.2 * i_scale,
-                0.2 * d_scale,
+                0.3 * d_scale,
                 setpoint=0.0,
                 output_limits=(self.model.actuator_ctrlrange[5][0], self.model.actuator_ctrlrange[5][1]),
                 sample_time=sample_time,
             )
-        )  # Wrist 3 Joint
+        )
+        # Gripper Joint (right finger)
+        
+        p_grip = 15.1
+        d_grip = 0.00
+
         self.controller_list.append(
             PID(
-                0.025 * p_scale,
+                p_grip * 650,
                 i_gripper,
-                0.00 * d_scale,
+                d_grip,
                 setpoint=0.0,
                 output_limits=(self.model.actuator_ctrlrange[6][0], self.model.actuator_ctrlrange[6][1]),
                 sample_time=sample_time,
             )
-        )  # Gripper Joint
-        # self.controller_list.append(PID(10.5*p_scale, 0.2, 0.1*d_scale, setpoint=0.0, output_limits=(-1, 1), sample_time=sample_time)) # Gripper Joint
-        # self.controller_list.append(PID(2*p_scale, 0.1*i_scale, 0.05*d_scale, setpoint=0.2, output_limits=(-0.5, 0.8), sample_time=sample_time)) # Finger 2 Joint 1
-        # self.controller_list.append(PID(1*p_scale, 0.1*i_scale, 0.05*d_scale, setpoint=0.0, output_limits=(-0.5, 0.8), sample_time=sample_time)) # Middle Finger Joint 1
-        # self.controller_list.append(PID(1*p_scale, 0.1*i_scale, 0.05*d_scale, setpoint=-0.1, output_limits=(-0.8, 0.8), sample_time=sample_time)) # Gripperpalm Finger 1 Joint
+        )
+        # Gripper Joint (left finger)
+        self.controller_list.append(
+            PID(
+                p_grip * p_scale,
+                i_gripper,
+                d_grip * d_scale,
+                setpoint=0.0,
+                output_limits=(self.model.actuator_ctrlrange[7][0], self.model.actuator_ctrlrange[7][1]),
+                sample_time=sample_time,
+            )
+        )
 
         self.current_target_joint_values = [
             self.controller_list[i].setpoint for i in range(len(self.data.ctrl))
@@ -358,7 +377,8 @@ class MJ_Controller(object):
 
                 mujoco.mj_step(self.model, self.data)
                 mujoco.mj_forward(self.model, self.data)
-                self.mujoco_renderer.render("human")
+                if render:
+                    self.mujoco_renderer.render("human")
                 steps += 1
 
             self.last_movement_steps = steps
@@ -392,11 +412,11 @@ class MJ_Controller(object):
         # print('Open: ', self.data.qpos[self.actuated_joint_ids][self.groups['Gripper']])
         return (
             self.move_group_to_joint_target(
-                group="Gripper", target=[0.0], max_steps=1000, tolerance=0.05, **kwargs
+                group="Gripper", target=[0, 0], max_steps=1000, tolerance=0.0001, **kwargs
             )
             if half
             else self.move_group_to_joint_target(
-                group="Gripper", target=[0.4], max_steps=1000, tolerance=0.05, **kwargs
+                group="Gripper", target=[0.0], max_steps=1000, tolerance=0.0001, **kwargs
             )
         )
 
@@ -406,11 +426,12 @@ class MJ_Controller(object):
         Closes the gripper while keeping the arm in a steady position.
         """
 
+        print('heyy')
         # result = self.move_group_to_joint_target(group='Gripper', target=[-0.4], tolerance=0.05, **kwargs)
         # print('Closed: ', self.data.qpos[self.actuated_joint_ids][self.groups['Gripper']])
         # result = self.move_group_to_joint_target(group='Gripper', target=[0.45, 0.45, 0.55, -0.17], tolerance=0.05, max_steps=max_steps, render=render, marker=True, quiet=quiet, plot=plot)
         return self.move_group_to_joint_target(
-            group="Gripper", target=[-0.4], tolerance=0.01, **kwargs
+            group="Gripper", target=[-0.008, -0.008], tolerance=0.0001, **kwargs
         )
 
     def grasp(self, **kwargs):
@@ -685,27 +706,6 @@ class MJ_Controller(object):
             )
         )
         plt.clf()
-
-    def get_image_data(self, show=False, camera="top_down", width=200, height=200):
-        """
-        Returns the RGB and depth images of the provided camera.
-        Args:
-            show: If True displays the images for five seconds or until a key is pressed.
-            camera: String specifying the name of the camera to use.
-        """
-
-        rgb, depth = copy.deepcopy(
-            self.sim.render(width=width, height=height, camera_name=camera, depth=True),
-            renderer.render()
-        )
-        if show:
-            cv.imshow("rbg", cv.cvtColor(rgb, cv.COLOR_BGR2RGB))
-            # cv.imshow('depth', depth)
-            cv.waitKey(1)
-            # cv.waitKey(delay=5000)
-            # cv.destroyAllWindows()
-
-        return np.array(np.fliplr(np.flipud(rgb))), np.array(np.fliplr(np.flipud(depth)))
 
     def depth_2_meters(self, depth):
         """

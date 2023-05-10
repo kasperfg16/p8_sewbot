@@ -1,6 +1,9 @@
 <mujoco model="ur5">
     <compiler angle="radian" meshdir="ur5" balanceinertia="true"/>
-    <option collision="all" gravity="0 0 -9.81" />
+    
+    <!-- <option collision="all" -->
+    
+    <option collision="all" gravity="0 0 -9.81"/>
 
 
     <default>
@@ -73,10 +76,11 @@
         <body name="B3_5" pos="-0.2 0.5 0.1" >
             <composite type="cloth" count="6 6 1" spacing="0.015" flatinertia="0.01">
                 <joint kind="main" damping="0.001"/>
-                <skin material="matdenim" texcoord="true" inflate="0.005" subgrid="2"/>
+                <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>
                 <geom type="capsule" size="0.015 0.015" />
             </composite>
         </body>
+        
          <!-- table  -->
         <body name="table" pos="0 0 0">
             <geom type="box" size="0.7 .7 .1" rgba="1 1 1 1"/>
@@ -174,11 +178,13 @@
         <motor name="joint3_motor" joint="joint3" ctrllimited="true" ctrlrange="-28 28" />
         <motor name="joint4_motor" joint="joint4" ctrllimited="true" ctrlrange="-28 28" />
         <motor name="joint5_motor" joint="joint5" ctrllimited="true" ctrlrange="-28 28" />
-        <motor name="joint7_rf" joint="joint_rf" />
+        <motor name="joint6_rf" joint="joint_lf" ctrllimited="true" ctrlrange="-50 50"/>
+        <motor name="joint7_rf" joint="joint_rf" ctrllimited="true" ctrlrange="-50 50"/>
     </actuator>
 
     <equality>
-		<joint name="fingers" joint1="joint_lf" joint2="joint_rf" polycoef="0 1 0 0 0"/>
+		<joint name="fingers_1" joint1="joint_lf" joint2="joint_rf" polycoef="0 1 0 0 0" active='true'/>
+        <joint name="fingers_2" joint1="joint_rf" joint2="joint_lf" polycoef="0 1 0 0 0" active='true'/>
 	</equality>
 
 </mujoco>

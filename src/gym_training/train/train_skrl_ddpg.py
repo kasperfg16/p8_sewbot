@@ -12,6 +12,7 @@ from skrl.agents.torch.ddpg import DDPG, DDPG_DEFAULT_CONFIG
 from skrl.resources.noises.torch import OrnsteinUhlenbeckNoise
 from skrl.trainers.torch import SequentialTrainer
 from skrl.envs.torch import wrap_env
+import nvidia_smi
 
 # Define the models (deterministic models) for the DDPG agent using mixin
 # - Actor (policy): takes as input the environment's observation/state and returns an action
@@ -47,26 +48,32 @@ class DeterministicCritic(DeterministicMixin, Model):
 
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
-display = False
 
-if display:
-    render_mode = 'human'
-else:
-    render_mode = None
-
-env = gym.vector.make("UR5_ddpg", num_envs=1, asynchronous=False, render_mode=render_mode)
+env = gym.vector.make("UR5_ddpg", num_envs=1, asynchronous=True)
 
 env = wrap_env(env)
 
 # See the used grafics card
 device = torch.cuda.current_device()
 print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
-#env.device  ='cpu'
+env.device  ='cpu'
 device = env.device
 
-# Instantiate a RandomMemory (without replacement) as experience replay memory
-memory = RandomMemory(memory_size=100000, num_envs=env.num_envs, device=device, replacement=False)
+nvidia_smi.nvmlInit()
 
+handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
+# card id 0 hardcoded here, there is also a call to get all available card ids, so we could iterate
+
+info = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
+
+print("Total memory:", info.total)
+print("Free memory:", info.free)
+print("Used memory:", info.used)
+
+nvidia_smi.nvmlShutdown()
+
+# Instantiate a RandomMemory (without replacement) as experience replay memory
+memory = RandomMemory(memory_size=100, num_envs=env.num_envs, device=device, replacement=False, export=False)
 
 # Instantiate the agent's models (function approximators).
 # DDPG requires 4 models, visit its documentation for more details
@@ -80,7 +87,6 @@ models_ddpg["target_critic"] = DeterministicCritic(env.observation_space, env.ac
 # Initialize the models' parameters (weights and biases) using a Gaussian distribution
 for model in models_ddpg.values():
     model.init_parameters(method_name="normal_", mean=0.0, std=0.1)
-
 
 # Configure and instantiate the agent.
 # Only modify some of the default configuration, visit its documentation to see all the options

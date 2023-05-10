@@ -1,3 +1,6 @@
 Mon May  8 08:45:02 2023
 WARNING: mju_openResource: unknown file '/home/kasper/Documents/p8_sewbot/srcsrc/gym_training/envs/mesh/ur5.xml'
 
+Wed May 10 09:25:23 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 70. The simulation is unstable. Time = 0.0240.
+
