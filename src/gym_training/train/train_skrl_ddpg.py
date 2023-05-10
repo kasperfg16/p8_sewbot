@@ -60,8 +60,8 @@ env = wrap_env(env)
 
 # See the used grafics card
 device = torch.cuda.current_device()
-#print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
-env.device  ='cpu'
+print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
+#env.device  ='cpu'
 device = env.device
 
 # Instantiate a RandomMemory (without replacement) as experience replay memory
@@ -87,11 +87,11 @@ for model in models_ddpg.values():
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
 cfg_ddpg["exploration"]["noise"] = OrnsteinUhlenbeckNoise(theta=0.15, sigma=0.1, base_scale=1.0, device=device)
-cfg_ddpg["batch_size"] = 10
+cfg_ddpg["batch_size"] = 100
 cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 0
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
-cfg_ddpg["experiment"]["write_interval"] = 1
+cfg_ddpg["experiment"]["write_interval"] = 5
 cfg_ddpg["experiment"]["checkpoint_interval"] = 100
 
 agent_ddpg = DDPG(models=models_ddpg,
