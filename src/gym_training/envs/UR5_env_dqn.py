@@ -3,7 +3,6 @@ import gymnasium as gym
 from gymnasium.envs.mujoco import MujocoEnv
 from gymnasium import spaces
 from gymnasium.utils import EzPickle
-from gym_training.controller.UR5_contr import URController
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -157,7 +156,7 @@ class UR5Env_dqn(MujocoEnv, EzPickle):
         info = {}
 
         self.step_counter += 1
-        if self.step_counter >= 20:
+        if self.step_counter >= 20000:
             truncated = True
             self.step_counter = 0
 

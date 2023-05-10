@@ -1,10 +1,6 @@
 <mujoco model="ur5">
     <compiler angle="radian" meshdir="ur5" balanceinertia="true"/>
-    
-    <!-- <option collision="all" -->
-    
-    <option collision="all" gravity="0 0 -9.81"/>
-
+    <option timestep="0.002" collision="all" gravity="0 0 -9.81" />
 
     <default>
         <light castshadow="false" diffuse="1 1 1" />
@@ -59,24 +55,34 @@
         <material name="blue" specular="1" shininess="0.5" reflectance="1" emission="0" rgba="0.678 0.847 0.902 1"/>
         <material name="black" specular="1" shininess="0.5" reflectance="1" emission="0" rgba="0.2 0.2 0.2 1"/>
         <material name="white" specular="1" shininess="0.3" reflectance="1" emission="0" rgba="0.9 0.9 0.9 1"/>
+        <!--6 standard materials-->
 
         <texture name="floor_tex"   type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 .2 .3" width="100" height="100" />
         <material name='floor_mat' texture="floor_tex"  shininess="0.8" texrepeat="10 10" specular="0.7"  reflectance="0.5" />
         <texture name="texdenim" type="2d" file="ur5/denim.png"/>
         <material name="matdenim" texture="texdenim"/>
+        <texture name="texwhite1" type="2d" file="ur5/white1.png"/>
+        <material name="matwhite1" texture="texwhite1"/>
+        <texture name="texwhite2" type="2d" file="ur5/white2.png"/>
+        <material name="matwhite2" texture="texwhite2"/>
+        <texture name="texwhite4" type="2d" file="ur5/white4.png"/>
+        <material name="matwhite4" texture="texwhite4"/>
+        <texture name="texblack" type="2d" file="ur5/black.png"/>
+        <material name="matblack" texture="texblack"/>
+        <!--6 special materials-->
     </asset>
 
     <worldbody>
 
         <light name="lightdefault" diffuse=".3 .3 .3" pos="0 0 3" dir="0 0 -1" />
-        <camera name="RealSense" mode="fixed" pos="-0.2 0.5 0.8" euler="0 0 3.14" fovy="42.5"/>
+        <camera name="RealSense" mode="fixed" pos="-0.2 0.5 0.6" euler="0 0 3.14" fovy="42.5"/>
         <geom name='floor' material="floor_mat" pos='0 0 0' size='2.5 2.5 0.1'  type='plane' />
 
          <!-- table  -->
         <body name="table" pos="0 0 0">
-            <geom type="box" size="0.7 .7 .1" rgba="1 1 1 1"/>
+            <geom type="box" size="0.7 .7 .5" rgba="1 1 1 1" mass="15"/>
 
-            <body name="base_link" pos="0 0 0.1">
+            <body name="base_link" pos="0 0 0.5">
                 <geom name="link0" type="mesh" mesh="link0" pos="0 0 0"/>
 
                 <body name="link1" pos="0 0 0.0213">

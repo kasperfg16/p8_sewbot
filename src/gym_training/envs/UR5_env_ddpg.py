@@ -1,6 +1,6 @@
 import numpy as np
 import gymnasium as gym
-#from gym_training.controller.UR3e_contr import UR3e_controller
+import random
 import gymnasium as gym
 import mujoco
 from gymnasium.envs.mujoco import MujocoEnv
@@ -15,12 +15,12 @@ import mujoco.viewer
 import sys
 
 
-# DEFAULT_CAMERA_CONFIG = {
-#     "trackbodyid": 1,
-#     "distance": 4.0,
-#     "lookat": np.array((0.0, 0.0, 2.0)),
-#     "elevation": -20.0,
-# }
+DEFAULT_CAMERA_CONFIG = {
+    "trackbodyid": 1,
+    "distance": 2.0,
+    "lookat": np.array((0.0, 0.0, 1.0)),
+    "elevation": -2.0,
+}
 
 def find_file(filename, search_path):
     """
@@ -102,7 +102,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             model_path=model_path,
             frame_skip=5,
             observation_space=self.observation_space,
-            # default_camera_config=DEFAULT_CAMERA_CONFIG,
+            #default_camera_config=DEFAULT_CAMERA_CONFIG,
             # **kwargs,
         )
         
@@ -157,7 +157,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         terminated = False
         truncated = False
         info = {}
-
+        # Randomization test
+        
         # Check if cloth is already in good position
         #self.get_coverage(show=False)
         if self.goalcoverage:
@@ -232,17 +233,19 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         w2 = 300
         max_stack_size = 5
 
-        new = cv2.subtract(self.im_background, np_array)
+        new = cv2.subtract(self.im_background, np_array, dtype=cv2.CV_32F)
         imgray = cv2.cvtColor(new, cv2.COLOR_RGB2GRAY)
         imgrayCopy = np.uint8(imgray)
         edged = cv2.Canny(imgrayCopy, 100, 250)
         contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         new2 = cv2.drawContours(np_array, contours, -1, (0,255,0), 3)
 
+
         currentarea = cv2.contourArea(contours[0])
         self.area_stack.insert(0, currentarea)
         ## compare with ground truth and previous area
         coverageper =  currentarea/clotharea
+        print(currentarea)
 
         if show and not self.headless_mode:
             cv2.imshow("Camera", new2)
@@ -256,19 +259,22 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         if coverageper > 0.9:
             self.goalcoverage = True
 
+        ## Depth testing
+        # depth = self.mujoco_renderer.render("depth_array", camera_name="RealSense")  
+        # zfar  = 10
+        # znear = 0.001
+        # depth_linear = (znear * zfar) / (zfar + depth * (znear - zfar))
+        # cv2.imshow("window", depth_linear/np.max(depth_linear))
+        # cv2.waitKey(1)
+
         return coveragereward
 
     def _set_action_space(self):
         # Define a set of actions to execute in the simulation
         return super()._set_action_space()
     
-    def compute_reward(self):# Define all the rewards possible
-        # Grasp reward 1 for open, 0 for close
-        ## Coverage reward if >90% coverage, call terminate
-        ## Compute only coverage after a grasp - remember to change   
-             
+    def compute_reward(self):# Define all the rewards possible           
         coveragereward = self.get_coverage(show=self.in_home_pose) # output percentage
-
         # move complete reward (also acts as a contact/collision penalty)
         if self.result_move == 'success':
             move_complete_reward = 1
@@ -285,6 +291,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         return total_reward
 
     def reset_model(self):
+        self.randomizationSparse() 
         self.in_home_pose = False
 
         noise_low = -self._reset_noise_scale
@@ -326,3 +333,80 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
+    
+    def randomizationSparse(self): # Randomization between trainings
+       
+        """
+        Cloth randomization:
+            Cloth color (randomizing hue, saturation, value, and colors, along with lighting and glossiness.)
+            Mechanical properties of cloth
+                Here we use the default value and perturbates with <=+-15%
+        | Name   | Number | Mass | Friction | Stiffness | Damping |
+        |--------|--------|------|----------|---------- |---------|
+        | Denim  |   7    | 
+        | Nylon  |   8    |      |          |           |         |
+        | Poly   |   9    |      |          |           |         |
+        | Cotton |   10   |      |          |           |         |
+        | Cotton |   11   |      |          |           |         |
+
+            matdenim = 7, matwhite1 = 8, matwhite2 = 9, matwhite4 = 10, matblack = 11
+        """
+        cloth_id = []
+        for i in range(self.model.nbody):
+            if mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i).startswith('B') is True:
+                cloth_id.append(i)
+        cloth_pertur = 0.15
+
+        # Material type
+        materials = range(7, 11, 1)
+        self.model.skin_matid = random.choice(materials)
+        if self.model.skin_matid == 7: # denim
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.004
+            #self.model.geom_friction[min(cloth_id):1+max(cloth_id)] =
+        elif self.model.skin_matid == 8: # white 1 /
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.005
+        elif self.model.skin_matid == 9: # white 2 /
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.006
+        elif self.model.skin_matid == 10: # white 4 / 100% cotton
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.007
+        elif self.model.skin_matid == 11: # black /
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.008
+
+        # Cloth mass 
+        mass_eps = self.model.body_mass[min(cloth_id)] * cloth_pertur
+        self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id)] + random.uniform(-mass_eps, mass_eps)
+        # Friction
+        frict_eps = self.model.geom_friction[min(cloth_id)] * cloth_pertur
+        for i in range(len(self.model.geom_friction[min(cloth_id):1+max(cloth_id)])):
+            self.model.geom_friction[i, :] = self.model.geom_friction[i, :] + random.uniform(-frict_eps, frict_eps)
+        # Stiffness
+        stiff_eps = self.model.jnt_stiffness[min(cloth_id)] * cloth_pertur
+        self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = self.model.jnt_stiffness[min(cloth_id)] + random.uniform(-stiff_eps, stiff_eps)
+        # Damping
+        damp_eps = self.model.dof_damping[min(cloth_id)] * cloth_pertur
+        self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = self.model.dof_damping[min(cloth_id)] + random.uniform(-damp_eps, damp_eps)
+
+        """
+        Manipulator randomization:
+            Initial position of manipulator
+            Mechanical properties of the manipulator - what we assume is true +- a small tolerance
+        """
+        # Initial pos
+
+        """
+        Lightning
+        """
+        light_pos_eps = self.model.light_pos * cloth_pertur
+        for i in range(len(self.model.light_pos)):
+            self.model.light_pos[i, :] = self.model.light_pos[i, :] + random.uniform(-light_pos_eps, light_pos_eps)
+
+        light_dir_eps = self.model.light_dir * cloth_pertur
+        for i in range(len(self.model.light_dir)):
+            self.model.light_dir[i, :] = self.model.light_dir[i, :] + random.uniform(-light_dir_eps, light_dir_eps)
+
+        """
+        Perturbation of camera orientation and position
+        """
+        cam_pos_eps = self.model.cam_pos * cloth_pertur
+        for i in range(len(self.model.cam_pos)):
+            self.model.cam_pos[i, :] = self.model.cam_pos[i, :] + random.uniform(-cam_pos_eps, cam_pos_eps)        
