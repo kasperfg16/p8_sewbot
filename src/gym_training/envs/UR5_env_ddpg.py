@@ -137,7 +137,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.area_stack = [0]*2
         self.result_move = False
         self.controller.show_model_info()
-        self.home_pose = [np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0]
+        self.home_pose = [np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0, 0]
         self.image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
         self.in_home_pose = False
 
@@ -159,14 +159,17 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         info = {}
 
         # Check if cloth is already in good position
-        self.get_coverage(show=False)
+        #self.get_coverage(show=False)
         if self.goalcoverage:
             self.goalcoverage = False
-            self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
+            self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
+            self.controller.stay(1000, render=not self.headless_mode)
             reward = self.compute_reward()
             observation  = self._get_obs()
             terminated = True
+            print('Tilløk')
             return observation, reward, terminated, truncated, info
+        terminated = True
 
         # Perform 'self.max_steps' movements based on action guesses from agent and then move to home pose
         if not self.step_counter >= self.max_steps:
@@ -174,28 +177,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             self.controller.stay(10, render=not self.headless_mode)
         else:
             ####### Test
-            til_1 = 15
-            tilt2 = 10
-            target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2]
-            self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
-            self.controller.stay(100, render=not self.headless_mode)
-
-            til_1 = 28
-            tilt2 = 15
-            target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, np.deg2rad(30), 0, 0]
-            self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode)
-            self.controller.stay(1000, render=not self.headless_mode)
-
-            self.controller.close_gripper()
-            self.controller.stay(1000, render=not self.headless_mode)
-
-            til_1 = 20
-            tilt2 = 5
-            target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2]
-            self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
-
-            self.controller.stay(1000, render=not self.headless_mode)
-
+            self.test_grip()
             #######
 
             self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
@@ -321,3 +303,26 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         observation = self._get_obs()
 
         return observation
+
+    def test_grip(self):
+        til_1 = 15
+        tilt2 = 10
+        self.controller.open_gripper()
+        target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(100, render=not self.headless_mode)
+
+        til_1 = 28
+        tilt2 = 15
+        target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, np.deg2rad(30), 0, 0]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode)
+        self.controller.stay(1000, render=not self.headless_mode)
+
+        self.controller.close_gripper()
+        self.controller.stay(1000, render=not self.headless_mode)
+
+        til_1 = 20
+        tilt2 = 5
+        target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)

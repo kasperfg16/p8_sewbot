@@ -93,7 +93,7 @@ class MJ_Controller(object):
         print("\nNumber of joints: {}".format(self.model.njnt))
         for i in range(self.model.njnt):
             print(
-                "Joint ID: {}, Joint Name: {}, Limits: {}".format(
+                "Joint ID: {}, Joint Name: {}, Limits[RAD]: {}".format(
                     i, mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i), self.model.jnt_range[i]
                 )
             )
@@ -101,7 +101,7 @@ class MJ_Controller(object):
         print("\nNumber of Actuators: {}".format(len(self.data.ctrl)))
         for i in range(len(self.data.ctrl)):
             print(
-                "Actuator ID: {}, Actuator Name: {}, Controlled Joint: {}, Control Range: {}".format(
+                "Actuator ID: {}, Actuator Name: {}, Controlled Joint: {}, Control Range[Nm]: {}".format(
                     i,
                     mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i),
                     self.actuators[i][3],
@@ -146,16 +146,16 @@ class MJ_Controller(object):
         # Values for training
         sample_time = 0.002
         # p_scale = 1
-        p_scale = 600
-        i_scale = 0
+        p_scale = 90
+        i_scale = 1
         i_gripper = 0
-        d_scale = 5500
+        d_scale = 1600
 
         # Shoulder Pan Joint
         self.controller_list.append(
             PID(
-                10 * p_scale,
-                0.1 * i_scale,
+                20 * p_scale,
+                0.0 * i_scale,
                 0.7 * d_scale,
                 setpoint=0,
                 output_limits=(self.model.actuator_ctrlrange[0][0], self.model.actuator_ctrlrange[0][1]),
@@ -165,9 +165,9 @@ class MJ_Controller(object):
         # Shoulder Lift Joint
         self.controller_list.append(
             PID(
-                25 * p_scale,
-                0.1 * i_scale,
-                0.9 * d_scale,
+                28 * p_scale,
+                0.0 * i_scale,
+                0.85 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[1][0], self.model.actuator_ctrlrange[1][1]),
                 sample_time=sample_time,
@@ -176,9 +176,9 @@ class MJ_Controller(object):
         # Elbow Joint
         self.controller_list.append(
             PID(
-                18 * p_scale,
-                0.1 * i_scale,
-                0.1 * d_scale,
+                26 * p_scale,
+                0.0 * i_scale,
+                0.15 * d_scale,
                 setpoint=1.57,
                 output_limits=(self.model.actuator_ctrlrange[2][0], self.model.actuator_ctrlrange[2][1]),
                 sample_time=sample_time,
@@ -187,9 +187,9 @@ class MJ_Controller(object):
         # Wrist 1 Joint
         self.controller_list.append(
             PID(
-                10 * p_scale,
-                0.2 * i_scale,
-                0.1 * d_scale,
+                11 * p_scale,
+                0.0 * i_scale,
+                0.2 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[3][0], self.model.actuator_ctrlrange[3][1]),
                 sample_time=sample_time,
@@ -199,7 +199,7 @@ class MJ_Controller(object):
         self.controller_list.append(
             PID(
                 17 * p_scale,
-                0.2 * i_scale,
+                0.0 * i_scale,
                 0.9 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[4][0], self.model.actuator_ctrlrange[4][1]),
@@ -209,8 +209,8 @@ class MJ_Controller(object):
         # Wrist 3 Joint
         self.controller_list.append(
             PID(
-                4 * p_scale,
-                0.2 * i_scale,
+                10 * p_scale,
+                0.0 * i_scale,
                 0.3 * d_scale,
                 setpoint=0.0,
                 output_limits=(self.model.actuator_ctrlrange[5][0], self.model.actuator_ctrlrange[5][1]),
@@ -224,7 +224,7 @@ class MJ_Controller(object):
 
         self.controller_list.append(
             PID(
-                p_grip * 650,
+                p_grip * 600,
                 i_gripper,
                 d_grip,
                 setpoint=0.0,
@@ -235,9 +235,9 @@ class MJ_Controller(object):
         # Gripper Joint (left finger)
         self.controller_list.append(
             PID(
-                p_grip * p_scale,
+                p_grip * 600,
                 i_gripper,
-                d_grip * d_scale,
+                d_grip,
                 setpoint=0.0,
                 output_limits=(self.model.actuator_ctrlrange[7][0], self.model.actuator_ctrlrange[7][1]),
                 sample_time=sample_time,
