@@ -328,7 +328,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.controller.close_gripper()
         self.controller.stay(1000, render=not self.headless_mode)
 
-        til_1 = 20
+        til_1 = 18
         tilt2 = 5
         target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
@@ -391,6 +391,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             Initial position of manipulator
             Mechanical properties of the manipulator - what we assume is true +- a small tolerance
         """
+
         # Initial pos
 
         """
