@@ -93,8 +93,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # else:
         #     print(f"{filename} not found in {search_path}")
 
-        self.img_width = 100
-        self.img_height = 100
+        self.img_width = 480
+        self.img_height = 480
         self.observation_space = spaces.Box(0, 255, shape=(self.img_width, self.img_height, 3), dtype=np.uint8)
 
         MujocoEnv.__init__(
@@ -131,14 +131,14 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
         filename = "groundtruth.png"
         search_path = "./"
-        self.im_background = np.asarray(cv2.imread(find_file(filename, search_path)), np.uint8)
+        #self.im_background = np.asarray(cv2.imread(find_file(filename, search_path)), np.uint8)
         self.stepcount = 0
         self.goalcoverage = False
-        self.area_stack = [0]*2
+        self.area_stack = [0]
         self.result_move = False
-        self.controller.show_model_info()
+        #self.controller.show_model_info()
         self.home_pose = [np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0, 0]
-        self.image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
+        self.image =  np.empty((480, 480, 3)) # image size
         self.in_home_pose = False
 
         # How many steps are the robot allowed to take before reward?
@@ -148,19 +148,18 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.headless_mode = False
 
         # Print output in terminal?
-        self.quiet = False
+        self.quiet = True
 
     def step(self, action):
-
         # init
         reward = 0
         terminated = False
         truncated = False
         info = {}
-        # Randomization test
         
         # Check if cloth is already in good position
         self.get_coverage(show=False)
+
         if self.goalcoverage:
             self.goalcoverage = False
             self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
@@ -168,11 +167,13 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             reward = self.compute_reward()
             observation  = self._get_obs()
             terminated = True
-            print('Tilløk')
-            return observation, reward, terminated, truncated, info
-        terminated = True
 
-        # Perform 'self.max_steps' movements based on action guesses from agent and then move to home pose
+            return observation, reward, terminated, truncated, info
+        
+        terminated = True
+        # # Recive observation that is send to the NN/agent
+        observation  = self._get_obs()
+
         if not self.step_counter >= self.max_steps:
             self.result_move = self.controller.move_group_to_joint_target(target=action, quiet=self.quiet, render=not self.headless_mode)
             self.controller.stay(10, render=not self.headless_mode)
@@ -184,34 +185,33 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
             self.controller.stay(10, render=not self.headless_mode)
             truncated = True
-            self.step_counter = -1
+            #self.step_counter = -1
             self.in_home_pose = True
         
         # Compute reward after operation
         reward = self.compute_reward()
 
-        # Recive observation that is send to the NN/agent
-        observation  = self._get_obs()
+        # # Recive observation that is send to the NN/agent
+        # observation  = self._get_obs()
 
         self.step_counter += 1
-
-        print('tilløk')
 
         return observation, reward, terminated, truncated, info
 
     def _get_obs(self):
         obs = self.image
 
-        # Resize img to be in observation space (For memory-efficiency)
-        new_size = (self.img_width, self.img_width)
-        resized_image = cv2.resize(obs, new_size)
+        # # Resize img to be in observation space (For memory-efficiency)
+        # new_size = (self.img_width, self.img_width)
+        # resized_image = cv2.resize(obs, new_size)
 
-        if not self.headless_mode:
-            cv2.imshow('Img used in observation space', resized_image)
-            cv2.waitKey(1)
+        # if not self.headless_mode:
+        #     cv2.imshow('Img used in observation space', obs)
+        #     cv2.waitKey(1)
 
         # Convert to a more memory-efficient format
-        obs = resized_image.astype(np.uint8)
+        print("obs")
+        obs = obs.astype(np.uint8)
 
         return obs # Concatenate when multiple obs
 
@@ -225,31 +225,38 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         return False # bool for collision or not
     
     def get_coverage(self, show=True):
-        self.image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")  
-        np_array = np.array(self.image).astype(dtype=np.uint8)
+        image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
+        self.image = image.astype(dtype=np.uint8)
+        #blur_img = cv2.GaussianBlur(self.image, (3, 3), 0)
+        # imgray = cv2.cvtColor(blur_img, cv2.COLOR_RGB2GRAY)
+        # imgray = np.uint8(imgray)
+        # bcggray = cv2.cvtColor(self.im_background, cv2.COLOR_RGB2GRAY)
+        # bcggray = np.uint8(bcggray)
+        #new = cv2.subtract(imgray, bcggray, dtype=cv2.CV_8U)
+
         ## use area from ground truth
-        clotharea = 14433.5
+        clotharea = 10000 #42483.0
         w1 = 100 
         w2 = 300
-        max_stack_size = 5
+        max_stack_size = 2       
 
-        new = cv2.subtract(self.im_background, np_array, dtype=cv2.CV_32F)
-        imgray = cv2.cvtColor(new, cv2.COLOR_RGB2GRAY)
-        imgrayCopy = np.uint8(imgray)
-        edged = cv2.Canny(imgrayCopy, 100, 250)
+        edged = cv2.Canny(self.image, 10, 250)
         contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        new2 = cv2.drawContours(np_array, contours, -1, (0,255,0), 3)
-
-
-        currentarea = cv2.contourArea(contours[0])
-        self.area_stack.insert(0, currentarea)
+        new2 = cv2.drawContours(self.image, contours, -1, (0,255,0), 3)
+        cv2.imshow("egde", new2)
+        cv2.waitKey(1)
+            
+        if np.size(contours)>0:
+            currentarea = cv2.contourArea(contours[0])
+            self.area_stack.append(currentarea)
+        else: currentarea = 0
         ## compare with ground truth and previous area
         coverageper =  currentarea/clotharea
-        print(currentarea)
 
         if show and not self.headless_mode:
-            cv2.imshow("Camera", new2)
-            cv2.waitKey(1)
+            # cv2.imshow("Camera", new2)
+            # cv2.waitKey(1)
+            pass
         
         if len(self.area_stack) > max_stack_size:
             self.area_stack.pop(0)
@@ -258,14 +265,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
         if coverageper > 0.9:
             self.goalcoverage = True
-
-        ## Depth testing
-        # depth = self.mujoco_renderer.render("depth_array", camera_name="RealSense")  
-        # zfar  = 10
-        # znear = 0.001
-        # depth_linear = (znear * zfar) / (zfar + depth * (znear - zfar))
-        # cv2.imshow("window", depth_linear/np.max(depth_linear))
-        # cv2.waitKey(1)
 
         return coveragereward
 
@@ -305,8 +304,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         )
         self.set_state(qpos, qvel)
 
-        self.img_stack=[]
-
+        # self.img_stack=[]
+        self.get_coverage()
         observation = self._get_obs()
 
         return observation
@@ -408,6 +407,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         """
         Perturbation of camera orientation and position
         """
-        cam_pos_eps = self.model.cam_pos * cloth_pertur
-        for i in range(len(self.model.cam_pos)):
-            self.model.cam_pos[i, :] = self.model.cam_pos[i, :] + random.uniform(-cam_pos_eps, cam_pos_eps)        
+        # cam_pos_eps = self.model.cam_pos * cloth_pertur
+        # for i in range(len(self.model.cam_pos)):
+        #     self.model.cam_pos[i, :] = self.model.cam_pos[i, :] + random.uniform(-cam_pos_eps, cam_pos_eps)        
