@@ -219,12 +219,12 @@ class MJ_Controller(object):
         )
         # Gripper Joint (right finger)
         
-        p_grip = 15.1
-        d_grip = 0.00
+        p_grip = 6000
+        d_grip = 0.0000
 
         self.controller_list.append(
             PID(
-                p_grip * 600,
+                p_grip,
                 i_gripper,
                 d_grip,
                 setpoint=0.0,
@@ -235,7 +235,7 @@ class MJ_Controller(object):
         # Gripper Joint (left finger)
         self.controller_list.append(
             PID(
-                p_grip * 600,
+                p_grip,
                 i_gripper,
                 d_grip,
                 setpoint=0.0,
@@ -410,15 +410,8 @@ class MJ_Controller(object):
         Opens the gripper while keeping the arm in a steady position.
         """
         # print('Open: ', self.data.qpos[self.actuated_joint_ids][self.groups['Gripper']])
-        return (
-            self.move_group_to_joint_target(
-                group="Gripper", target=[0, 0], max_steps=1000, tolerance=0.0001, **kwargs
-            )
-            if half
-            else self.move_group_to_joint_target(
-                group="Gripper", target=[0.0], max_steps=1000, tolerance=0.0001, **kwargs
-            )
-        )
+        return (self.move_group_to_joint_target(
+                group="Gripper", target=[0, 0], max_steps=1000, tolerance=0.0001, **kwargs))
 
     def close_gripper(self, **kwargs):
         # def close_gripper(self, render=True, max_steps=1000, plot=False, quiet=True):
@@ -426,7 +419,6 @@ class MJ_Controller(object):
         Closes the gripper while keeping the arm in a steady position.
         """
 
-        print('heyy')
         # result = self.move_group_to_joint_target(group='Gripper', target=[-0.4], tolerance=0.05, **kwargs)
         # print('Closed: ', self.data.qpos[self.actuated_joint_ids][self.groups['Gripper']])
         # result = self.move_group_to_joint_target(group='Gripper', target=[0.45, 0.45, 0.55, -0.17], tolerance=0.05, max_steps=max_steps, render=render, marker=True, quiet=quiet, plot=plot)
