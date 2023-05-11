@@ -160,7 +160,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # Randomization test
         
         # Check if cloth is already in good position
-        #self.get_coverage(show=False)
+        self.get_coverage(show=False)
         if self.goalcoverage:
             self.goalcoverage = False
             self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
