@@ -93,8 +93,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # else:
         #     print(f"{filename} not found in {search_path}")
 
-        self.img_width = 480
-        self.img_height = 480
+        self.img_width = 100
+        self.img_height = 100
         self.observation_space = spaces.Box(0, 255, shape=(self.img_width, self.img_height, 3), dtype=np.uint8)
 
         MujocoEnv.__init__(
@@ -129,8 +129,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
-        filename = "groundtruth.png"
-        search_path = "./"
+        # filename = "groundtruth.png"
+        # search_path = "./"
         #self.im_background = np.asarray(cv2.imread(find_file(filename, search_path)), np.uint8)
         self.stepcount = 0
         self.goalcoverage = False
@@ -148,9 +148,10 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.headless_mode = False
 
         # Print output in terminal?
-        self.quiet = True
+        self.quiet = False
 
     def step(self, action):
+
         # init
         reward = 0
         terminated = False
@@ -200,20 +201,18 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
     def _get_obs(self):
         obs = self.image
-
         # # Resize img to be in observation space (For memory-efficiency)
-        # new_size = (self.img_width, self.img_width)
-        # resized_image = cv2.resize(obs, new_size)
+        new_size = (self.img_width, self.img_width)
+        resized_image = cv2.resize(obs, new_size)
 
         # if not self.headless_mode:
         #     cv2.imshow('Img used in observation space', obs)
         #     cv2.waitKey(1)
 
         # Convert to a more memory-efficient format
-        print("obs")
-        obs = obs.astype(np.uint8)
+        obs = resized_image.astype(np.uint8)
 
-        return obs # Concatenate when multiple obs
+        return obs
 
     def truncate(self):
 
@@ -225,33 +224,30 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         return False # bool for collision or not
     
     def get_coverage(self, show=True):
+        #clotharea = 42483.0
+        w1 = 10 
+        max_stack_size = 2 
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
         self.image = image.astype(dtype=np.uint8)
-        #blur_img = cv2.GaussianBlur(self.image, (3, 3), 0)
-        # imgray = cv2.cvtColor(blur_img, cv2.COLOR_RGB2GRAY)
-        # imgray = np.uint8(imgray)
-        # bcggray = cv2.cvtColor(self.im_background, cv2.COLOR_RGB2GRAY)
-        # bcggray = np.uint8(bcggray)
-        #new = cv2.subtract(imgray, bcggray, dtype=cv2.CV_8U)
+        print(self.area_stack)
 
-        ## use area from ground truth
-        clotharea = 10000 #42483.0
-        w1 = 100 
-        w2 = 300
-        max_stack_size = 2       
+        ## use area from ground truth      
+        if self.model.skin_matid == 7: # denim
+            blur_img = cv2.GaussianBlur(self.image, (9, 9), 3)
 
         edged = cv2.Canny(self.image, 10, 250)
         contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         new2 = cv2.drawContours(self.image, contours, -1, (0,255,0), 3)
-        cv2.imshow("egde", new2)
+        cv2.imshow("Contour coverage", new2)
         cv2.waitKey(1)
+
             
         if np.size(contours)>0:
             currentarea = cv2.contourArea(contours[0])
             self.area_stack.append(currentarea)
         else: currentarea = 0
         ## compare with ground truth and previous area
-        coverageper =  currentarea/clotharea
+        #coverageper =  currentarea/clotharea
 
         if show and not self.headless_mode:
             # cv2.imshow("Camera", new2)
@@ -261,11 +257,21 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         if len(self.area_stack) > max_stack_size:
             self.area_stack.pop(0)
 
-        coveragereward =  w1 * coverageper + w2 * (self.area_stack[1] - self.area_stack[0])/clotharea 
+        coveragereward =  w1 * (self.area_stack[1] - self.area_stack[0])
 
-        if coverageper > 0.9:
+        ## Determine if contour is rectangular
+        peri = cv2.arcLength(contours[0], True)
+        approx = cv2.approxPolyDP(contours[0], 0.04 * peri, True)
+        # compute the bounding box of the contour and use the bounding box to compute the aspect ratio
+        (x, y, w, h) = cv2.boundingRect(approx)
+        ar = w / float(h)
+		# a square will have an aspect ratio that is approximately equal to one, otherwise, the shape is a rectangle
+        shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
+        
+        if shape == "square" or "rectangle":
+            print("Yay, the cloth is unfolded")
             self.goalcoverage = True
-
+            self.area_stack = [0]
         return coveragereward
 
     def _set_action_space(self):
@@ -290,6 +296,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         return total_reward
 
     def reset_model(self):
+        #self.area_stack = [0]
         self.randomizationSparse() 
         self.in_home_pose = False
 
@@ -303,8 +310,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             low=noise_low, high=noise_high, size=self.model.nv
         )
         self.set_state(qpos, qvel)
-
-        # self.img_stack=[]
+        
         self.get_coverage()
         observation = self._get_obs()
 
