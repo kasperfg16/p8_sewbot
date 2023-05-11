@@ -75,7 +75,7 @@
     <worldbody>
 
         <light name="lightdefault" diffuse=".3 .3 .3" pos="0 0 3" dir="0 0 -1" />
-        <camera name="RealSense" mode="fixed" pos="-0.2 0.5 1.5" euler="0 0 3.14" fovy="42.5"/>
+        <camera name="RealSense" mode="fixed" pos="-0.22 0.35 1.2" euler="0 0 3.14" fovy="42.5"/>
         <geom name='floor' material="floor_mat" pos='0 0 0' size='2.5 2.5 0.1'  type='plane' />
 
          <!-- table  -->
@@ -167,9 +167,9 @@
         </body>
     
     <!-- cloth -->
-        <body name="B3_5" pos="-0.2 0.5 0.8" >
+        <body name="B3_5" pos="-0.2 0.5 1.5" >
             <joint name="free_joint" type="free" stiffness="0" damping="0" frictionloss="0" armature="0"/>
-            <composite type="cloth" count="6 6 1" spacing="0.05" flatinertia="0.00">
+             <composite type="cloth" count="6 6 1" spacing="0.0333333333" flatinertia="0.00"> 
                 <joint type='free' kind="main" damping="0.001"/>
                 <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="40"/>
                 <geom type="capsule" size="0.015 0.015" />
