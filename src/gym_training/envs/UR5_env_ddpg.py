@@ -93,8 +93,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # else:
         #     print(f"{filename} not found in {search_path}")
 
-        self.img_width = 480
-        self.img_height = 480
+        self.img_width = 100
+        self.img_height = 100
         self.observation_space = spaces.Box(0, 255, shape=(self.img_width, self.img_height, 3), dtype=np.uint8)
 
         MujocoEnv.__init__(
