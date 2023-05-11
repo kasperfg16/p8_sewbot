@@ -107,7 +107,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         )
         
         # Action space (In this case - joint limits)
-        low = np.array([-np.pi,
+        self.act_space_low = np.array([-np.pi,
                         -np.pi/2,
                         -np.pi,
                         -np.pi,
@@ -115,7 +115,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
                         -np.pi,
                         -0.008])
         
-        high = np.array([np.pi,
+        self.act_space_high = np.array([np.pi,
                          np.pi/2,
                          np.pi,
                          np.pi,
@@ -124,8 +124,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
                          0])
         
         self.renderer = mujoco.Renderer(model=self.model)
-        self._reset_noise_scale=0
-        self.action_space = spaces.Box(low=low, high=high, shape=(7,), seed=42, dtype=np.float16)
+        self._reset_noise_scale=0.1
+        self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(7,), seed=42, dtype=np.float16)
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
@@ -154,13 +154,16 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
         # init
         reward = 0
-        terminated = False
         truncated = False
         info = {}
-        # Randomization test
+        self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
+        self.controller.stay(2000, render=not self.headless_mode)
+
+        # Recive observation that is send to the NN/agent
+        observation  = self._get_obs()
         
         # Check if cloth is already in good position
-        self.get_coverage(show=False)
+        self.get_coverage(show=True)
         if self.goalcoverage:
             self.goalcoverage = False
             self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
@@ -170,32 +173,29 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             terminated = True
             print('Tilløk')
             return observation, reward, terminated, truncated, info
-        terminated = True
 
-        # Perform 'self.max_steps' movements based on action guesses from agent and then move to home pose
-        if not self.step_counter >= self.max_steps:
-            self.result_move = self.controller.move_group_to_joint_target(target=action, quiet=self.quiet, render=not self.headless_mode)
-            self.controller.stay(10, render=not self.headless_mode)
         else:
-            ####### Test
-            self.test_grip()
-            #######
+            # Perform 'self.max_steps' movements based on action guesses from agent and then move to home pose
+            if not self.step_counter >= self.max_steps:
+                self.result_move = self.controller.move_group_to_joint_target(target=action, quiet=self.quiet, render=not self.headless_mode)
+                self.controller.stay(10, render=not self.headless_mode)
+            else:
+                ####### Test
+                self.test_grip()
+                #######
 
-            self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
-            self.controller.stay(10, render=not self.headless_mode)
-            truncated = True
-            self.step_counter = -1
-            self.in_home_pose = True
-        
+                self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
+                self.controller.stay(10, render=not self.headless_mode)
+                truncated = True
+                self.step_counter = -1
+                self.in_home_pose = True
+
+        terminated = False
+
         # Compute reward after operation
         reward = self.compute_reward()
 
-        # Recive observation that is send to the NN/agent
-        observation  = self._get_obs()
-
         self.step_counter += 1
-
-        print('tilløk')
 
         return observation, reward, terminated, truncated, info
 
@@ -292,22 +292,11 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
     def reset_model(self):
         self.randomizationSparse() 
-        self.in_home_pose = False
-
-        noise_low = -self._reset_noise_scale
-        noise_high = self._reset_noise_scale
-
-        qpos = self.init_qpos + self.np_random.uniform(
-            low=noise_low, high=noise_high, size=self.model.nq
-        )
-        qvel = self.init_qvel + self.np_random.uniform(
-            low=noise_low, high=noise_high, size=self.model.nv
-        )
-        self.set_state(qpos, qvel)
-
-        self.img_stack=[]
 
         observation = self._get_obs()
+
+        # Initialize manipulator in home pose
+        self.data.qpos[self.controller.actuated_joint_ids] = self.home_pose
 
         return observation
 
@@ -335,7 +324,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.controller.stay(1000, render=not self.headless_mode)
     
     def randomizationSparse(self): # Randomization between trainings
-       
+
         """
         Cloth randomization:
             Cloth color (randomizing hue, saturation, value, and colors, along with lighting and glossiness.)
@@ -351,6 +340,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
             matdenim = 7, matwhite1 = 8, matwhite2 = 9, matwhite4 = 10, matblack = 11
         """
+        
         cloth_id = []
         for i in range(self.model.nbody):
             if mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i).startswith('B') is True:
@@ -386,13 +376,22 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         damp_eps = self.model.dof_damping[min(cloth_id)] * cloth_pertur
         self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = self.model.dof_damping[min(cloth_id)] + random.uniform(-damp_eps, damp_eps)
 
-        """
-        Manipulator randomization:
-            Initial position of manipulator
-            Mechanical properties of the manipulator - what we assume is true +- a small tolerance
-        """
+        # cloth_joint_id = []
+        # for i in range(self.model.nbody):
+        #     if mujoco.mj_id2name(
+        #         self.model,
+        #         mujoco.mjtObj.mjOBJ_JOINT,
+        #         i
+        #         ).startswith('J1') or mujoco.mj_id2name(
+        #         self.model,
+        #         mujoco.mjtObj.mjOBJ_JOINT,
+        #         i).startswith('J0') is True:
+        #         cloth_joint_id.append(i)
 
-        # Initial pos
+        # print('cloth_joint_id', cloth_joint_id)
+
+        # # Pose
+        # self.data.joint(cloth_joint_id).qpos = 1
 
         """
         Lightning
@@ -410,4 +409,19 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         """
         cam_pos_eps = self.model.cam_pos * cloth_pertur
         for i in range(len(self.model.cam_pos)):
-            self.model.cam_pos[i, :] = self.model.cam_pos[i, :] + random.uniform(-cam_pos_eps, cam_pos_eps)        
+            self.model.cam_pos[i, :] = self.model.cam_pos[i, :] + random.uniform(-cam_pos_eps, cam_pos_eps)
+
+        """
+        Pose randomization (all bodies)
+        """
+
+        noise_low = -self._reset_noise_scale
+        noise_high = self._reset_noise_scale
+
+        qpos = self.init_qpos + self.np_random.uniform(
+            low=noise_low, high=noise_high, size=self.model.nq
+        )
+        qvel = self.init_qvel + self.np_random.uniform(
+            low=noise_low, high=noise_high, size=self.model.nv
+        )
+        self.set_state(qpos, qvel)        
