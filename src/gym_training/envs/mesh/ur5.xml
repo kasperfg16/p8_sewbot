@@ -75,7 +75,11 @@
     <worldbody>
 
         <light name="lightdefault" diffuse=".3 .3 .3" pos="0 0 3" dir="0 0 -1" />
+<<<<<<< HEAD
         <camera name="RealSense" mode="fixed" pos="-0.2 0.5 0.6" euler="0 0 3.14" fovy="42.5"/>
+=======
+        
+>>>>>>> 40d807d744b5b731e4288eae0b6ddf19f9e07733
         <geom name='floor' material="floor_mat" pos='0 0 0' size='2.5 2.5 0.1'  type='plane' />
 
          <!-- table  -->
@@ -175,6 +179,7 @@
                 <geom type="capsule" size="0.004 0.004" />
             </composite>
         </body>
+        <camera name="RealSense" mode="fixed" pos="-0.18 -0.4 1.0" euler="0 0 3.14" fovy="42.5"/>
 
     </worldbody>
     <!-- ctrlrange info : https://www.universal-robots.com/articles/ur/robot-care-maintenance/max-joint-torques-cb3-and-e-series/-->
