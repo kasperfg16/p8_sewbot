@@ -43,7 +43,7 @@ class MJ_Controller(object):
         self.create_lists()
         self.groups = defaultdict(list)
         self.groups["All"] = list(range(len(self.data.ctrl)))
-        self.create_group("Arm", list(range(5)))
+        self.create_group("Arm", list(range(6)))
         self.create_group("Gripper", [6, 7])
         self.actuated_joint_ids = np.array([i[2] for i in self.actuators])
         self.reached_target = False
