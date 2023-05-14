@@ -12,7 +12,7 @@ import cv2
 import matplotlib.pyplot as plt
 from gym_training.controller.mujoco_controller import MJ_Controller
 import mujoco.viewer
-import sys
+import time
 
 
 DEFAULT_CAMERA_CONFIG = {
@@ -134,11 +134,11 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         #self.im_background = np.asarray(cv2.imread(find_file(filename, search_path)), np.uint8)
         self.stepcount = 0
         self.goalcoverage = False
-        self.area_stack = [0]
+        self.area_stack = [0]*2
         self.result_move = False
-        #self.controller.show_model_info()
+        self.controller.show_model_info()
         self.home_pose = [np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0, 0]
-        self.image =  np.empty((480, 480, 3)) # image size
+        self.image = np.empty((480, 480, 3)) # image size
         self.in_home_pose = False
 
         # How many steps are the robot allowed to take before reward?
@@ -234,7 +234,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         max_stack_size = 2 
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
         self.image = image.astype(dtype=np.uint8)
-        print(self.area_stack)
 
         ## use area from ground truth      
         if self.model.skin_matid == 7: # denim
@@ -243,38 +242,33 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         edged = cv2.Canny(self.image, 10, 250)
         contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         new2 = cv2.drawContours(self.image, contours, -1, (0,255,0), 3)
-        cv2.imshow("Contour coverage", new2)
-        cv2.waitKey(1)
-
+            
         if np.size(contours)>0:
             currentarea = cv2.contourArea(contours[0])
             self.area_stack.append(currentarea)
-        else: currentarea = 0
-        ## compare with ground truth and previous area
-        #coverageper =  currentarea/clotharea
-
-        if show and not self.headless_mode:
-            cv2.imshow("Camera", new2)
-            cv2.waitKey(1)
+            ## Determine if contour is rectangular
+            peri = cv2.arcLength(contours[0], True)
+            approx = cv2.approxPolyDP(contours[0], 0.04 * peri, True)
+            # compute the bounding box of the contour and use the bounding box to compute the aspect ratio
+            (x, y, w, h) = cv2.boundingRect(approx)
+            ar = w / float(h)
+            # a square will have an aspect ratio that is approximately equal to one, otherwise, the shape is a rectangle
+            shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
         
+            if shape == "square" or shape == "rectangle" and currentarea>10000:
+                print("Yay, the cloth is unfolded")
+                self.goalcoverage = True
+                self.area_stack = [0]*2
+        else: self.area_stack.append(0)
+
+        print("area stack after: ", self.area_stack)
+
         if len(self.area_stack) > max_stack_size:
             self.area_stack.pop(0)
 
         coveragereward =  w1 * (self.area_stack[1] - self.area_stack[0])
+        print("reward", coveragereward)
 
-        ## Determine if contour is rectangular
-        peri = cv2.arcLength(contours[0], True)
-        approx = cv2.approxPolyDP(contours[0], 0.04 * peri, True)
-        # compute the bounding box of the contour and use the bounding box to compute the aspect ratio
-        (x, y, w, h) = cv2.boundingRect(approx)
-        ar = w / float(h)
-		# a square will have an aspect ratio that is approximately equal to one, otherwise, the shape is a rectangle
-        shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
-        
-        if shape == "square" or "rectangle":
-            print("Yay, the cloth is unfolded")
-            self.goalcoverage = True
-            self.area_stack = [0]
         return coveragereward
 
     def _set_action_space(self):
@@ -299,6 +293,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
     def reset_model(self):
         #self.area_stack = [0]
         self.randomizationSparse() 
+        # time.sleep(5)
+        self.get_coverage()
         observation = self._get_obs()
 
         # Initialize manipulator in home pose
@@ -411,23 +407,16 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             self.model.light_dir[i, :] = self.model.light_dir[i, :] + random.uniform(-light_dir_eps, light_dir_eps)
 
         """
-        Perturbation of camera orientation and position
-        """
-        cam_pos_eps = self.model.cam_pos * cloth_pertur
-        for i in range(len(self.model.cam_pos)):
-            self.model.cam_pos[i, :] = self.model.cam_pos[i, :] + random.uniform(-cam_pos_eps, cam_pos_eps)
-
-        """
         Pose randomization (all bodies)
         """
 
-        noise_low = -self._reset_noise_scale
-        noise_high = self._reset_noise_scale
+        # noise_low = -self._reset_noise_scale
+        # noise_high = self._reset_noise_scale
 
-        qpos = self.init_qpos + self.np_random.uniform(
-            low=noise_low, high=noise_high, size=self.model.nq
-        )
-        qvel = self.init_qvel + self.np_random.uniform(
-            low=noise_low, high=noise_high, size=self.model.nv
-        )
-        self.set_state(qpos, qvel)        
+        # qpos = self.init_qpos + self.np_random.uniform(
+        #     low=noise_low, high=noise_high, size=self.model.nq
+        # )
+        # qvel = self.init_qvel + self.np_random.uniform(
+        #     low=noise_low, high=noise_high, size=self.model.nv
+        # )
+        # self.set_state(qpos, qvel)        
