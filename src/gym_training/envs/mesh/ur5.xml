@@ -177,10 +177,10 @@
         <body name="B3_5" pos="-0.2 0.4 0.8" euler="1 1 1">
             
             <freejoint/>
-            <composite type="cloth" count="10 10 1" spacing=" 0.02" flatinertia="0.1">
-                <joint kind="main" damping="0.002" frictionloss='10'/>
+            <composite type="cloth" count="9 9 1" spacing=" 0.02" flatinertia="0.01">
+                <joint kind="main" damping="0.001"/>
                 <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>
-                <geom type="capsule" size=" 0.006   0.004 " rgba=".8 .2 .1 1" friction='0.4 0.0005 0.00001' condim='4'/>
+                <geom type="capsule" size=" 0.006   0.004 " rgba=".8 .2 .1 1" friction='1 0.005 0.0001' condim='4'/>
             </composite>
         </body>
         <camera name="RealSense" mode="fixed" pos="-0.18 0.4 1.0" euler="0 0 3.14" fovy="42.5"/>

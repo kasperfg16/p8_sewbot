@@ -1,6 +1,6 @@
 import numpy as np
 
-scale = 5
+scale = 4
 
 spacing = 0.05
 size=np.array([0.015, 0.01])
