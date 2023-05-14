@@ -458,21 +458,21 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         cloth_pertur = 0.15
 
         # Material type
-        times = 0.1
+        times = 0.01
 
         materials = range(7, 11, 1)
         self.model.skin_matid = random.choice(materials)
         if self.model.skin_matid == 7: # denim
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.01*times
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id):1+max(cloth_id)]
             #self.model.geom_friction[min(cloth_id):1+max(cloth_id)] =
         elif self.model.skin_matid == 8: # white 1 /
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.01*times
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id):1+max(cloth_id)]
         elif self.model.skin_matid == 9: # white 2 /
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.01*times
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id):1+max(cloth_id)]
         elif self.model.skin_matid == 10: # white 4 / 100% cotton
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.01*times
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id):1+max(cloth_id)]
         elif self.model.skin_matid == 11: # black /
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.01*times
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id):1+max(cloth_id)]
 
         # Cloth mass 
         mass_eps = self.model.body_mass[min(cloth_id)] * cloth_pertur

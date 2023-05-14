@@ -79,7 +79,7 @@
 
          <!-- table  -->
         <body name="table" pos="0 0 0">
-            <geom type="box" size="0.7 .7 .5" rgba="1 1 1 1" mass="15"/>
+            <geom type="box" size="0.7 .7 .5" rgba="1 1 1 1" mass="15" condim='4'/>
 
             <body name="base_link" pos="0 0 0.5">
                 <geom name="link0" type="mesh" mesh="link0" pos="0 0 0"/>
@@ -145,14 +145,14 @@
 
                                                 <body name="left_finger" pos="-0.0068 0.02 0" > 
                                                     <inertial pos="0 0 0" mass="0.0045" diaginertia="0.1 0.1 0.1" />
-                                                    <geom name="left_finger" type="mesh" material="silver2" mesh="MHZ2-20D_mhz2-prong" />
-                                                    <geom name="left_hat" type="mesh" material="white" mesh="gripper_hat" pos="-0.0112 0.0026 0" euler="1.57 0 1.57"/>
+                                                    <geom name="left_finger" type="mesh" material="silver2" mesh="MHZ2-20D_mhz2-prong" condim='4'/>
+                                                    <geom name="left_hat" type="mesh" material="white" mesh="gripper_hat" pos="-0.0112 0.0026 0" euler="1.57 0 1.57" condim='4'/>
                                                     <joint name="joint_lf" class="GRIPPER" type="slide" pos="0 0 0" axis="0 1 0" limited="true" range="-0.008 0" />
                                                 </body>
                                                 <body name="right_finger" pos="-0.0068 -0.02 0" quat="0 360 0 0">
                                                     <inertial pos="0 0 0" mass="0.0045" diaginertia="0.1 0.1 0.1" />
-                                                    <geom name="right_finger" type="mesh" material="silver2" mesh="MHZ2-20D_mhz2-prong" />
-                                                    <geom name="gripper_hat" type="mesh" material="black" mesh="gripper_hat" pos="-0.0112 0.0026 0" euler="1.57 0 1.57" />
+                                                    <geom name="right_finger" type="mesh" material="silver2" mesh="MHZ2-20D_mhz2-prong" condim='4'/>
+                                                    <geom name="gripper_hat" type="mesh" material="black" mesh="gripper_hat" pos="-0.0112 0.0026 0" euler="1.57 0 1.57" condim='4'/>
                                                     <joint name="joint_rf" class="GRIPPER" type="slide" pos="0 0 0" axis="0 1 0" limited="true" range="-0.008 0" />
                                                 </body>                                                    
                                             </body>
@@ -177,7 +177,7 @@
         <body name="B3_5" pos="-0.2 0.4 0.8" euler="1 1 1">
             
             <freejoint/>
-            <composite type="cloth" count="12 12 1" spacing=" 0.02" flatinertia="0.1">
+            <composite type="cloth" count="10 10 1" spacing=" 0.02" flatinertia="0.1">
                 <joint kind="main" damping="0.002" frictionloss='10'/>
                 <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>
                 <geom type="capsule" size=" 0.006   0.004 " rgba=".8 .2 .1 1" friction='0.4 0.0005 0.00001' condim='4'/>
