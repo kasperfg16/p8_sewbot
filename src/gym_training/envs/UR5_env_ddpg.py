@@ -124,7 +124,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
                          0])
         
         self.renderer = mujoco.Renderer(model=self.model)
-        self._reset_noise_scale=0.1
+        self._reset_noise_scale=0.01
         self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(7,), seed=42, dtype=np.float16)
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
@@ -153,67 +153,60 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
     def step(self, action):
 
         # init
-        reward = 0
-        truncated = False
-        info = {}
+        self.terminated = False
+        self.truncated = False
+        self.reward = 0
+        self.info = {}
+        
+        # Stay and let cloth fall
         self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
         self.controller.stay(2000, render=not self.headless_mode)
-
-        # Recive observation that is send to the NN/agent
-        observation  = self._get_obs()
         
         # Check if cloth is already in good position
-        self.get_coverage(show=True)
-        if self.goalcoverage:
-            self.goalcoverage = False
-            self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
-            self.controller.stay(1000, render=not self.headless_mode)
-            reward = self.compute_reward()
-            observation  = self._get_obs()
-            terminated = True
+        self.check()
 
-            return observation, reward, terminated, truncated, info
+        # Perform 'self.max_steps' movements based on action guesses from agent and then move to home pose
+        self.unfold(action)
 
+        # Compute reward after operation
+        self.compute_reward()
+
+        self.step_counter += 1
+
+        # Recive observation after action - Before taking next action
+        self.observation  = self._get_obs()
+
+        return self.observation, self.reward, self.terminated, self.truncated, self.info
+
+    def unfold(self, action):
         if not self.step_counter >= self.max_steps:
             self.result_move = self.controller.move_group_to_joint_target(target=action, quiet=self.quiet, render=not self.headless_mode)
             self.controller.stay(10, render=not self.headless_mode)
         else:
-            # Perform 'self.max_steps' movements based on action guesses from agent and then move to home pose
-            if not self.step_counter >= self.max_steps:
-                self.result_move = self.controller.move_group_to_joint_target(target=action, quiet=self.quiet, render=not self.headless_mode)
-                self.controller.stay(10, render=not self.headless_mode)
-            else:
-                ####### Test
-                self.test_grip()
-                #######
+            ####### Test
+            self.test_grip()
+            #######
 
-                self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
-                self.controller.stay(10, render=not self.headless_mode)
-                truncated = True
-                self.step_counter = -1
-                self.in_home_pose = True
-
-        terminated = False
-
-        # Compute reward after operation
-        reward = self.compute_reward()
-
-        self.step_counter += 1
-
-        return observation, reward, terminated, truncated, info
+            self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
+            self.controller.stay(10, render=not self.headless_mode)
+            self.truncated = True
+            self.step_counter = -1
+            self.in_home_pose = True
+        
 
     def _get_obs(self):
         obs = self.image
+
         # # Resize img to be in observation space (For memory-efficiency)
         new_size = (self.img_width, self.img_width)
-        resized_image = cv2.resize(obs, new_size)
+        obs = cv2.resize(obs, new_size)
 
-        # if not self.headless_mode:
-        #     cv2.imshow('Img used in observation space', obs)
-        #     cv2.waitKey(1)
+        if not self.headless_mode:
+            cv2.imshow('Img used in observation space', obs)
+            cv2.waitKey(1)
 
         # Convert to a more memory-efficient format
-        obs = resized_image.astype(np.uint8)
+        obs = obs.astype(np.uint8)
 
         return obs
 
@@ -226,6 +219,15 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
         return False # bool for collision or not
     
+    def check(self):
+        self.get_coverage(show=True)
+        if self.goalcoverage:
+            self.goalcoverage = False
+            self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
+            self.controller.stay(1000, render=not self.headless_mode)
+            self.terminated = True
+
+
     def get_coverage(self, show=True):
         #clotharea = 42483.0
         w1 = 10 
@@ -244,7 +246,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         cv2.imshow("Contour coverage", new2)
         cv2.waitKey(1)
 
-            
         if np.size(contours)>0:
             currentarea = cv2.contourArea(contours[0])
             self.area_stack.append(currentarea)
@@ -253,9 +254,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         #coverageper =  currentarea/clotharea
 
         if show and not self.headless_mode:
-            # cv2.imshow("Camera", new2)
-            # cv2.waitKey(1)
-            pass
+            cv2.imshow("Camera", new2)
+            cv2.waitKey(1)
         
         if len(self.area_stack) > max_stack_size:
             self.area_stack.pop(0)
@@ -282,7 +282,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         return super()._set_action_space()
     
     def compute_reward(self):# Define all the rewards possible           
-        coveragereward = self.get_coverage(show=self.in_home_pose) # output percentage
+        coveragereward = self.get_coverage(show=True) # output percentage
         # move complete reward (also acts as a contact/collision penalty)
         if self.result_move == 'success':
             move_complete_reward = 1
@@ -294,9 +294,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             print('move complete reward: ', move_complete_reward)
 
         # Summarize all rewards 
-        total_reward = move_complete_reward + coveragereward
-
-        return total_reward
+        self.reward = move_complete_reward + coveragereward
 
     def reset_model(self):
         #self.area_stack = [0]
@@ -316,8 +314,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(100, render=not self.headless_mode)
 
-        til_1 = 28
-        tilt2 = 15
+        til_1 = 29
+        tilt2 = 15.2
         target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, np.deg2rad(30), 0, 0]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode)
         self.controller.stay(1000, render=not self.headless_mode)

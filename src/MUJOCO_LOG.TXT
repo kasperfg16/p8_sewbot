@@ -1,0 +1,102 @@
+Thu May 11 16:02:32 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 82. The simulation is unstable. Time = 0.0200.
+
+Thu May 11 16:02:50 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 11. The simulation is unstable. Time = 0.0220.
+
+Thu May 11 16:03:09 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 62. The simulation is unstable. Time = 0.0160.
+
+Thu May 11 16:04:11 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 8. The simulation is unstable. Time = 0.0180.
+
+Thu May 11 16:04:31 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 11. The simulation is unstable. Time = 0.0260.
+
+Thu May 11 16:04:50 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 9. The simulation is unstable. Time = 0.0600.
+
+Thu May 11 16:05:08 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 52. The simulation is unstable. Time = 0.0180.
+
+Thu May 11 16:05:27 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 8. The simulation is unstable. Time = 0.0140.
+
+Thu May 11 16:05:50 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 13. The simulation is unstable. Time = 0.0320.
+
+Thu May 11 16:06:31 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 14. The simulation is unstable. Time = 0.0200.
+
+Thu May 11 16:06:47 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 8. The simulation is unstable. Time = 0.0100.
+
+Thu May 11 16:07:06 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 11. The simulation is unstable. Time = 0.0100.
+
+Thu May 11 16:07:20 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 24. The simulation is unstable. Time = 0.0180.
+
+Thu May 11 16:07:39 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 58. The simulation is unstable. Time = 0.0120.
+
+Thu May 11 16:07:58 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 17. The simulation is unstable. Time = 0.0120.
+
+Thu May 11 16:08:20 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 12. The simulation is unstable. Time = 0.0240.
+
+Thu May 11 16:08:39 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 11. The simulation is unstable. Time = 0.0260.
+
+Thu May 11 16:08:58 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 13. The simulation is unstable. Time = 0.0120.
+
+Thu May 11 16:09:17 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 11. The simulation is unstable. Time = 0.0120.
+
+Thu May 11 16:09:36 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 9. The simulation is unstable. Time = 0.0160.
+
+Thu May 11 16:09:55 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 11. The simulation is unstable. Time = 0.0100.
+
+Thu May 11 16:10:14 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 20. The simulation is unstable. Time = 0.0080.
+
+Thu May 11 16:10:33 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 39. The simulation is unstable. Time = 0.0220.
+
+Thu May 11 16:10:52 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 9. The simulation is unstable. Time = 0.0140.
+
+Thu May 11 16:11:10 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 8. The simulation is unstable. Time = 0.0160.
+
+Thu May 11 16:11:29 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 8. The simulation is unstable. Time = 0.0100.
+
+Thu May 11 16:11:48 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 8. The simulation is unstable. Time = 0.0120.
+
+Thu May 11 16:12:07 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 23. The simulation is unstable. Time = 0.0100.
+
+Thu May 11 16:12:26 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 24. The simulation is unstable. Time = 0.0120.
+
+Thu May 11 16:13:03 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 8. The simulation is unstable. Time = 0.0120.
+
+Thu May 11 16:13:24 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 8. The simulation is unstable. Time = 0.0100.
+
+Thu May 11 16:13:43 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 34. The simulation is unstable. Time = 0.0860.
+
+Thu May 11 16:14:02 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 12. The simulation is unstable. Time = 0.0140.
+
+Thu May 11 16:37:17 2023
+WARNING: Nan, Inf or huge value in QACC at DOF 11. The simulation is unstable. Time = 0.3200.
+
