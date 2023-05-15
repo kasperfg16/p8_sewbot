@@ -1,9 +1,0 @@
-setup.py
-gym_training/__init__.py
-gym_training.egg-info/PKG-INFO
-gym_training.egg-info/SOURCES.txt
-gym_training.egg-info/dependency_links.txt
-gym_training.egg-info/requires.txt
-gym_training.egg-info/top_level.txt
-gym_training/envs/__init__.py
-gym_training/train/train.py

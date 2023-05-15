@@ -1,5 +1,0 @@
-gymnasium
-mujoco
-numpy
-nvidia-ml-py3
-skrl
