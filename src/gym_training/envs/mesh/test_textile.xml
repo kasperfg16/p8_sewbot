@@ -59,8 +59,8 @@
     <body name="B3_5" pos="-0.0125 -0.04 1.005" euler="0 0 3.14">
             
         <freejoint/>
-        <composite type="cloth" count="4 19 1" spacing=" 0.0083" flatinertia="0.01">
-            <joint kind="main" damping="0.001" stiffness="0.000001" />
+        <composite type="cloth" count="4 19 1" spacing=" 0.0083" flatinertia="0">
+            <joint kind="main" damping="0.0001" stiffness="0.000000000001" />
             <!-- <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>-->
             <geom type="capsule" size=" 0.0025 .00166 " rgba=".8 .2 .1 1" mass='9.21435128518972e-06'/>
         </composite>

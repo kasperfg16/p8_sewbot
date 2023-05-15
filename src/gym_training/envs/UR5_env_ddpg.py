@@ -149,7 +149,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.headless_mode = False
 
         # Print output in terminal?
-        self.quiet = True
+        self.quiet = False
 
     def step(self, action):
         
@@ -206,7 +206,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             print('Number should be between 0 and 1')
     
     def unfold(self):
-        self.done_signal = True
 
         if not self.done_signal:
             result_move = self.controller.move_group_to_joint_target(target=self.joint_position, quiet=self.quiet, render=not self.headless_mode, group='Arm')
@@ -217,17 +216,18 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
             self.controller.stay(500, render=not self.headless_mode)
             if self.gripper_state == 0:
-                self.controller.close_gripper(render=not self.headless_mode, quiet=self.quiet)
+                self.controller.close_gripper()
             elif self.gripper_state == 1:
-                self.controller.open_gripper(render=not self.headless_mode, quiet=self.quiet)
+                self.controller.open_gripper()
             
             self.controller.stay(50, render=not self.headless_mode)
         else:
             ####### Test
-            self.test_grip()
+            #self.test_grip()
             #######
             if not self.step_counter > 0:
-                self.controller.open_gripper(render=not self.headless_mode, quiet=self.quiet)
+                print('ff')
+                self.controller.open_gripper()
                 self.controller.stay(1000, render=not self.headless_mode)
 
             result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
@@ -371,15 +371,13 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         w2 = 10
 
         if self.done_signal:
-            # If we have done something it can get the coverage reward
-            if self.move_reward > 1:
-                coveragereward = self.get_coverage() # output percentage
+            coveragereward = self.get_coverage() # output percentage
             
             # If it says it is done but it isn't it fails (truncate)
             # If agent says it is done and it is the it has success (terminate)
             if not self.goalcoverage:
                 self.truncated = True
-                done_reward = -1
+                done_reward = -100
                 
             else:
                 self.terminated = True
