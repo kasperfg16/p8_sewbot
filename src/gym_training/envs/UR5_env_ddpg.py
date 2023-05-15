@@ -109,7 +109,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # Action space (In this case - joint limits)
         self.act_space_low = np.array([
             -np.deg2rad(210),
-            -np.pi/2,
+            -np.deg2rad(90),
             -np.pi,
             -np.pi,
             -np.pi,
@@ -119,7 +119,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         
         self.act_space_high = np.array([
             np.deg2rad(-90),
-            np.pi/2,
+            np.deg2rad(30),
             np.pi,
             np.pi,
             np.pi,
@@ -139,7 +139,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.stepcount = 0
         self.goalcoverage = False
         self.area_stack = [0]*2
-        self.result_move = False
+        self.move_reward = 0
         self.controller.show_model_info()
         self.home_pose = np.array([np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0, 0])
         self.image = np.empty((480, 480, 3)) # image size
@@ -152,7 +152,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.quiet = False
 
     def step(self, action):
-
+        
         # init
         self.terminated = False
         self.truncated = False
@@ -168,7 +168,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # Check if cloth is already in good position
         if self.step_counter == 0:
             # Stay and let cloth fall
-            self.controller.stay(1000, render=not self.headless_mode)
+            self.controller.stay(2000, render=not self.headless_mode)
             self.check()
 
         # Perform 'self.max_steps' movements based on action guesses from agent and then move to home pose
@@ -185,11 +185,11 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         return self.observation, self.reward, self.terminated, self.truncated, self.info
     
     def to_bool(self, number):
+        threshold = 0.5
         if 0 <= number <= 1:
-            threshold = 0.5  # Define your threshold value
+            return number > threshold
         else:
             print('Number should be between 0 and 1')
-        return number > threshold
 
     def get_gripper_state(self, number):
         if 0 <= number <= 1:
@@ -206,11 +206,15 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             print('Number should be between 0 and 1')
     
     def unfold(self):
-        self.done_signal = True
 
         if not self.done_signal:
-            self.result_move = self.controller.move_group_to_joint_target(target=self.joint_position, quiet=self.quiet, render=not self.headless_mode, group='Arm')
-            self.controller.stay(1000, render=not self.headless_mode)
+            result_move = self.controller.move_group_to_joint_target(target=self.joint_position, quiet=self.quiet, render=not self.headless_mode, group='Arm')
+            if result_move == 'success':
+                self.move_reward = self.move_reward + 1
+            else:
+                self.move_reward = self.move_reward - 1
+
+            self.controller.stay(500, render=not self.headless_mode)
             if self.gripper_state == 0:
                 self.controller.close_gripper()
             elif self.gripper_state == 1:
@@ -219,16 +223,23 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             self.controller.stay(50, render=not self.headless_mode)
         else:
             ####### Test
-            self.test_grip()
+            #self.test_grip()
             #######
-            self.controller.open_gripper()
-            self.controller.stay(1000, render=not self.headless_mode)
-            self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
+            if not self.step_counter > 0:
+                print('ff')
+                self.controller.open_gripper()
+                self.controller.stay(1000, render=not self.headless_mode)
+
+            result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
+            if result_move == 'success':
+                self.move_reward = self.move_reward + 1
+            else:
+                self.move_reward = self.move_reward - 1
+
             self.controller.stay(10, render=not self.headless_mode)
             self.truncated = True
             self.step_counter = -1
             self.in_home_pose = True
-        
 
     def _get_obs(self):
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
@@ -257,16 +268,14 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         return False # bool for collision or not
     
     def check(self):
-        self.get_coverage(show=True)
+        self.get_coverage()
         if self.goalcoverage:
             self.goalcoverage = False
             self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
-            self.controller.stay(1000, render=not self.headless_mode)
             self.terminated = True
 
-
-    def get_coverage(self, show=True):
-        #clotharea = 42483.0
+    def get_coverage(self):
+        max_clotharea = 42483.0
         currentarea = 0
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
         self.image = image.astype(dtype=np.uint8)
@@ -295,60 +304,59 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             ar = w / float(h)
             # a square will have an aspect ratio that is approximately equal to one, otherwise, the shape is a rectangle
 
-            shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
+            shape = "square" if ar >= 0.98 and ar <= 1.02 else "rectangle"
 
-            if shape == "square" or shape == "rectangle" and currentarea>10000:
+            if shape == "square" and currentarea>max_clotharea*0.90:
                 if not self.quiet:
                     print("Yay, the cloth is unfolded")
                 self.goalcoverage = True
 
-        coveragereward = currentarea
-        print("reward", coveragereward)
+        coveragereward = currentarea/max_clotharea
 
         return coveragereward
     
-    def get_coverage2(self, show=True):
-        #clotharea = 42483.0
-        w1 = 10 
-        max_stack_size = 2 
-        image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
-        self.image = image.astype(dtype=np.uint8)
+    # def get_coverage2(self, show=True):
+    #     #clotharea = 42483.0
+    #     w1 = 10 
+    #     max_stack_size = 2 
+    #     image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
+    #     self.image = image.astype(dtype=np.uint8)
 
-        ## use area from ground truth      
-        if self.model.skin_matid == 7: # denim
-            blur_img = cv2.GaussianBlur(self.image, (9, 9), 3)
+    #     ## use area from ground truth      
+    #     if self.model.skin_matid == 7: # denim
+    #         blur_img = cv2.GaussianBlur(self.image, (9, 9), 3)
 
-        edged = cv2.Canny(self.image, 10, 250)
-        contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        new2 = cv2.drawContours(self.image, contours, -1, (0,255,0), 3)
+    #     edged = cv2.Canny(self.image, 10, 250)
+    #     contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #     new2 = cv2.drawContours(self.image, contours, -1, (0,255,0), 3)
             
-        if np.size(contours)>0:
-            currentarea = cv2.contourArea(contours[0])
-            self.area_stack.append(currentarea)
-            ## Determine if contour is rectangular
-            peri = cv2.arcLength(contours[0], True)
-            approx = cv2.approxPolyDP(contours[0], 0.04 * peri, True)
-            # compute the bounding box of the contour and use the bounding box to compute the aspect ratio
-            (x, y, w, h) = cv2.boundingRect(approx)
-            ar = w / float(h)
-            # a square will have an aspect ratio that is approximately equal to one, otherwise, the shape is a rectangle
-            shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
+    #     if np.size(contours)>0:
+    #         currentarea = cv2.contourArea(contours[0])
+    #         self.area_stack.append(currentarea)
+    #         ## Determine if contour is rectangular
+    #         peri = cv2.arcLength(contours[0], True)
+    #         approx = cv2.approxPolyDP(contours[0], 0.04 * peri, True)
+    #         # compute the bounding box of the contour and use the bounding box to compute the aspect ratio
+    #         (x, y, w, h) = cv2.boundingRect(approx)
+    #         ar = w / float(h)
+    #         # a square will have an aspect ratio that is approximately equal to one, otherwise, the shape is a rectangle
+    #         shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
         
-            if shape == "square" or shape == "rectangle" and currentarea>10000:
-                print("Yay, the cloth is unfolded")
-                self.goalcoverage = True
-                self.area_stack = [0]*2
-        else: self.area_stack.append(0)
+    #         if shape == "square" or shape == "rectangle" and currentarea>10000:
+    #             print("Yay, the cloth is unfolded")
+    #             self.goalcoverage = True
+    #             self.area_stack = [0]*2
+    #     else: self.area_stack.append(0)
 
-        print("area stack after: ", self.area_stack)
+    #     print("area stack after: ", self.area_stack)
 
-        if len(self.area_stack) > max_stack_size:
-            self.area_stack.pop(0)
+    #     if len(self.area_stack) > max_stack_size:
+    #         self.area_stack.pop(0)
 
-        coveragereward =  w1 * (self.area_stack[1] - self.area_stack[0])
-        print("reward", coveragereward)
+    #     coveragereward =  w1 * (self.area_stack[1] - self.area_stack[0])
+    #     print("reward", coveragereward)
 
-        return coveragereward
+    #     return coveragereward
 
     def _set_action_space(self):
         # Define a set of actions to execute in the simulation
@@ -358,8 +366,12 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         coveragereward = 0
         done_reward = 0
 
+        # Reward weights
+        w1 = 1
+        w2 = 10
+
         if self.done_signal:
-            coveragereward = self.get_coverage(show=True) # output percentage
+            coveragereward = self.get_coverage() # output percentage
             
             # If it says it is done but it isn't it fails (truncate)
             # If agent says it is done and it is the it has success (terminate)
@@ -371,24 +383,21 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
                 self.terminated = True
                 done_reward = 100
 
-        # move complete reward (also acts as a contact/collision penalty)
-        if self.result_move == 'success':
-            move_complete_reward = 1
-        else:
-            move_complete_reward = -1
+        # Summarize all rewards 
+        self.reward = self.move_reward*w1 + coveragereward*w2 + done_reward
 
         if not self.quiet:
+            print('done_reward: ', done_reward)
             print('coveragereward: ', coveragereward)
-            print('move complete reward: ', move_complete_reward)
-
-        # Summarize all rewards 
-        self.reward = move_complete_reward + coveragereward + done_reward
+            print('self.move_reward: ', self.move_reward)
+            print('self.reward:', self.reward)
 
     def reset_model(self):
         #self.area_stack = [0]
         self.randomizationSparse() 
         # time.sleep(5)
 
+        self.move_reward = 0
         self.step_counter = 0
         observation = self._get_obs()
 
@@ -413,25 +422,30 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
 
-        self.controller.open_gripper()
-        target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
-        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
-        self.controller.stay(100, render=not self.headless_mode)
-
-        til_1 = 29
-        tilt2 = 15.2
-        target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, np.deg2rad(30), 0, 0]
-        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode)
+        target = [np.deg2rad(0), np.deg2rad(-90), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
         self.controller.stay(1000, render=not self.headless_mode)
-
-        self.controller.close_gripper()
-        self.controller.stay(1000, render=not self.headless_mode)
-
-        til_1 = 18
-        tilt2 = 5
-        target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
+
+        # self.controller.open_gripper()
+        # target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
+        # self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        # self.controller.stay(100, render=not self.headless_mode)
+
+        # til_1 = 29
+        # tilt2 = 15.2
+        # target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, np.deg2rad(30), 0, 0]
+        # self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode)
+        # self.controller.stay(1000, render=not self.headless_mode)
+
+        # self.controller.close_gripper()
+        # self.controller.stay(1000, render=not self.headless_mode)
+
+        # til_1 = 18
+        # tilt2 = 5
+        # target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
+        # self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        # self.controller.stay(1000, render=not self.headless_mode)
     
     def randomizationSparse(self): # Randomization between trainings
 
@@ -458,21 +472,19 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         cloth_pertur = 0.15
 
         # Material type
-        times = 0.01
-
         materials = range(7, 11, 1)
         self.model.skin_matid = random.choice(materials)
         if self.model.skin_matid == 7: # denim
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id):1+max(cloth_id)]
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.004
             #self.model.geom_friction[min(cloth_id):1+max(cloth_id)] =
         elif self.model.skin_matid == 8: # white 1 /
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id):1+max(cloth_id)]
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.005
         elif self.model.skin_matid == 9: # white 2 /
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id):1+max(cloth_id)]
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.006
         elif self.model.skin_matid == 10: # white 4 / 100% cotton
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id):1+max(cloth_id)]
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.007
         elif self.model.skin_matid == 11: # black /
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id):1+max(cloth_id)]
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.008
 
         # Cloth mass 
         mass_eps = self.model.body_mass[min(cloth_id)] * cloth_pertur
