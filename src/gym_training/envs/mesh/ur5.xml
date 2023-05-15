@@ -172,7 +172,6 @@
             </body>
         </body>
     
-<<<<<<< HEAD
     <!-- cloth -->
         <body name="B3_5" pos="0.2 -0.45 0.5" >
             <joint name="free_joint" type="free" stiffness="0" damping="0" frictionloss="0" armature="0" />
@@ -183,37 +182,6 @@
             </composite>
         </body>
         <camera name="RealSense" mode="fixed" pos="0.22 -0.5 1.0" euler="0 0 3.14" fovy="42.5"/>
-=======
-    <!-- cloth
-    
-    <composite type="cloth" count="6 6 1" spacing="0.05" flatinertia="0.01">
-                <joint kind="main" damping="0.001"/>
-                <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>
-                <geom type="capsule" size="0.005 0.002" rgba=".8 .2 .1 1"/>
-            </composite>
-    -->
-
-        <body name="B3_5" pos="-0.2 0.4 0.8" euler="0 0 3.14">
-            
-        <freejoint/>
-        <composite type="cloth" count="20 20 1" spacing=" 0.0083" flatinertia="0">
-            <joint kind="main" damping="0.0001" stiffness="0.000000000001" />
-            <!-- <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>-->
-            <geom type="capsule" size=" 0.0025 .00166 " rgba=".8 .2 .1 1" mass='9.21435128518972e-06'/>
-        </composite>
-        </body>
-        
-        <!--
-            <body name="B3_5" pos="-0.2 0.4 0.8" euler="1 1 1">
-            <composite type="grid" count="9 9 1" spacing="0.05" offset="0 0 1">
-                <skin material="matdenim" inflate="0.001" subgrid="3" texcoord="true"/>
-                <geom size=".02"/>
-                <pin coord="0 0"/>
-                <pin coord="8 0"/>
-            </composite>
-        </body> -->
-        <camera name="RealSense" mode="fixed" pos="-0.18 0.4 1.0" euler="0 0 3.14" fovy="42.5"/>
->>>>>>> 0e053457cdae00f20765199bdd6fbbf06362dc7c
 
     </worldbody>
     <!-- ctrlrange info : https://www.universal-robots.com/articles/ur/robot-care-maintenance/max-joint-torques-cb3-and-e-series/-->
