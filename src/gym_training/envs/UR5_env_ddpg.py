@@ -146,10 +146,10 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.in_home_pose = False
 
         # Show renders?
-        self.headless_mode = False
+        self.headless_mode = True
 
         # Print output in terminal?
-        self.quiet = False
+        self.quiet = True
 
     def step(self, action):
         
@@ -216,9 +216,9 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
             self.controller.stay(500, render=not self.headless_mode)
             if self.gripper_state == 0:
-                self.controller.close_gripper()
+                self.controller.close_gripper(render=not self.headless_mode, quiet=self.quiet)
             elif self.gripper_state == 1:
-                self.controller.open_gripper()
+                self.controller.open_gripper(render=not self.headless_mode, quiet=self.quiet)
             
             self.controller.stay(50, render=not self.headless_mode)
         else:
@@ -226,8 +226,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             #self.test_grip()
             #######
             if not self.step_counter > 0:
-                print('ff')
-                self.controller.open_gripper()
+                self.controller.open_gripper(render=not self.headless_mode, quiet=self.quiet)
                 self.controller.stay(1000, render=not self.headless_mode)
 
             result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
@@ -371,13 +370,15 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         w2 = 10
 
         if self.done_signal:
-            coveragereward = self.get_coverage() # output percentage
+            # If we have done something it can get the coverage reward
+            if self.move_reward > 1:
+                coveragereward = self.get_coverage() # output percentage
             
             # If it says it is done but it isn't it fails (truncate)
             # If agent says it is done and it is the it has success (terminate)
             if not self.goalcoverage:
                 self.truncated = True
-                done_reward = -100
+                done_reward = -1
                 
             else:
                 self.terminated = True
