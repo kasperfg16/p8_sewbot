@@ -17,7 +17,7 @@ def report_gpu():
    torch.cuda.empty_cache()
 # Load and wrap the Gymnasium environment.
 # Note: the environment version may change depending on the gymnasium version
-display = True
+display = False
 
 if display:
     render_mode = 'human'

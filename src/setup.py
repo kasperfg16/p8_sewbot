@@ -5,4 +5,5 @@ setup(name='gym_training',
       install_requires=['gymnasium', 
                       'numpy',
                       'mujoco',
-                      'skrl'])
+                      'skrl',
+                      'nvidia-ml-py3'])

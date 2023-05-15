@@ -1,11 +1,13 @@
-from gym_training.controller.mujoco_controller import MJ_Controller
 import numpy as np
 
-# create controller instance
-controller = MJ_Controller()
+scale = 4
 
-# Display robot information
-controller.show_model_info()
+spacing = 0.05
+size=np.array([0.015, 0.01])
 
-target = np.array([2.0371404, 0.5061614, -2.2295423, -2.5810633, 0.11319327, 0.41720057, 0.007])
-controller.move_group_to_joint_target(target=target)
+spacing=spacing/scale
+size=size/scale
+
+print('spacing="',spacing,'"')
+
+print('size="',size[0],' ',size[1],'"')
