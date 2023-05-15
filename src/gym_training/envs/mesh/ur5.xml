@@ -1,6 +1,8 @@
 <mujoco model="ur5">
     <compiler angle="radian" meshdir="ur5" balanceinertia="true"/>
-    <option timestep="0.002" collision="all" gravity="0 0 -9.81" />
+    <option timestep="0.002" collision="all" gravity="0 0 -9.81" noslip_iterations='1'/>
+
+    <size njmax="8000" nconmax="4000"/>
 
     <default>
         <light castshadow="false" diffuse="1 1 1" />
@@ -79,7 +81,7 @@
 
          <!-- table  -->
         <body name="table" pos="0 0 0">
-            <geom type="box" size="0.7 .7 .5" rgba="1 1 1 1" mass="15" condim='4'/>
+            <geom type="box" size="0.7 .7 .5" rgba="1 1 1 1" mass="1500" condim='4'/>
 
             <body name="base_link" pos="0 0 0.5">
                 <geom name="link0" type="mesh" mesh="link0" pos="0 0 0"/>
@@ -173,16 +175,26 @@
                 <geom type="capsule" size="0.005 0.002" rgba=".8 .2 .1 1"/>
             </composite>
     -->
-        
-        <body name="B3_5" pos="-0.2 0.4 0.8" euler="1 1 1">
+
+        <body name="B3_5" pos="-0.2 0.4 0.8" euler="0 0 3.14">
             
-            <freejoint/>
-            <composite type="cloth" count="9 9 1" spacing=" 0.02" flatinertia="0.01">
-                <joint kind="main" damping="0.001"/>
-                <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>
-                <geom type="capsule" size=" 0.006   0.004 " rgba=".8 .2 .1 1" friction='1 0.005 0.0001' condim='4'/>
-            </composite>
+        <freejoint/>
+        <composite type="cloth" count="20 20 1" spacing=" 0.0083" flatinertia="0">
+            <joint kind="main" damping="0.0001" stiffness="0.000000000001" />
+            <!-- <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>-->
+            <geom type="capsule" size=" 0.0025 .00166 " rgba=".8 .2 .1 1" mass='9.21435128518972e-06'/>
+        </composite>
         </body>
+        
+        <!--
+            <body name="B3_5" pos="-0.2 0.4 0.8" euler="1 1 1">
+            <composite type="grid" count="9 9 1" spacing="0.05" offset="0 0 1">
+                <skin material="matdenim" inflate="0.001" subgrid="3" texcoord="true"/>
+                <geom size=".02"/>
+                <pin coord="0 0"/>
+                <pin coord="8 0"/>
+            </composite>
+        </body> -->
         <camera name="RealSense" mode="fixed" pos="-0.18 0.4 1.0" euler="0 0 3.14" fovy="42.5"/>
 
     </worldbody>

@@ -206,6 +206,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             print('Number should be between 0 and 1')
     
     def unfold(self):
+        self.done_signal = True
 
         if not self.done_signal:
             result_move = self.controller.move_group_to_joint_target(target=self.joint_position, quiet=self.quiet, render=not self.headless_mode, group='Arm')
@@ -223,7 +224,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             self.controller.stay(50, render=not self.headless_mode)
         else:
             ####### Test
-            #self.test_grip()
+            self.test_grip()
             #######
             if not self.step_counter > 0:
                 print('ff')
@@ -422,30 +423,25 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
 
-        target = [np.deg2rad(0), np.deg2rad(-90), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
-        self.controller.stay(1000, render=not self.headless_mode)
+        self.controller.open_gripper()
+        target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(100, render=not self.headless_mode)
+
+        til_1 = 29
+        tilt2 = 15.2
+        target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, np.deg2rad(30)]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
 
-        # self.controller.open_gripper()
-        # target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
-        # self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
-        # self.controller.stay(100, render=not self.headless_mode)
+        self.controller.close_gripper()
+        self.controller.stay(1000, render=not self.headless_mode)
 
-        # til_1 = 29
-        # tilt2 = 15.2
-        # target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, np.deg2rad(30), 0, 0]
-        # self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode)
-        # self.controller.stay(1000, render=not self.headless_mode)
-
-        # self.controller.close_gripper()
-        # self.controller.stay(1000, render=not self.headless_mode)
-
-        # til_1 = 18
-        # tilt2 = 5
-        # target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
-        # self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
-        # self.controller.stay(1000, render=not self.headless_mode)
+        til_1 = 18
+        tilt2 = 5
+        target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)
     
     def randomizationSparse(self): # Randomization between trainings
 
@@ -472,19 +468,20 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         cloth_pertur = 0.15
 
         # Material type
+        # Mass properties: src/gym_training/envs/mesh/textile_properties.csv
         materials = range(7, 11, 1)
         self.model.skin_matid = random.choice(materials)
-        if self.model.skin_matid == 7: # denim
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.004
+        if self.model.skin_matid == 7: # Textile 2 (denim)
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 2.29630627176258e-05
             #self.model.geom_friction[min(cloth_id):1+max(cloth_id)] =
-        elif self.model.skin_matid == 8: # white 1 /
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.005
-        elif self.model.skin_matid == 9: # white 2 /
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.006
-        elif self.model.skin_matid == 10: # white 4 / 100% cotton
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.007
-        elif self.model.skin_matid == 11: # black /
-            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 0.008
+        elif self.model.skin_matid == 8: # Textile 1 (white 1 polyester) /
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 9.21435128518972e-06
+        elif self.model.skin_matid == 9: # Textile 4 (white 2) /
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 9.92247748402137E-06
+        elif self.model.skin_matid == 10: # Textile 3 (white 4 / 100% cotton)
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 6.23348013597663E-06
+        elif self.model.skin_matid == 11: # Textile 5 (black) /
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 1.23787496357988E-05
 
         # Cloth mass 
         mass_eps = self.model.body_mass[min(cloth_id)] * cloth_pertur
