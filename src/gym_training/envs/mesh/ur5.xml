@@ -153,13 +153,8 @@
                                                 </body>
                                                 <body name="right_finger" pos="-0.0068 -0.02 0" quat="0 360 0 0">
                                                     <inertial pos="0 0 0" mass="0.0045" diaginertia="0.1 0.1 0.1" />
-<<<<<<< HEAD
-                                                    <geom name="right_finger" type="mesh" material="silver2" mesh="MHZ2-20D_mhz2-prong" />
-                                                    <geom name="gripper_hat" type="mesh" material="white" mesh="gripper_hat" pos="-0.0112 0.0026 0" euler="1.57 0 1.57" />
-=======
                                                     <geom name="right_finger" type="mesh" material="silver2" mesh="MHZ2-20D_mhz2-prong" condim='4'/>
                                                     <geom name="gripper_hat" type="mesh" material="black" mesh="gripper_hat" pos="-0.0112 0.0026 0" euler="1.57 0 1.57" condim='4'/>
->>>>>>> 0e053457cdae00f20765199bdd6fbbf06362dc7c
                                                     <joint name="joint_rf" class="GRIPPER" type="slide" pos="0 0 0" axis="0 1 0" limited="true" range="-0.008 0" />
                                                 </body>                                                    
                                             </body>
@@ -172,16 +167,35 @@
             </body>
         </body>
     
-    <!-- cloth -->
-        <body name="B3_5" pos="0.2 -0.45 0.5" >
-            <joint name="free_joint" type="free" stiffness="0" damping="0" frictionloss="0" armature="0" />
-            <composite type="cloth" count="9 9 1" spacing="0.03" flatinertia="0.10">
-                <joint type='free' kind="main" damping="0.1" stiffness='0.1'/>
-                <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="20"/>
-                <geom type="capsule" size="0.004 0.004" />
+    <!-- cloth
+    
+    <composite type="cloth" count="6 6 1" spacing="0.05" flatinertia="0.01">
+                <joint kind="main" damping="0.001"/>
+                <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>
+                <geom type="capsule" size="0.005 0.002" rgba=".8 .2 .1 1"/>
+            </composite>
+    -->
+
+        <body name="B3_5" pos="-0.2 0.4 0.8" euler="1 1 1">
+            
+            <freejoint/>
+            <composite type="cloth" count="9 9 1" spacing=" 0.02" flatinertia="0.01">
+                <joint kind="main" damping="0.00001"/>
+                <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>
+                <geom type="capsule" size=" 0.006   0.004 " rgba=".8 .2 .1 1" friction='1 0.005 0.0001' condim='4'/>
             </composite>
         </body>
-        <camera name="RealSense" mode="fixed" pos="0.22 -0.5 1.0" euler="0 0 3.14" fovy="42.5"/>
+        
+        <!--
+            <body name="B3_5" pos="-0.2 0.4 0.8" euler="1 1 1">
+            <composite type="grid" count="9 9 1" spacing="0.05" offset="0 0 1">
+                <skin material="matdenim" inflate="0.001" subgrid="3" texcoord="true"/>
+                <geom size=".02"/>
+                <pin coord="0 0"/>
+                <pin coord="8 0"/>
+            </composite>
+        </body> -->
+        <camera name="RealSense" mode="fixed" pos="-0.18 0.4 1.0" euler="0 0 3.14" fovy="42.5"/>
 
     </worldbody>
     <!-- ctrlrange info : https://www.universal-robots.com/articles/ur/robot-care-maintenance/max-joint-torques-cb3-and-e-series/-->
