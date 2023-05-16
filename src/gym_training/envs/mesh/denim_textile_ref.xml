@@ -1,8 +1,8 @@
 <mujoco model="ur5">
     <compiler angle="radian" meshdir="ur5" balanceinertia="true"/>
-    <option timestep="0.002" collision="all" gravity="0 0 -9.81" />
+    <option timestep="0.00002" collision="all" gravity="0 0 -9.81" />
 
-    <option solver="CG" jacobian="sparse" integrator="implicitfast" />
+    <option solver="CG" jacobian="sparse" integrator="implicitfast" impratio='1'/>
 
     <default>
         <light castshadow="false" diffuse="1 1 1" />
@@ -56,22 +56,22 @@
     </body>
     -->
 
-    <body name="B3_5" pos="-0.0125 -0.075 1.005" euler="0 0 3.14">
+    <body name="B3_5" pos="-0.0125 -0.075 1.1" euler="0 0 3.14">
             
         <freejoint/>
-        <composite type="cloth" count="4 19 1" spacing=" 0.0083" flatinertia="0">
-            <joint kind="main" damping="0.0000015" stiffness="0.00016" />
+        <composite type="cloth" count="21 26 1" spacing=" 0.0083" flatinertia="0">
+            <joint kind="main" damping="0.00001" stiffness="0.001" />
             <!-- <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>-->
             <geom type="capsule" size=" 0.0025 .00166 " rgba=".8 .2 .1 1" mass='1.23787496357988E-05'/>
         </composite>
     </body>
 
     <!--
-        Textile 1 stiffness: Real: 0.01300 tuned_damping: 0.0000001,    tuned_stiffness: 0.0000013 
-        Textile 2 stiffness: Real: 0.10700 tuned_damping: 0.00001,      tuned_stiffness: 0.001  
-        Textile 3 stiffness: Real: 0.03366 tuned_damping: 0.000001,     tuned_stiffness: 0.00001
-        Textile 4 stiffness: Real: 0.02333 tuned_damping: 0.0000001,    tuned_stiffness: 0.0000075
-        Textile 5 stiffness: Real: 0.07333 tuned_damping: 0.0000015,    tuned_stiffness: 0.00016
+        Textile 1   Polyester   stiffness: Real: 0.01300 tuned_damping: 0.0000001,    tuned_stiffness: 0.0000013 
+        Textile 2   Denim       stiffness: Real: 0.10700 tuned_damping: 0.00001,      tuned_stiffness: 0.001  
+        Textile 3   Bomuld1     stiffness: Real: 0.03366 tuned_damping: 0.000001,     tuned_stiffness: 0.00001
+        Textile 4   Bomuld2     stiffness: Real: 0.02333 tuned_damping: 0.0000001,    tuned_stiffness: 0.0000075
+        Textile 5   Polyamid    stiffness: Real: 0.07333 tuned_damping: 0.0000015,    tuned_stiffness: 0.00016
     -->
 
     <!--
@@ -82,11 +82,7 @@
     -->
 
     <body name="table" pos="0 -0.01 0">
-    <geom type="box" size="0.025 0.10 1" rgba="1 1 1 1" mass="15" condim='4'/>
-    </body>
-
-    <body name="top" pos="0 -0.01 2.005">
-    <geom type="box" size="0.025 0.10 1" rgba="1 1 1 0.25" mass="15" condim='4'/>
+    <geom type="box" size="0.5 0.50 1" rgba="1 1 1 1" mass="1500" condim='4'/>
     </body>
 
     <body name="41deg_check" pos="0 -0.133 0.9127" euler="0.72431164 0 0">               <!--pos"0 -0.114 0.929"-->

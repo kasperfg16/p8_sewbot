@@ -464,37 +464,52 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         for i in range(self.model.nbody):
             if mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i).startswith('B') is True:
                 cloth_id.append(i)
-        cloth_pertur = 0.15
+        cloth_pertur = 0.00015
 
         # Material type
         # Mass properties: src/gym_training/envs/mesh/textile_properties.csv
+        # Stiffness and damping properties: src/gym_training/envs/mesh/ur5.xml
         materials = range(7, 11, 1)
         self.model.skin_matid = random.choice(materials)
         if self.model.skin_matid == 7: # Textile 2 (denim)
             self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 2.29630627176258e-05
-            #self.model.geom_friction[min(cloth_id):1+max(cloth_id)] =
+            self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = 0.00001
+            self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = 0.00001
+
         elif self.model.skin_matid == 8: # Textile 1 (white 1 polyester) /
             self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 9.21435128518972e-06
+            self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = 0.0000013
+            self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = 0.0000001
+            
         elif self.model.skin_matid == 9: # Textile 4 (white 2) /
             self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 9.92247748402137E-06
+            self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = 0.0000075
+            self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = 0.0000001
+
         elif self.model.skin_matid == 10: # Textile 3 (white 4 / 100% cotton)
             self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 6.23348013597663E-06
+            self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = 0.00001
+            self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = 0.000001
+
         elif self.model.skin_matid == 11: # Textile 5 (black) /
             self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 1.23787496357988E-05
+            self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = 0.00016
+            self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = 0.0000015
 
-        # Cloth mass 
-        mass_eps = self.model.body_mass[min(cloth_id)] * cloth_pertur
-        self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id)] + random.uniform(-mass_eps, mass_eps)
-        # Friction
-        frict_eps = self.model.geom_friction[min(cloth_id)] * cloth_pertur
-        for i in range(len(self.model.geom_friction[min(cloth_id):1+max(cloth_id)])):
-            self.model.geom_friction[i, :] = self.model.geom_friction[i, :] + random.uniform(-frict_eps, frict_eps)
-        # Stiffness
-        stiff_eps = self.model.jnt_stiffness[min(cloth_id)] * cloth_pertur
-        self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = self.model.jnt_stiffness[min(cloth_id)] + random.uniform(-stiff_eps, stiff_eps)
-        # Damping
-        damp_eps = self.model.dof_damping[min(cloth_id)] * cloth_pertur
-        self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = self.model.dof_damping[min(cloth_id)] + random.uniform(-damp_eps, damp_eps)
+
+        # # Cloth mass 
+        # mass_eps = self.model.body_mass[min(cloth_id)] * cloth_pertur
+        # self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id)] + random.uniform(-mass_eps, mass_eps)
+        # # Friction
+        # frict_eps = self.model.geom_friction[min(cloth_id)] * cloth_pertur
+        # for i in range(len(self.model.geom_friction[min(cloth_id):1+max(cloth_id)])):
+        #     self.model.geom_friction[i, :] = self.model.geom_friction[i, :] + random.uniform(-frict_eps, frict_eps)
+        # # Stiffness
+        # stiff_eps = self.model.jnt_stiffness[min(cloth_id)] * cloth_pertur
+        # self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = self.model.jnt_stiffness[min(cloth_id)] + random.uniform(-stiff_eps, stiff_eps)
+        # # Damping
+        # damp_eps = self.model.dof_damping[min(cloth_id)] * cloth_pertur
+        # self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = self.model.dof_damping[min(cloth_id)] + random.uniform(-damp_eps, damp_eps)
 
         # cloth_joint_id = []
         # for i in range(self.model.nbody):
