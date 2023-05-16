@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import gymnasium as gym
 import random
@@ -128,7 +129,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             1])
         
         self.renderer = mujoco.Renderer(model=self.model)
-        self._reset_noise_scale=0.005
+        self._reset_noise_scale=0.01
         self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.float16)
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
@@ -141,12 +142,12 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.area_stack = [0]*2
         self.move_reward = 0
         self.controller.show_model_info()
-        self.home_pose = np.array([np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0, 0])
+        self.home_pose = np.array([-np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0, 0])
         self.image = np.empty((480, 480, 3)) # image size
         self.in_home_pose = False
 
         # Show renders?
-        self.headless_mode = False
+        self.headless_mode = True
 
         # Print output in terminal?
         self.quiet = False
@@ -168,6 +169,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # Check if cloth is already in good position
         if self.step_counter == 0:
             # Stay and let cloth fall
+            self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
             self.controller.stay(2000, render=not self.headless_mode)
             self.check()
 
@@ -209,16 +211,13 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
         if not self.done_signal:
             result_move = self.controller.move_group_to_joint_target(target=self.joint_position, quiet=self.quiet, render=not self.headless_mode, group='Arm')
-            if result_move == 'success':
-                self.move_reward = self.move_reward + 1
-            else:
-                self.move_reward = self.move_reward - 1
+            self.move_reward += result_move
 
             self.controller.stay(500, render=not self.headless_mode)
             if self.gripper_state == 0:
-                self.controller.close_gripper()
+                self.controller.close_gripper(render=not self.headless_mode)
             elif self.gripper_state == 1:
-                self.controller.open_gripper()
+                self.controller.open_gripper(render=not self.headless_mode)
             
             self.controller.stay(50, render=not self.headless_mode)
         else:
@@ -226,15 +225,11 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             #self.test_grip()
             #######
             if not self.step_counter > 0:
-                print('ff')
-                self.controller.open_gripper()
+                self.controller.open_gripper(render=not self.headless_mode)
                 self.controller.stay(1000, render=not self.headless_mode)
 
             result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
-            if result_move == 'success':
-                self.move_reward = self.move_reward + 1
-            else:
-                self.move_reward = self.move_reward - 1
+            self.move_reward += result_move
 
             self.controller.stay(10, render=not self.headless_mode)
             self.truncated = True
@@ -368,7 +363,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
         # Reward weights
         w1 = 1
-        w2 = 10
+        w2 = 50
 
         if self.done_signal:
             coveragereward = self.get_coverage() # output percentage
@@ -382,15 +377,20 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             else:
                 self.terminated = True
                 done_reward = 100
+        
+        # Incentivice to do it faster
+        step_penalty = self.step_counter/2
 
         # Summarize all rewards 
-        self.reward = self.move_reward*w1 + coveragereward*w2 + done_reward
+        self.reward = self.move_reward*w1 + coveragereward*w2 + done_reward - step_penalty
 
         if not self.quiet:
             print('done_reward: ', done_reward)
-            print('coveragereward: ', coveragereward)
-            print('self.move_reward: ', self.move_reward)
+            print('coveragereward with weight: ', coveragereward*w2)
+            print('move_reward with weight: ', self.move_reward*w1)
+            print('step_penalty:', -step_penalty)
             print('self.reward:', self.reward)
+
 
     def reset_model(self):
         #self.area_stack = [0]
@@ -402,7 +402,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         observation = self._get_obs()
 
         # Standard deviation for the Gaussian noise
-        noise_std_dev = 0.001  # Adjust this value as per your requirements
+        noise_std_dev = 0.0005  # Adjust this value as per your requirements
 
         # Add Gaussian noise to the pose
         noise = np.random.normal(0, noise_std_dev, self.home_pose.shape)

@@ -277,7 +277,7 @@ class MJ_Controller(object):
         group="All",
         target=None,
         tolerance=0.02,
-        max_steps=1000,
+        max_steps=250,
         plot=False,
         marker=False,
         render=True,
@@ -307,7 +307,7 @@ class MJ_Controller(object):
                     len(self.groups[group]))
             ids = self.groups[group]
             steps = 1
-            result = ""
+            result = 0
             if plot:
                 self.plot_list = defaultdict(list)
             self.reached_target = False
@@ -358,9 +358,9 @@ class MJ_Controller(object):
                                 attrs=["bold"],
                             )
                         )
-                    result = "success"
+                    for delta in deltas:
+                        result += 1
                     self.reached_target = True
-                    # break
 
                 if steps > max_steps:
                     if not quiet:
@@ -372,8 +372,12 @@ class MJ_Controller(object):
                             )
                         )
                         print("Deltas: ", deltas)
-                    result = "max. steps reached: {}".format(max_steps)
-                    break
+                        for delta in deltas:
+                            if delta <= tolerance:
+                                result += 1
+                            else:
+                                result -= 1
+                    return result
 
                 mujoco.mj_step(self.model, self.data)
                 mujoco.mj_forward(self.model, self.data)
@@ -405,15 +409,15 @@ class MJ_Controller(object):
             print(e)
             print(f"Could not set new group joint target for group {group}")
 
-    def open_gripper(self, half=False, **kwargs):
+    def open_gripper(self, render=True, half=False, **kwargs):
         """
         Opens the gripper while keeping the arm in a steady position.
         """
         # print('Open: ', self.data.qpos[self.actuated_joint_ids][self.groups['Gripper']])
         return (self.move_group_to_joint_target(
-                group="Gripper", target=[0, 0], max_steps=1000, tolerance=0.0001, **kwargs))
+                group="Gripper", target=[0, 0], max_steps=1000, tolerance=0.0001, **kwargs, render=render))
 
-    def close_gripper(self, **kwargs):
+    def close_gripper(self, render=True, **kwargs):
         # def close_gripper(self, render=True, max_steps=1000, plot=False, quiet=True):
         """
         Closes the gripper while keeping the arm in a steady position.
@@ -423,7 +427,7 @@ class MJ_Controller(object):
         # print('Closed: ', self.data.qpos[self.actuated_joint_ids][self.groups['Gripper']])
         # result = self.move_group_to_joint_target(group='Gripper', target=[0.45, 0.45, 0.55, -0.17], tolerance=0.05, max_steps=max_steps, render=render, marker=True, quiet=quiet, plot=plot)
         return self.move_group_to_joint_target(
-            group="Gripper", target=[-0.008, -0.008], tolerance=0.0001, **kwargs
+            group="Gripper", target=[-0.008, -0.008], tolerance=0.0001, **kwargs, render=render
         )
 
     def grasp(self, **kwargs):

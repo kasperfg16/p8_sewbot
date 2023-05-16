@@ -1,13 +1,4 @@
-import numpy as np
+import math
 
-scale = 4
 
-spacing = 0.05
-size=np.array([0.015, 0.01])
-
-spacing=spacing/scale
-size=size/scale
-
-print('spacing="',spacing,'"')
-
-print('size="',size[0],' ',size[1],'"')
+print(math.exp(30/10))
