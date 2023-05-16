@@ -6,4 +6,11 @@ setup(name='gym_training',
                       'numpy',
                       'mujoco',
                       'skrl',
-                      'nvidia-ml-py3'])
+                      'nvidia-ml-py3',
+                      'matplotlib',
+                      'opencv-python',
+                      'simple_pid',
+                      'termcolor',
+                      'ikpy',
+                      'pyquaternion',
+                      'imageio'])
