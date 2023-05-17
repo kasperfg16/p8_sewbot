@@ -98,7 +98,7 @@ cfg_ddpg["random_timesteps"] = 10
 cfg_ddpg["learning_starts"] = 0
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
 cfg_ddpg["experiment"]["write_interval"] = 5
-cfg_ddpg["experiment"]["checkpoint_interval"] = 100
+cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 
 agent_ddpg = DDPG(models=models_ddpg,
                   memory=memory,

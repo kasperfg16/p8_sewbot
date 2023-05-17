@@ -128,7 +128,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             1,
             1])
         
-        self._reset_noise_scale=0.01
+        self.renderer = mujoco.Renderer(model=self.model)
+        self._reset_noise_scale=0.005
         self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.float16)
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
@@ -319,7 +320,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
         # Reward weights
         w1 = 1
-        w2 = 50
+        w2 = 10
 
         if self.done_signal:
             coveragereward = self.get_coverage() # output percentage
@@ -346,6 +347,8 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             print('move_reward with weight: ', self.move_reward*w1)
             print('step_penalty:', -step_penalty)
             print('self.reward:', self.reward)
+        
+        self.move_reward = 0
 
 
     def reset_model(self):
