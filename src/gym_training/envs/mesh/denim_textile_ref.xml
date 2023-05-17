@@ -24,8 +24,8 @@
 
     <body name="B3_5" pos="0 0 1" euler='0 90 0'>
       <freejoint/>
-      <composite type="cloth" count="9 10 1" spacing="0.02" flatinertia="0.01">
-        <joint kind="main" damping="0.0000001" stiffness='0.000000001'/>
+      <composite type="cloth" count="9 10 1" spacing="0.02" flatinertia="0.1">
+        <joint kind="main" damping="0.000001" stiffness='0.000000001'/>
         <skin material="matcarpet" texcoord="true" inflate="0.0005" subgrid="3"/>
         <geom type="capsule" size="0.002 0.002" rgba=".8 .2 .1 1" mass='9.21435128518972E-06'/>
       </composite>
