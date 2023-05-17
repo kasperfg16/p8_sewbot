@@ -34,7 +34,7 @@ def find_file(filename, search_path):
             return os.path.abspath(os.path.join(root, filename))
     return None
 
-class UR5Env_ddpg(MujocoEnv, EzPickle):
+class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
     """
     ### Action space
     | Num | Action                | Control Min | Control Max | Name in XML file | Joint | Unit |
@@ -86,7 +86,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         **kwargs
     ):
         EzPickle.__init__(self,  **kwargs)
-        filename = "ur5.xml"
+        filename = "ur5_no_noise.xml"
         search_path = "./"
         model_path = find_file(filename, search_path)
         # if model_path is not None:
@@ -129,7 +129,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             1])
         
         self.renderer = mujoco.Renderer(model=self.model)
-        self._reset_noise_scale=0.005
         self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.float16)
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
@@ -224,7 +223,9 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             ####### Test
             #self.test_grip()
             #######
-            if not self.step_counter > 0:
+            
+            # Open gripper and let cloth fall
+            if self.step_counter > 0:
                 self.controller.open_gripper(render=not self.headless_mode)
                 self.controller.stay(1000, render=not self.headless_mode)
 
@@ -232,9 +233,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             self.move_reward += result_move
 
             self.controller.stay(10, render=not self.headless_mode)
-            self.truncated = True
-            self.step_counter = -1
-            self.in_home_pose = True
 
     def _get_obs(self):
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
@@ -265,13 +263,13 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
     def check(self):
         self.get_coverage()
         if self.goalcoverage:
-            self.goalcoverage = False
             self.result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
             self.terminated = True
+            self.goalcoverage = False
 
     def get_coverage(self):
-        max_clotharea = 42483.0
         currentarea = 0
+        max_clotharea = 42483.0
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
         self.image = image.astype(dtype=np.uint8)
         
@@ -320,7 +318,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
 
         # Reward weights
         w1 = 1
-        w2 = 10
+        w2 = 50
 
         if self.done_signal:
             coveragereward = self.get_coverage() # output percentage
@@ -338,7 +336,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # Incentivice to do it faster
         step_penalty = self.step_counter/2
 
-        # Summarize all rewards 
+        # Summarize all rewards
         self.reward = self.move_reward*w1 + coveragereward*w2 + done_reward - step_penalty
 
         if not self.quiet:
@@ -350,7 +348,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         
         self.move_reward = 0
 
-
     def reset_model(self):
         #self.area_stack = [0]
         self.randomizationSparse() 
@@ -360,14 +357,9 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.step_counter = 0
         observation = self._get_obs()
 
-        # Standard deviation for the Gaussian noise
-        noise_std_dev = 0.0005  # Adjust this value as per your requirements
-
-        # Add Gaussian noise to the pose
-        noise = np.random.normal(0, noise_std_dev, self.home_pose.shape)
 
         # Initialize manipulator in home pose
-        self.data.qpos[self.controller.actuated_joint_ids] = self.home_pose + noise
+        self.data.qpos[self.controller.actuated_joint_ids] = self.home_pose
 
         return observation
 
@@ -428,8 +420,10 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         # Material type
         # Mass properties: src/gym_training/envs/mesh/textile_properties.csv
         # Stiffness and damping properties: src/gym_training/envs/mesh/ur5.xml
-        materials = range(7, 11, 1)
-        self.model.skin_matid = random.choice(materials)
+        
+        # only choose denim
+        self.model.skin_matid = 7
+
         if self.model.skin_matid == 7: # Textile 2 (denim)
             self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 2.29630627176258e-05
             self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = 0.00001
@@ -456,59 +450,13 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = 0.0000015
 
 
-        # # Cloth mass 
-        # mass_eps = self.model.body_mass[min(cloth_id)] * cloth_pertur
-        # self.model.body_mass[min(cloth_id):1+max(cloth_id)] = self.model.body_mass[min(cloth_id)] + random.uniform(-mass_eps, mass_eps)
-        # # Friction
-        # frict_eps = self.model.geom_friction[min(cloth_id)] * cloth_pertur
-        # for i in range(len(self.model.geom_friction[min(cloth_id):1+max(cloth_id)])):
-        #     self.model.geom_friction[i, :] = self.model.geom_friction[i, :] + random.uniform(-frict_eps, frict_eps)
-        # # Stiffness
-        # stiff_eps = self.model.jnt_stiffness[min(cloth_id)] * cloth_pertur
-        # self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = self.model.jnt_stiffness[min(cloth_id)] + random.uniform(-stiff_eps, stiff_eps)
-        # # Damping
-        # damp_eps = self.model.dof_damping[min(cloth_id)] * cloth_pertur
-        # self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = self.model.dof_damping[min(cloth_id)] + random.uniform(-damp_eps, damp_eps)
-
-        # cloth_joint_id = []
-        # for i in range(self.model.nbody):
-        #     if mujoco.mj_id2name(
-        #         self.model,
-        #         mujoco.mjtObj.mjOBJ_JOINT,
-        #         i
-        #         ).startswith('J1') or mujoco.mj_id2name(
-        #         self.model,
-        #         mujoco.mjtObj.mjOBJ_JOINT,
-        #         i).startswith('J0') is True:
-        #         cloth_joint_id.append(i)
-
-        # print('cloth_joint_id', cloth_joint_id)
-
-        # # Pose
-        # self.data.joint(cloth_joint_id).qpos = 1
-
         """
         Lightning
         """
-        light_pos_eps = self.model.light_pos * cloth_pertur
+        
         for i in range(len(self.model.light_pos)):
-            self.model.light_pos[i, :] = self.model.light_pos[i, :] + random.uniform(-light_pos_eps, light_pos_eps)
+            self.model.light_pos[i, :] = self.model.light_pos[i, :]
 
         light_dir_eps = self.model.light_dir * cloth_pertur
         for i in range(len(self.model.light_dir)):
-            self.model.light_dir[i, :] = self.model.light_dir[i, :] + random.uniform(-light_dir_eps, light_dir_eps)
-
-        """
-        Pose randomization (all bodies)
-        """
-
-        noise_low = -self._reset_noise_scale
-        noise_high = self._reset_noise_scale
-
-        qpos = self.init_qpos + self.np_random.uniform(
-            low=noise_low, high=noise_high, size=self.model.nq
-        )
-        qvel = self.init_qvel + self.np_random.uniform(
-            low=noise_low, high=noise_high, size=self.model.nv
-        )
-        self.set_state(qpos, qvel)        
+            self.model.light_dir[i, :] = self.model.light_dir[i, :]
