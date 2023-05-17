@@ -146,7 +146,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.in_home_pose = False
 
         # Show renders?
-        self.headless_mode = False
+        self.headless_mode = True
 
         # Print output in terminal?
         self.quiet = False
@@ -223,7 +223,9 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             ####### Test
             #self.test_grip()
             #######
-            if not self.step_counter > 0:
+            
+            # Open gripper and let cloth fall
+            if self.step_counter > 0:
                 self.controller.open_gripper(render=not self.headless_mode)
                 self.controller.stay(1000, render=not self.headless_mode)
 
@@ -231,9 +233,6 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             self.move_reward += result_move
 
             self.controller.stay(10, render=not self.headless_mode)
-            self.truncated = True
-            self.step_counter = -1
-            self.in_home_pose = True
 
     def _get_obs(self):
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
@@ -337,7 +336,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         # Incentivice to do it faster
         step_penalty = self.step_counter/2
 
-        # Summarize all rewards 
+        # Summarize all rewards
         self.reward = self.move_reward*w1 + coveragereward*w2 + done_reward - step_penalty
 
         if not self.quiet:
@@ -346,7 +345,8 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             print('move_reward with weight: ', self.move_reward*w1)
             print('step_penalty:', -step_penalty)
             print('self.reward:', self.reward)
-
+        
+        self.move_reward = 0
 
     def reset_model(self):
         #self.area_stack = [0]
@@ -453,10 +453,10 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         """
         Lightning
         """
-        light_pos_eps = self.model.light_pos * cloth_pertur
+        
         for i in range(len(self.model.light_pos)):
-            self.model.light_pos[i, :] = self.model.light_pos[i, :] + random.uniform(-light_pos_eps, light_pos_eps)
+            self.model.light_pos[i, :] = self.model.light_pos[i, :]
 
         light_dir_eps = self.model.light_dir * cloth_pertur
         for i in range(len(self.model.light_dir)):
-            self.model.light_dir[i, :] = self.model.light_dir[i, :] + random.uniform(-light_dir_eps, light_dir_eps)      
+            self.model.light_dir[i, :] = self.model.light_dir[i, :]
