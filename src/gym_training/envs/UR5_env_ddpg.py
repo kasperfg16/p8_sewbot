@@ -128,7 +128,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             1,
             1])
         
-        self.renderer = mujoco.Renderer(model=self.model)
         self._reset_noise_scale=0.005
         self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.float16)
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
