@@ -1,3 +1,5 @@
+import csv
+import os
 import gymnasium as gym
 import gym_training
 
@@ -92,13 +94,13 @@ for model in models_ddpg.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
-cfg_ddpg["exploration"]["noise"] = OrnsteinUhlenbeckNoise(theta=0.15, sigma=0.1, base_scale=2.0, device=device)
+cfg_ddpg["exploration"]["noise"] = OrnsteinUhlenbeckNoise(theta=0, sigma=0.1, base_scale=0.1, device=device)
 cfg_ddpg["batch_size"] = 10
 cfg_ddpg["random_timesteps"] = 10
 cfg_ddpg["learning_starts"] = 10
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
 cfg_ddpg["experiment"]["write_interval"] = 5
-cfg_ddpg["experiment"]["checkpoint_interval"] = 100
+cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 
 agent_ddpg = DDPG(models=models_ddpg,
                   memory=memory,
@@ -110,6 +112,8 @@ agent_ddpg = DDPG(models=models_ddpg,
 # Configure and instantiate the RL trainer
 cfg_trainer = {"timesteps": 20000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
+
+print(cfg_ddpg)
 
 # start training
 trainer.train()
