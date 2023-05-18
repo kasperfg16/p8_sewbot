@@ -148,7 +148,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.headless_mode = True
 
         # Print output in terminal?
-        self.quiet = False
+        self.quiet = True
 
         self.max_step = 20
 

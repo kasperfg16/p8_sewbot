@@ -12,9 +12,41 @@ from skrl.models.torch import Model, DeterministicMixin
 from skrl.memories.torch import RandomMemory
 from skrl.agents.torch.ddpg import DDPG, DDPG_DEFAULT_CONFIG
 from skrl.resources.noises.torch import OrnsteinUhlenbeckNoise
+from skrl.resources.noises.torch import GaussianNoise
 from skrl.trainers.torch import SequentialTrainer
 from skrl.envs.torch import wrap_env
 import nvidia_smi
+
+
+def print_config(config, i=0):
+    for x in config:
+        x_modified = x.replace('_', '\\_')
+        if x in config and config[x] is None:
+            continue
+        elif isinstance(config[x], int) or isinstance(config[x], float):
+            print(x_modified + ':', str(config[x]), '\\\\')
+        else:
+            for y in config[x]:
+                y_modified = y.replace('_', '\\_')
+                if isinstance(config[x][y], str) and 'skrl.resources.noises.torch.gaussian' in config[x][y]:
+                    config[x][y] = 'skrl.resources.noises.torch.gaussian.GaussianNoise'
+                if config[x][y] is None:
+                    continue
+                if isinstance(config[x][y], GaussianNoise):
+                    print('\par ' * (i+1) + y_modified + ':', 'skrl.resources.noises.torch.gaussian.GaussianNoise')
+                else:
+                    print('\par ' * (i+1) + y_modified + ':', config[x][y])
+                if isinstance(config[x][y], dict):
+                    print_config(config[x][y], i=i + 1)
+
+
+
+
+
+
+
+
+
 
 # Define the models (deterministic models) for the DDPG agent using mixin
 # - Actor (policy): takes as input the environment's observation/state and returns an action
@@ -51,7 +83,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
 
-env = gym.vector.make("UR5_ddpg_no_noise", num_envs=7, asynchronous=True)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=8, asynchronous=True)
 
 env = wrap_env(env)
 
@@ -94,9 +126,11 @@ for model in models_ddpg.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
-cfg_ddpg["exploration"]["noise"] = OrnsteinUhlenbeckNoise(theta=0, sigma=0.1, base_scale=0.1, device=device)
+cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=0.2, device=device)
+cfg_ddpg["exploration"]["final_scale"] = 0
+cfg_ddpg["exploration"]["timesteps"] = 100
 cfg_ddpg["batch_size"] = 10
-cfg_ddpg["random_timesteps"] = 10
+cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 10
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
 cfg_ddpg["experiment"]["write_interval"] = 5
@@ -110,10 +144,19 @@ agent_ddpg = DDPG(models=models_ddpg,
                   device=device)
 
 # Configure and instantiate the RL trainer
-cfg_trainer = {"timesteps": 20000, "headless": True}
+cfg_trainer = {"timesteps": 6000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
 
 print(cfg_ddpg)
+
+
+
+with open('run_config_csvfile.csv', 'w') as f:  # You will need 'wb' mode in Python 2.x
+    w = csv.DictWriter(f, cfg_ddpg.keys())
+    w.writeheader()
+    w.writerow(cfg_ddpg)
+
+print_config(cfg_ddpg)
 
 # start training
 trainer.train()
