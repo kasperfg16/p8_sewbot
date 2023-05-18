@@ -109,7 +109,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         
         # Action space (In this case - joint limits)
         self.act_space_low = np.array([
-            -np.deg2rad(110),
+            -np.deg2rad(160),
             -np.deg2rad(45),
             -np.deg2rad(-90),
             -np.pi,
@@ -119,7 +119,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             0])
         
         self.act_space_high = np.array([
-            np.deg2rad(-160),
+            np.deg2rad(-110),
             np.deg2rad(0),
             np.deg2rad(90+70),
             np.pi,
@@ -139,7 +139,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.goalcoverage = False
         self.area_stack = [0]*2
         self.move_reward = 0
-        self.controller.show_model_info()
+        #self.controller.show_model_info()
         self.home_pose = np.array([-np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0, 0])
         self.image = np.empty((480, 480, 3)) # image size
         self.in_home_pose = False

@@ -27,8 +27,6 @@ def print_config(config, i=0, string=None):
         string_config = ''
     else:
         string_config = string
-        print('')
-        print(string_config)
     for x in config:
         x_modified = x.replace('_', '\\_')
         if x in config and config[x] is None:
@@ -41,7 +39,7 @@ def print_config(config, i=0, string=None):
             string_config += ('{ \phantom - } ' * i + x_modified + ':' + str(config[x]) + '\\\\' + '\n')
         else:
             if x_modified:
-                string_config += ('{ \phantom -5 } ' * i + x_modified + ':' + '\\\\' + '\n')
+                string_config += ('{ \phantom - } ' * i + x_modified + ':' + '\\\\' + '\n')
             string_config = print_config(config[x], i=i + 1, string=string_config)
     
     return string_config
@@ -130,9 +128,10 @@ for model in models_ddpg.values():
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
 cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=0.2, device=device)
 cfg_ddpg["exploration"]["final_scale"] = 0
-cfg_ddpg["batch_size"] = 100
+cfg_ddpg["batch_size"] = 10
 cfg_ddpg["random_timesteps"] = 0
-cfg_ddpg["learning_starts"] = 100
+cfg_ddpg["learning_starts"] = 10
+cfg_ddpg["discount_factor"] = 0.98
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
 cfg_ddpg["experiment"]["write_interval"] = 5
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
@@ -178,7 +177,6 @@ trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
 
 string = print_config(config=cfg_ddpg)
 
-print(string)
 write_txt_file_from_str(str=string, file_path=output_file)
 
 output_file = os.path.join(path_experiment, "run_config_csvfile.csv")
@@ -188,10 +186,16 @@ with open(output_file, 'w') as f:  # You will need 'wb' mode in Python 2.x
     w.writeheader()
     w.writerow(cfg_ddpg)
 
+# add file to .git_attributes
+
+print('If you want to upload to github, you have to run this if you haven\'t dione it before:')
+print('curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash')
+print('sudo apt-get install git-lfs')
+
 # Example usage
 filename_to_add = os.path.join(path_experiment, 'checkpoints/best_agent.pt')
 print(filename_to_add)
 add_file_to_gitattributes(filename_to_add)
 
 # start training
-trainer.train()
+#trainer.train()
