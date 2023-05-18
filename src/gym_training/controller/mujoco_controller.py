@@ -149,7 +149,7 @@ class MJ_Controller(object):
         p_scale = 90
         i_scale = 1
         i_gripper = 0
-        d_scale = 1550
+        d_scale = 1300
 
         # Shoulder Pan Joint
         self.controller_list.append(
@@ -189,7 +189,7 @@ class MJ_Controller(object):
             PID(
                 11 * p_scale,
                 0.0 * i_scale,
-                0.2 * d_scale,
+                0.1 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[3][0], self.model.actuator_ctrlrange[3][1]),
                 sample_time=sample_time,

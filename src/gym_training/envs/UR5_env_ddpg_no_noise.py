@@ -109,7 +109,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         
         # Action space (In this case - joint limits)
         self.act_space_low = np.array([
-            -np.deg2rad(210),
+            -np.deg2rad(175),
             -np.deg2rad(90),
             -np.pi,
             -np.pi,
@@ -128,8 +128,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             1,
             1])
         
-        self.renderer = mujoco.Renderer(model=self.model)
-        self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.float16)
+        self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42)
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
@@ -149,7 +148,9 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.headless_mode = True
 
         # Print output in terminal?
-        self.quiet = False
+        self.quiet = True
+
+        self.max_step = 20
 
     def step(self, action):
         
@@ -179,6 +180,9 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.compute_reward()
 
         self.step_counter += 1
+
+        if self.max_step <= self.step_counter:
+            self.truncated = True
 
         # Recive observation after action - Before taking next action
         self.observation  = self._get_obs()
@@ -212,7 +216,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             result_move = self.controller.move_group_to_joint_target(target=self.joint_position, quiet=self.quiet, render=not self.headless_mode, group='Arm')
             self.move_reward += result_move
 
-            self.controller.stay(500, render=not self.headless_mode)
+            self.controller.stay(200, render=not self.headless_mode)
             if self.gripper_state == 0:
                 self.controller.close_gripper(render=not self.headless_mode)
             elif self.gripper_state == 1:
@@ -327,7 +331,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             # If agent says it is done and it is the it has success (terminate)
             if not self.goalcoverage:
                 self.truncated = True
-                done_reward = -100
+                done_reward = -10
                 
             else:
                 self.terminated = True
@@ -368,7 +372,8 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         til_1 = 15
         tilt2 = 10
 
-        target = [np.deg2rad(-90), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
+        target = [-np.deg2rad(175), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
+
         self.controller.stay(1000, render=not self.headless_mode)
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)

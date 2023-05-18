@@ -49,7 +49,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
 
-env = gym.vector.make("UR5_ddpg", num_envs=1, asynchronous=False)
+env = gym.vector.make("UR5_ddpg", num_envs=7, asynchronous=True)
 
 env = wrap_env(env)
 
@@ -92,7 +92,7 @@ for model in models_ddpg.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
-cfg_ddpg["exploration"]["noise"] = OrnsteinUhlenbeckNoise(theta=0.15, sigma=0.1, base_scale=100.0, device=device)
+cfg_ddpg["exploration"]["noise"] = OrnsteinUhlenbeckNoise(theta=0.15, sigma=0.1, base_scale=10.0, device=device)
 cfg_ddpg["batch_size"] = 5
 cfg_ddpg["random_timesteps"] = 10
 cfg_ddpg["learning_starts"] = 0

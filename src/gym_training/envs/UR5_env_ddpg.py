@@ -128,7 +128,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             1,
             1])
         
-        self.renderer = mujoco.Renderer(model=self.model)
         self._reset_noise_scale=0.005
         self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.float16)
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
@@ -147,7 +146,7 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
         self.in_home_pose = False
 
         # Show renders?
-        self.headless_mode = True
+        self.headless_mode = False
 
         # Print output in terminal?
         self.quiet = False
@@ -232,9 +231,6 @@ class UR5Env_ddpg(MujocoEnv, EzPickle):
             self.move_reward += result_move
 
             self.controller.stay(10, render=not self.headless_mode)
-            self.truncated = True
-            self.step_counter = -1
-            self.in_home_pose = True
 
     def _get_obs(self):
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
