@@ -146,10 +146,10 @@ class MJ_Controller(object):
         # Values for training
         sample_time = 0.002
         # p_scale = 1
-        p_scale = 90
+        p_scale = 150
         i_scale = 1
         i_gripper = 0
-        d_scale = 1300
+        d_scale = 3000
 
         # Shoulder Pan Joint
         self.controller_list.append(
@@ -187,7 +187,7 @@ class MJ_Controller(object):
         # Wrist 1 Joint
         self.controller_list.append(
             PID(
-                11 * p_scale,
+                27 * p_scale,
                 0.0 * i_scale,
                 0.1 * d_scale,
                 setpoint=-1.57,
@@ -415,7 +415,7 @@ class MJ_Controller(object):
         """
         # print('Open: ', self.data.qpos[self.actuated_joint_ids][self.groups['Gripper']])
         return (self.move_group_to_joint_target(
-                group="Gripper", target=[0, 0], max_steps=1000, tolerance=0.0001, **kwargs, render=render))
+                group="Gripper", target=[0, 0], max_steps=1000, tolerance=0.0001, **kwargs, render=render, quiet=True))
 
     def close_gripper(self, render=True, **kwargs):
         # def close_gripper(self, render=True, max_steps=1000, plot=False, quiet=True):
@@ -427,7 +427,7 @@ class MJ_Controller(object):
         # print('Closed: ', self.data.qpos[self.actuated_joint_ids][self.groups['Gripper']])
         # result = self.move_group_to_joint_target(group='Gripper', target=[0.45, 0.45, 0.55, -0.17], tolerance=0.05, max_steps=max_steps, render=render, marker=True, quiet=quiet, plot=plot)
         return self.move_group_to_joint_target(
-            group="Gripper", target=[-0.008, -0.008], tolerance=0.0001, **kwargs, render=render
+            group="Gripper", target=[-0.008, -0.008], tolerance=0.0001, **kwargs, render=render, quiet=True
         )
 
     def grasp(self, **kwargs):

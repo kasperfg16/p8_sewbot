@@ -17,36 +17,47 @@ from skrl.trainers.torch import SequentialTrainer
 from skrl.envs.torch import wrap_env
 import nvidia_smi
 
+# def print_config(config, i=0):
+#     for x in config:
+#         x_modified = x.replace('_', '\\_')
+#         if x in config and config[x] is None:
+#             print('{ \phantom - } ' * i + x_modified + ':', str(config[x]), '\\\\')
+#         elif isinstance(config[x], int) or isinstance(config[x], float):
+#             print('{ \phantom - } ' * i + x_modified + ':', str(config[x]), '\\\\')
+#         elif isinstance(config[x], GaussianNoise):
+#             print('{ \phantom - } ' * i + x_modified + ':', 'skrl.resources.noises.torch.gaussian.GaussianNoise' + '\\\\')
+#         else:
+#             if x_modified:
+#                 print('{ \phantom - } ' * i + x_modified + ':' + '\\\\')
+#             print_config(config[x], i=i + 1)
 
-def print_config(config, i=0):
+def print_config(config, i=0, string=None):
+    if string == None:
+        string_config = ''
+    else:
+        string_config = string
+        print('')
+        print(string_config)
     for x in config:
         x_modified = x.replace('_', '\\_')
         if x in config and config[x] is None:
-            continue
+            string_config += ('{ \phantom - } ' * i + x_modified + ':' + str(config[x]) + '\\\\' + '\n')
         elif isinstance(config[x], int) or isinstance(config[x], float):
-            print(x_modified + ':', str(config[x]), '\\\\')
+            string_config += ('{ \phantom - } ' * i + x_modified + ':' + str(config[x]) + '\\\\' + '\n')
+        elif isinstance(config[x], GaussianNoise):
+            string_config += ('{ \phantom - } ' * i + x_modified + ':' + 'skrl.resources.noises.torch.gaussian.GaussianNoise' + '\\\\' + '\n')
+        elif isinstance(config[x], str):
+            string_config += ('{ \phantom - } ' * i + x_modified + ':' + str(config[x]) + '\\\\' + '\n')
         else:
-            for y in config[x]:
-                y_modified = y.replace('_', '\\_')
-                if isinstance(config[x][y], str) and 'skrl.resources.noises.torch.gaussian' in config[x][y]:
-                    config[x][y] = 'skrl.resources.noises.torch.gaussian.GaussianNoise'
-                if config[x][y] is None:
-                    continue
-                if isinstance(config[x][y], GaussianNoise):
-                    print('\par ' * (i+1) + y_modified + ':', 'skrl.resources.noises.torch.gaussian.GaussianNoise')
-                else:
-                    print('\par ' * (i+1) + y_modified + ':', config[x][y])
-                if isinstance(config[x][y], dict):
-                    print_config(config[x][y], i=i + 1)
+            if x_modified:
+                string_config += ('{ \phantom -5 } ' * i + x_modified + ':' + '\\\\' + '\n')
+            string_config = print_config(config[x], i=i + 1, string=string_config)
+    
+    return string_config
 
-
-
-
-
-
-
-
-
+def write_txt_file_from_str(str, file_path=None):
+    with open(file_path, 'w') as file:
+        file.write(str)
 
 # Define the models (deterministic models) for the DDPG agent using mixin
 # - Actor (policy): takes as input the environment's observation/state and returns an action
@@ -83,7 +94,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
 
-env = gym.vector.make("UR5_ddpg_no_noise", num_envs=8, asynchronous=True)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=10, asynchronous=True)
 
 env = wrap_env(env)
 
@@ -128,13 +139,40 @@ for model in models_ddpg.values():
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
 cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=0.2, device=device)
 cfg_ddpg["exploration"]["final_scale"] = 0
-cfg_ddpg["exploration"]["timesteps"] = 100
 cfg_ddpg["batch_size"] = 10
 cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 10
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
 cfg_ddpg["experiment"]["write_interval"] = 5
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
+cfg_ddpg["experiment"]["directory"] = 'runs_for_report'
+cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_1'
+
+dir = cfg_ddpg["experiment"]["directory"] + '/' + cfg_ddpg["experiment"]["experiment_name"]
+print(dir)
+
+directory = './' + cfg_ddpg["experiment"]["directory"]
+experiment_name = cfg_ddpg["experiment"]["experiment_name"] + "_config_"
+cfg_ddpg["experiment"]["experiment_name"] = experiment_name
+experiment_name = cfg_ddpg["experiment"]["experiment_name"]
+path_experiment = os.path.join(directory, experiment_name)
+
+
+if not os.path.exists(path_experiment):
+    path_experiment = os.path.join(directory, experiment_name + str(1))
+    cfg_ddpg["experiment"]["experiment_name"] = experiment_name + str(1)
+
+if os.path.exists(path_experiment):
+    print('Experiment already exists. Adding integer identifier.')
+    identifier = 1
+    while os.path.exists(path_experiment):
+        path_experiment = os.path.join(directory, experiment_name + str(identifier))
+        cfg_ddpg["experiment"]["experiment_name"] = experiment_name + str(identifier)
+        identifier += 1
+
+print('cfg_ddpg["experiment"]["experiment_name"]', cfg_ddpg["experiment"]["experiment_name"])
+
+output_file = os.path.join(path_experiment, "skrl_config.txt")
 
 agent_ddpg = DDPG(models=models_ddpg,
                   memory=memory,
@@ -147,16 +185,17 @@ agent_ddpg = DDPG(models=models_ddpg,
 cfg_trainer = {"timesteps": 6000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
 
-print(cfg_ddpg)
+string = print_config(config=cfg_ddpg)
 
+print(string)
+write_txt_file_from_str(str=string, file_path=output_file)
 
+output_file = os.path.join(path_experiment, "run_config_csvfile.csv")
 
-with open('run_config_csvfile.csv', 'w') as f:  # You will need 'wb' mode in Python 2.x
+with open(output_file, 'w') as f:  # You will need 'wb' mode in Python 2.x
     w = csv.DictWriter(f, cfg_ddpg.keys())
     w.writeheader()
     w.writerow(cfg_ddpg)
-
-print_config(cfg_ddpg)
 
 # start training
 trainer.train()

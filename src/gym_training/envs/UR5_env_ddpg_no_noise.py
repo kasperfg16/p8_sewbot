@@ -109,9 +109,9 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         
         # Action space (In this case - joint limits)
         self.act_space_low = np.array([
-            -np.deg2rad(175),
-            -np.deg2rad(90),
-            -np.pi,
+            -np.deg2rad(110),
+            -np.deg2rad(45),
+            -np.deg2rad(-90),
             -np.pi,
             -np.pi,
             -np.pi,
@@ -119,9 +119,9 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             0])
         
         self.act_space_high = np.array([
-            np.deg2rad(-90),
-            np.deg2rad(30),
-            np.pi,
+            np.deg2rad(-160),
+            np.deg2rad(0),
+            np.deg2rad(90+70),
             np.pi,
             np.pi,
             np.pi,
@@ -212,6 +212,10 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
     
     def unfold(self):
 
+        ####### Test
+        #self.done_signal = True
+        #######
+        
         if not self.done_signal:
             result_move = self.controller.move_group_to_joint_target(target=self.joint_position, quiet=self.quiet, render=not self.headless_mode, group='Arm')
             self.move_reward += result_move
@@ -225,6 +229,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             self.controller.stay(50, render=not self.headless_mode)
         else:
             ####### Test
+            #self.show_action_space()
             #self.test_grip()
             #######
             
@@ -366,17 +371,83 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.data.qpos[self.controller.actuated_joint_ids] = self.home_pose
 
         return observation
+    
+    def show_action_space(self):
+
+        np.array([-np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0, 0])
+
+        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, 0, 0, self.act_space_low[5]]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(4000, render=not self.headless_mode)
+
+        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, 0, 0, self.act_space_high[5]]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(4000, render=not self.headless_mode)
+
+        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, 0, self.act_space_low[4], 0]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(4000, render=not self.headless_mode)
+
+        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, 0, self.act_space_high[4], 0]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(4000, render=not self.headless_mode)
+
+        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, self.act_space_high[3], 0, 0]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(4000, render=not self.headless_mode)
+
+        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, self.act_space_low[3], 0, 0]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(4000, render=not self.headless_mode)
+        
+        target = [self.act_space_low[0], self.act_space_high[1], self.act_space_low[2], self.act_space_high[3], self.act_space_low[4], self.act_space_high[5]]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)
+
+        target = [self.act_space_low[0], self.act_space_high[1], self.act_space_low[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)
+
+        target = [self.act_space_low[0], self.act_space_high[1], self.act_space_low[2], self.act_space_low[3], self.act_space_high[4], self.act_space_high[5]]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)
+
+        target = [self.act_space_low[0], self.act_space_high[1], self.act_space_low[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)
+
+        target = [self.act_space_high[0], self.act_space_high[1], self.act_space_low[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)
+
+        target = [self.act_space_high[0], self.act_space_low[1], self.act_space_low[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)
+
+        target = [self.act_space_low[0], self.act_space_low[1], self.act_space_low[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)
+
+        target = [self.act_space_low[0], self.act_space_high[1], self.act_space_high[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)
+
 
     def test_grip(self):
-        
+    
         til_1 = 15
         tilt2 = 10
 
         target = [-np.deg2rad(175), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
-
-        self.controller.stay(1000, render=not self.headless_mode)
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
+
+        target = [np.deg2rad(-90), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
+        self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
+        self.controller.stay(1000, render=not self.headless_mode)
+
+
+
 
         self.controller.open_gripper()
         target = [np.deg2rad(45-185), np.deg2rad(-tilt2), np.deg2rad(90+til_1), np.deg2rad(til_1+tilt2), np.pi/2, 0]
