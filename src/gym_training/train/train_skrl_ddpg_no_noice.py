@@ -203,7 +203,7 @@ if inferrence:
     agent_ddpg.load("./runs_for_report/DDPG_env_iteration_1_config_1/checkpoints/best_agent.pt")
 
 # Configure and instantiate the RL trainer
-cfg_trainer = {"timesteps": 6000, "headless": True}
+cfg_trainer = {"timesteps": 10000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
 
 # Write some files with experiment description

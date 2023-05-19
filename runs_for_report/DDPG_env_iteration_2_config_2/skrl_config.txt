@@ -26,11 +26,6 @@ experiment:\\
 { \phantom - } wandb:False\\
 { \phantom - } wandb\_kwargs:\\
 
-description:
 
-Changes
-cfg_ddpg["exploration"]["final_scale"] = 0.000000001
-cfg_ddpg["batch_size"] = 20
-cfg_ddpg["random_timesteps"] = 0
-cfg_ddpg["learning_starts"] = 20
-cfg_ddpg["discount_factor"] = 0.99
+Other:
+longer training: 10000 steps
