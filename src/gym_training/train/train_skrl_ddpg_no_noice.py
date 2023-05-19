@@ -83,7 +83,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
 
-env = gym.vector.make("UR5_ddpg_no_noise", num_envs=1, asynchronous=False)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=8, asynchronous=True)
 
 env = wrap_env(env)
 
@@ -128,15 +128,15 @@ for model in models_ddpg.values():
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
 cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=0.2, device=device)
 cfg_ddpg["exploration"]["final_scale"] = 0
-cfg_ddpg["batch_size"] = 10
+cfg_ddpg["batch_size"] = 50
 cfg_ddpg["random_timesteps"] = 0
-cfg_ddpg["learning_starts"] = 10
-cfg_ddpg["discount_factor"] = 0.98
+cfg_ddpg["learning_starts"] = 50
+cfg_ddpg["discount_factor"] = 0.99
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
 cfg_ddpg["experiment"]["write_interval"] = 5
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 cfg_ddpg["experiment"]["directory"] = 'runs_for_report'
-cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_1'
+cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_2'
 
 dir = cfg_ddpg["experiment"]["directory"] + '/' + cfg_ddpg["experiment"]["experiment_name"]
 print(dir)
@@ -198,7 +198,7 @@ print('curl -s https://packagecloud.io/install/repositories/github/git-lfs/scrip
 print('sudo apt-get install git-lfs')
 print('run: \' git add .gitattributes \' ')
 print('And then run: \' git commit -m "Add .gitattributes file" \' ')
-print('And then run: \' git push" \' ')
+print('And then run: \' git push \' ')
 
 filename_to_add = os.path.join(path_experiment, 'checkpoints/best_agent.pt')
 filename_to_add = filename_to_add.replace("./", "")
