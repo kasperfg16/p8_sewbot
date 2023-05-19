@@ -1,5 +1,6 @@
 import csv
 import os
+import sys
 import gymnasium as gym
 import gym_training
 
@@ -84,7 +85,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
 
-env = gym.vector.make("UR5_ddpg_no_noise", num_envs=8, asynchronous=True)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=2, asynchronous=True)
 
 env = wrap_env(env)
 
@@ -173,6 +174,7 @@ try:
     print("Commands executed successfully.")
 except subprocess.CalledProcessError as e:
     print("Command execution failed:", e.output.decode())
+    sys.exit(1)
 
 if not os.path.exists(path_experiment):
     path_experiment = os.path.join(directory, experiment_name + str(1))
@@ -231,6 +233,7 @@ try:
     print("Commands executed successfully.")
 except subprocess.CalledProcessError as e:
     print("Command execution failed:", e.output.decode())
+    sys.exit(1)
 
 # start training
 trainer.train()
