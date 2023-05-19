@@ -56,13 +56,13 @@
     </body>
     -->
 
-    <body name="B3_5" pos="-0.0125 -0.075 1.005" euler="0 0 3.14">
+    <body name="B3_5" pos="-0.0125 -0.097 1.0025" euler="0 0 3.14">
             
         <freejoint/>
         <composite type="cloth" count="4 19 1" spacing=" 0.0083" flatinertia="0">
             <joint kind="main" damping="0.0000015" stiffness="0.00016" />
             <!-- <skin material="matdenim" texcoord="true" inflate="0.001" subgrid="2"/>-->
-            <geom type="capsule" size=" 0.0025 .00166 " rgba=".8 .2 .1 1" mass='1.23787496357988E-05'/>
+            <geom type="capsule" size=" 0.0025 .00166 " rgba=".8 .2 .1 1" mass='1.23787496357988E-05'/> <!--friction='1 0.005 0.0001'-->
         </composite>
     </body>
 
@@ -85,13 +85,29 @@
     <geom type="box" size="0.025 0.10 1" rgba="1 1 1 1" mass="15" condim='4'/>
     </body>
 
-    <body name="top" pos="0 -0.01 2.005">
+    <body name="top" pos="0 -0.01 2.0045">
     <geom type="box" size="0.025 0.10 1" rgba="1 1 1 0.25" mass="15" condim='4'/>
     </body>
 
-    <body name="41deg_check" pos="0 -0.133 0.9127" euler="0.72431164 0 0">               <!--pos"0 -0.114 0.929"-->
-    <geom type="box" size="0.025 0.075 0.05" rgba="0 1 0 1" mass="1500" condim='4'/>    <!--size="0.025 0.05 0.05" -->
+    <!--
+    <body name="41deg_check" pos="0 -0.133 0.9127" euler="0.72431164 0 0">               
+    <geom type="box" size="0.025 0.075 0.05" rgba="0 1 0 1" mass="1500" condim='4'/>
     </body>
+
+    <body name="60deg_check" pos="0 -0.1042 0.91" euler="1.04719755 0 0">              
+    <geom type="box" size="0.025 0.075 0.05" rgba="0 1 0 1" mass="1500" condim='4'/>
+    </body>
+
+    <body name="20deg_check" pos="0 -0.133 0.9127" euler="0.34906585 0 0">              
+    <geom type="box" size="0.025 0.075 0.05" rgba="0 1 0 1" mass="1500" condim='4'/>   
+    </body>
+
+    -->
+
+    <body name="60deg_check" pos="0 -0.1042 0.91" euler="1.04719755 0 0">              
+    <geom type="box" size="0.025 0.075 0.05" rgba="0 1 0 1" mass="1500" condim='4'/>
+    </body>
+    
     
     </worldbody>
 
