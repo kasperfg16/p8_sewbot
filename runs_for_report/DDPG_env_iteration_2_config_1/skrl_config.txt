@@ -31,3 +31,4 @@ description:
 coverage reward increased from 50 to 100
 done reward increased from 100 to 1000
 batch and learning starts increased from 10 to 50
+num env: 10

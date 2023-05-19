@@ -85,7 +85,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
 
-env = gym.vector.make("UR5_ddpg_no_noise", num_envs=2, asynchronous=True)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=10, asynchronous=True)
 
 env = wrap_env(env)
 
