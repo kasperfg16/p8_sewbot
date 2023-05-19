@@ -16,6 +16,7 @@ from skrl.resources.noises.torch import GaussianNoise
 from skrl.trainers.torch import SequentialTrainer
 from skrl.envs.torch import wrap_env
 import nvidia_smi
+import subprocess
 
 def add_file_to_gitattributes(filename):
     gitattributes_path = '.gitattributes'
@@ -147,6 +148,31 @@ cfg_ddpg["experiment"]["experiment_name"] = experiment_name
 experiment_name = cfg_ddpg["experiment"]["experiment_name"]
 path_experiment = os.path.join(directory, experiment_name)
 
+# Run the git pull command
+repo_name = 'p8_sewbot'
+
+# Find the repository path
+current_path = os.getcwd()
+repository_path = None
+
+# Iterate through parent directories until the repository is found
+while current_path != '/':
+    if os.path.isdir(os.path.join(current_path, repo_name, '.git')):
+        repository_path = os.path.join(current_path, repo_name)
+        break
+    current_path = os.path.dirname(current_path)
+
+# Check if the repository path was found
+if repository_path:
+    print("Repository path:", repository_path)
+else:
+    print("Repository not found.")
+
+try:
+    subprocess.check_output(['git', 'pull'], cwd=repository_path)
+    print("Commands executed successfully.")
+except subprocess.CalledProcessError as e:
+    print("Command execution failed:", e.output.decode())
 
 if not os.path.exists(path_experiment):
     path_experiment = os.path.join(directory, experiment_name + str(1))
@@ -160,8 +186,6 @@ if os.path.exists(path_experiment):
         cfg_ddpg["experiment"]["experiment_name"] = experiment_name + str(identifier)
         identifier += 1
 
-print('cfg_ddpg["experiment"]["experiment_name"]', cfg_ddpg["experiment"]["experiment_name"])
-
 output_file = os.path.join(path_experiment, "skrl_config.txt")
 
 agent_ddpg = DDPG(models=models_ddpg,
@@ -172,7 +196,7 @@ agent_ddpg = DDPG(models=models_ddpg,
                   device=device)
 
 # load checkpoint
-inferrence = True
+inferrence = False
 if inferrence:
     agent_ddpg.load("./runs_for_report/DDPG_env_iteration_1_config_1/checkpoints/best_agent.pt")
 
@@ -192,17 +216,21 @@ with open(output_file, 'w') as f:  # You will need 'wb' mode in Python 2.x
     w.writeheader()
     w.writerow(cfg_ddpg)
 
-# add file to .git_attributes
-print('If you want to upload the model to github, the model is too big. But we can use \n git lfs , you have to run this if you haven\'t dione it before:')
-print('curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash')
-print('sudo apt-get install git-lfs')
-print('run: \' git add .gitattributes \' ')
-print('And then run: \' git commit -m "Add .gitattributes file" \' ')
-print('And then run: \' git push \' ')
-
 filename_to_add = os.path.join(path_experiment, 'checkpoints/best_agent.pt')
 filename_to_add = filename_to_add.replace("./", "")
 add_file_to_gitattributes(filename_to_add)
+
+# Auto git push the new expiriment to git repo
+try:
+    subprocess.check_output(['git', 'lfs', 'install'], stderr=subprocess.STDOUT, cwd=repository_path)
+    subprocess.check_output(['git', 'add', '.gitattributes'], cwd=repository_path)
+    subprocess.check_output(['git', 'commit', '-m', 'Add .gitattributes file'], cwd=repository_path)
+    subprocess.check_output(['git', 'add', output_file], cwd=repository_path)
+    subprocess.check_output(['git', 'commit', '-m', 'Add .gitattributes file'], cwd=repository_path)
+    subprocess.check_output(['git', 'push'], cwd=repository_path)
+    print("Commands executed successfully.")
+except subprocess.CalledProcessError as e:
+    print("Command execution failed:", e.output.decode())
 
 # start training
 trainer.train()
