@@ -30,7 +30,7 @@ class DeterministicActor(DeterministicMixin, Model):
 
 # Load and wrap the Gymnasium environment.
 # Note: the environment version may change depending on the gymnasium version
-env = gym.vector.make("UR3e", num_envs=2, asynchronous=True)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=1, asynchronous=False)
 
 env = wrap_env(env)
 
@@ -60,7 +60,7 @@ agent_ddpg = DDPG(models=models_ddpg,
                   device=device)
 
 # load checkpoint
-agent_ddpg.load("./runs/23-04-27_16-56-38-469063_DDPG/checkpoints/best_agent.pt")
+agent_ddpg.load("./runs_for_report/DDPG_env_iteration_1_config_1/checkpoints/best_agent.pt")
 
 # Configure and instantiate the RL trainer
 cfg_trainer = {"timesteps": 15000, "headless": True}

@@ -145,7 +145,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.in_home_pose = False
 
         # Show renders?
-        self.headless_mode = True
+        self.headless_mode = False
 
         # Print output in terminal?
         self.quiet = True
@@ -327,7 +327,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
 
         # Reward weights
         w1 = 1
-        w2 = 50
+        w2 = 100
 
         if self.done_signal:
             coveragereward = self.get_coverage() # output percentage
@@ -340,7 +340,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
                 
             else:
                 self.terminated = True
-                done_reward = 100
+                done_reward = 1000
         
         # Incentivice to do it faster
         step_penalty = self.step_counter/2

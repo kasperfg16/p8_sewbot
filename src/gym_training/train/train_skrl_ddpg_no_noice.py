@@ -83,7 +83,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
 
-env = gym.vector.make("UR5_ddpg_no_noise", num_envs=8, asynchronous=True)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=1, asynchronous=False)
 
 env = wrap_env(env)
 
@@ -171,10 +171,16 @@ agent_ddpg = DDPG(models=models_ddpg,
                   action_space=env.action_space,
                   device=device)
 
+# load checkpoint
+inferrence = True
+if inferrence:
+    agent_ddpg.load("./runs_for_report/DDPG_env_iteration_1_config_1/checkpoints/best_agent.pt")
+
 # Configure and instantiate the RL trainer
 cfg_trainer = {"timesteps": 6000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
 
+# Write some files with experiment description
 string = print_config(config=cfg_ddpg)
 
 write_txt_file_from_str(str=string, file_path=output_file)
@@ -187,15 +193,16 @@ with open(output_file, 'w') as f:  # You will need 'wb' mode in Python 2.x
     w.writerow(cfg_ddpg)
 
 # add file to .git_attributes
-
-print('If you want to upload to github, you have to run this if you haven\'t dione it before:')
+print('If you want to upload the model to github, the model is too big. But we can use \n git lfs , you have to run this if you haven\'t dione it before:')
 print('curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash')
 print('sudo apt-get install git-lfs')
+print('run: \' git add .gitattributes \' ')
+print('And then run: \' git commit -m "Add .gitattributes file" \' ')
+print('And then run: \' git push" \' ')
 
-# Example usage
 filename_to_add = os.path.join(path_experiment, 'checkpoints/best_agent.pt')
-print(filename_to_add)
+filename_to_add = filename_to_add.replace("./", "")
 add_file_to_gitattributes(filename_to_add)
 
 # start training
-#trainer.train()
+trainer.train()
