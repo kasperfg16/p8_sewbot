@@ -51,3 +51,4 @@ runs_for_report/Inverted pendulum_config_19/checkpoints/best_agent.pt filter=lfs
 runs_for_report/Inverted pendulum_config_20/checkpoints/best_agent.pt filter=lfs diff=lfs merge=lfs -text
 runs_for_report/Inverted pendulum_config_23/checkpoints/best_agent.pt filter=lfs diff=lfs merge=lfs -text
 runs_for_report/Inverted pendulum_config_24/checkpoints/best_agent.pt filter=lfs diff=lfs merge=lfs -text
+runs_for_report/Inverted pendulum_config_25/checkpoints/best_agent.pt filter=lfs diff=lfs merge=lfs -text
