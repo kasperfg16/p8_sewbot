@@ -85,7 +85,8 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
 
-env = gym.vector.make("InvertedPendulum-v4", num_envs=10, asynchronous=True)
+#env = gym.vector.make("InvertedPendulum-v4", num_envs=3, asynchronous=True)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=3, asynchronous=True)
 
 env = wrap_env(env)
 
@@ -109,7 +110,7 @@ print("Used memory:", info.used)
 nvidia_smi.nvmlShutdown()
 
 # Instantiate a RandomMemory (without replacement) as experience replay memory
-memory = RandomMemory(memory_size=100, num_envs=env.num_envs, device=device, replacement=False, export=False)
+memory = RandomMemory(memory_size=15000, num_envs=env.num_envs, device=device, replacement=False, export=True)
 
 # Instantiate the agent's models (function approximators).
 # DDPG requires 4 models, visit its documentation for more details
@@ -128,17 +129,16 @@ for model in models_ddpg.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
-cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=0.2, device=device)
-cfg_ddpg["exploration"]["final_scale"] = 0.000000001
-cfg_ddpg["batch_size"] = 20
+cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=0.4, device=device)
+cfg_ddpg["batch_size"] = 100
 cfg_ddpg["random_timesteps"] = 0
-cfg_ddpg["learning_starts"] = 20
-cfg_ddpg["discount_factor"] = 0.99
+cfg_ddpg["learning_starts"] = 100
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
-cfg_ddpg["experiment"]["write_interval"] = 5
+cfg_ddpg["experiment"]["write_interval"] = 1000
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 cfg_ddpg["experiment"]["directory"] = 'runs_for_report'
-cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_2'
+cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_3'
+#cfg_ddpg["experiment"]["experiment_name"] = 'InvertedPendulum-v4_test_config_1'
 
 dir = cfg_ddpg["experiment"]["directory"] + '/' + cfg_ddpg["experiment"]["experiment_name"]
 print(dir)
@@ -203,7 +203,7 @@ if inferrence:
     agent_ddpg.load("./runs_for_report/DDPG_env_iteration_1_config_1/checkpoints/best_agent.pt")
 
 # Configure and instantiate the RL trainer
-cfg_trainer = {"timesteps": 10000, "headless": True}
+cfg_trainer = {"timesteps": 150000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
 
 # Write some files with experiment description
