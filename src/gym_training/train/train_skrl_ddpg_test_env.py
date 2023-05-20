@@ -85,8 +85,8 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Load and wrap the Gym environment.
 # Note: the environment version may change depending on the gym version
 
-env = gym.vector.make("InvertedPendulum-v4", num_envs=3, asynchronous=True)
-#env = gym.vector.make("testEnv", num_envs=3, asynchronous=True)
+#env = gym.vector.make("InvertedPendulum-v4", num_envs=3, asynchronous=True)
+env = gym.vector.make("testEnv", num_envs=3, asynchronous=True)
 
 env = wrap_env(env)
 
@@ -110,7 +110,7 @@ print("Used memory:", info.used)
 nvidia_smi.nvmlShutdown()
 
 # Instantiate a RandomMemory (without replacement) as experience replay memory
-memory = RandomMemory(memory_size=20000, num_envs=env.num_envs, device=device, replacement=False, export=True)
+memory = RandomMemory(memory_size=15000, num_envs=env.num_envs, device=device, replacement=False, export=True)
 
 # Instantiate the agent's models (function approximators).
 # DDPG requires 4 models, visit its documentation for more details
@@ -129,7 +129,7 @@ for model in models_ddpg.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
-cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=0.2, device=device)
+cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=0.4, device=device)
 cfg_ddpg["batch_size"] = 100
 cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 100
@@ -137,7 +137,8 @@ cfg_ddpg["learning_starts"] = 100
 cfg_ddpg["experiment"]["write_interval"] = 1000
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 cfg_ddpg["experiment"]["directory"] = 'runs_for_report'
-cfg_ddpg["experiment"]["experiment_name"] = 'InvertedPendulum-v4_test'
+cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_3'
+#cfg_ddpg["experiment"]["experiment_name"] = 'InvertedPendulum-v4_test_config_1'
 
 dir = cfg_ddpg["experiment"]["directory"] + '/' + cfg_ddpg["experiment"]["experiment_name"]
 print(dir)
