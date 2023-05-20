@@ -198,9 +198,9 @@ class MJ_Controller(object):
         # Wrist 2 Joint
         self.controller_list.append(
             PID(
-                17 * p_scale,
+                25 * p_scale,
                 0.0 * i_scale,
-                0.7 * d_scale,
+                0.3 * d_scale,
                 setpoint=-1.57,
                 output_limits=(self.model.actuator_ctrlrange[4][0], self.model.actuator_ctrlrange[4][1]),
                 sample_time=sample_time,

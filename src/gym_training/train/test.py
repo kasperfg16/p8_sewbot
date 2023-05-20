@@ -1,4 +1,14 @@
-import math
+import decimal
+import numpy as np
+
+# Create a float16 number
+number = np.int16()
+
+print(number)
 
 
-print(math.exp(30/10))
+number = np.int32(2155)
+
+number = np.float32(number/1000)
+
+print(number)

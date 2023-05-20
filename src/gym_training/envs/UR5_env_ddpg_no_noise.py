@@ -116,7 +116,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             -np.pi,
             -np.pi,
             0,
-            0])
+            0]).astype(np.float16)
         
         self.act_space_high = np.array([
             np.deg2rad(-110),
@@ -126,9 +126,9 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             np.pi,
             np.pi,
             1,
-            1])
+            1]).astype(np.float16)
         
-        self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42)
+        self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.float16)
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
         self.graspcompleter = False # to define if a grasp have been made or not. When true, call reward
@@ -229,7 +229,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             self.controller.stay(50, render=not self.headless_mode)
         else:
             ####### Test
-            #self.show_action_space()
+            self.show_action_space()
             #self.test_grip()
             #######
             
