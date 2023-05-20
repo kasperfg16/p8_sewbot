@@ -20,10 +20,11 @@ rewards\_shaper:None\\
 experiment:\\
 { \phantom - } directory:runs_for_report\\
 { \phantom - } experiment\_name:DDPG_env_iteration_3_config_2\\
-{ \phantom - } write\_interval:1000\\
+{ \phantom - } write\_interval:101\\
 { \phantom - } checkpoint\_interval:500\\
 { \phantom - } store\_separately:False\\
 { \phantom - } wandb:False\\
 { \phantom - } wandb\_kwargs:\\
 
-Batch size lowered
+description:
+Batch size lowered compared to DDPG_env_iteration_3_config_1

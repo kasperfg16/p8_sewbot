@@ -134,7 +134,7 @@ cfg_ddpg["batch_size"] = 20
 cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 20
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
-cfg_ddpg["experiment"]["write_interval"] = 1000
+cfg_ddpg["experiment"]["write_interval"] = 101
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 cfg_ddpg["experiment"]["directory"] = 'runs_for_report'
 cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_3'
