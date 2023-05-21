@@ -106,3 +106,4 @@ runs_for_report/DDPG_env_batch16_config_2/checkpoints/best_agent.pt filter=lfs d
 runs_for_report/DDPG_env_iteration_3_config_3/checkpoints/best_agent.pt filter=lfs diff=lfs merge=lfs -text
 runs_for_report/DDPG_env_iteration_4_config_4/checkpoints/best_agent.pt filter=lfs diff=lfs merge=lfs -text
 runs_for_report/DDPG_env_iteration_4_config_1/checkpoints/best_agent.pt filter=lfs diff=lfs merge=lfs -text
+runs_for_report/DDPG_env_iteration_4_config_2/checkpoints/best_agent.pt filter=lfs diff=lfs merge=lfs -text
