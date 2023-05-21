@@ -86,7 +86,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Note: the environment version may change depending on the gym version
 
 #env = gym.vector.make("InvertedPendulum-v4", num_envs=3, asynchronous=True)
-env = gym.vector.make("UR5_ddpg_no_noise", num_envs=3k, asynchronous=True)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=3, asynchronous=True)
 
 env = wrap_env(env)
 

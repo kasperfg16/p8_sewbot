@@ -15,6 +15,22 @@ from gym_training.controller.mujoco_controller import MJ_Controller
 import mujoco.viewer
 import time
 
+def index_difference(arr1, arr2):
+    difference = []
+    for i in range(len(arr1)):
+        if i < len(arr2):
+            diff = abs(i - arr2[i])
+            difference.append(diff)
+        else:
+            difference.append(i)
+    return difference
+
+def calculate_product(arr):
+    product = 1
+    for num in arr:
+        product *= num
+    return product
+
 def find_file(filename, search_path):
     """
     Search for a file in the given search path.
@@ -48,10 +64,10 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         # note: The action space has dtype=uint16. The first 6 values are divided with 1000 in the step() to create a set of joint angles with precision of 0.001 between high and low values
         self.descretization = 100
         self.act_space_low = np.array([
-            -np.deg2rad(160)*self.descretization,
+            -np.deg2rad(150)*self.descretization,
             -np.deg2rad(45)*self.descretization,
             -np.deg2rad(-90)*self.descretization,
-            -np.pi*self.descretization,
+            -np.deg2rad(90)*self.descretization,
             -np.pi*self.descretization,
             -np.pi*self.descretization,
             0,
@@ -59,14 +75,20 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         
         self.act_space_high = np.array([
             np.deg2rad(-110)*self.descretization,
-            np.deg2rad(0)*self.descretization,
-            np.deg2rad(90+70)*self.descretization,
-            np.pi*self.descretization,
+            np.deg2rad(-30)*self.descretization,
+            np.deg2rad(90+60)*self.descretization,
+            -np.deg2rad(0)*self.descretization,
             np.pi*self.descretization,
             np.pi*self.descretization,
             2,
             1]).astype(np.int16)
         
+
+        # Example usage:
+        result = index_difference(self.act_space_low, self.act_space_high)
+
+        print('posible actions: ', calculate_product(result))
+                
         self.observation_space = spaces.Box(min(self.act_space_low), max(self.act_space_high), shape=(self.img_width*self.img_height*3+8, ), dtype=np.float32)
             
         self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.int16)
@@ -339,59 +361,59 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
 
         np.array([-np.pi/2, 0, np.pi/2, 0, np.pi/2, 0, 0, 0])
 
-        target = [self.act_space_low[0]/1000, self.act_space_high[1]/1000, np.pi/2, 0, 0, self.act_space_low[5]]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, np.pi/2, 0, 0, self.act_space_low[5]/self.descretization]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(4000, render=not self.headless_mode)
 
-        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, 0, 0, self.act_space_high[5]]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, np.pi/2, 0, 0, self.act_space_high[5]/self.descretization]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(4000, render=not self.headless_mode)
 
-        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, 0, self.act_space_low[4], 0]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, np.pi/2, 0, self.act_space_low[4]/self.descretization, 0]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(4000, render=not self.headless_mode)
 
-        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, 0, self.act_space_high[4], 0]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, np.pi/2, 0, self.act_space_high[4]/self.descretization, 0]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(4000, render=not self.headless_mode)
 
-        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, self.act_space_high[3], 0, 0]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, np.pi/2, self.act_space_high[3]/self.descretization, 0, 0]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(4000, render=not self.headless_mode)
 
-        target = [self.act_space_low[0], self.act_space_high[1], np.pi/2, self.act_space_low[3], 0, 0]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, np.pi/2, self.act_space_low[3]/self.descretization, 0, 0]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(4000, render=not self.headless_mode)
         
-        target = [self.act_space_low[0], self.act_space_high[1], self.act_space_low[2], self.act_space_high[3], self.act_space_low[4], self.act_space_high[5]]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, self.act_space_low[2]/self.descretization, self.act_space_high[3]/self.descretization, self.act_space_low[4]/self.descretization, self.act_space_high[5]/self.descretization]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
 
-        target = [self.act_space_low[0], self.act_space_high[1], self.act_space_low[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, self.act_space_low[2]/self.descretization, self.act_space_high[3]/self.descretization, self.act_space_high[4]/self.descretization, self.act_space_high[5]/self.descretization]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
 
-        target = [self.act_space_low[0], self.act_space_high[1], self.act_space_low[2], self.act_space_low[3], self.act_space_high[4], self.act_space_high[5]]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, self.act_space_low[2]/self.descretization, self.act_space_low[3]/self.descretization, self.act_space_high[4]/self.descretization, self.act_space_high[5]/self.descretization]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
 
-        target = [self.act_space_low[0], self.act_space_high[1], self.act_space_low[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, self.act_space_low[2]/self.descretization, self.act_space_high[3]/self.descretization, self.act_space_high[4]/self.descretization, self.act_space_high[5]/self.descretization]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
 
-        target = [self.act_space_high[0], self.act_space_high[1], self.act_space_low[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        target = [self.act_space_high[0]/self.descretization, self.act_space_high[1]/self.descretization, self.act_space_low[2]/self.descretization, self.act_space_high[3]/self.descretization, self.act_space_high[4]/self.descretization, self.act_space_high[5]/self.descretization]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
 
-        target = [self.act_space_high[0], self.act_space_low[1], self.act_space_low[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        target = [self.act_space_high[0]/self.descretization, self.act_space_low[1]/self.descretization, self.act_space_low[2]/self.descretization, self.act_space_high[3]/self.descretization, self.act_space_high[4]/self.descretization, self.act_space_high[5]/self.descretization]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
 
-        target = [self.act_space_low[0], self.act_space_low[1], self.act_space_low[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_low[1]/self.descretization, self.act_space_low[2]/self.descretization, self.act_space_high[3]/self.descretization, self.act_space_high[4]/self.descretization, self.act_space_high[5]/self.descretization]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
 
-        target = [self.act_space_low[0], self.act_space_high[1], self.act_space_high[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
+        target = [self.act_space_low[0]/self.descretization, self.act_space_high[1]/self.descretization, self.act_space_high[2]/self.descretization, self.act_space_high[3]/self.descretization, self.act_space_high[4]/self.descretization, self.act_space_high[5]/self.descretization]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
     

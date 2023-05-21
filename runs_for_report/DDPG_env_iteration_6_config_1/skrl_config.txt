@@ -30,4 +30,4 @@ Iterration6:
 
 discretization of action space:
 
-from 1000 to 100 i.e. from 0.001 rad to 0.01 rad
+from 0.001 rad to 0.01 rad
