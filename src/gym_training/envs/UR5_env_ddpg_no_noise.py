@@ -252,7 +252,10 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         w2 = 100
 
         if self.done_signal:
-            coveragereward = self.get_coverage() # output percentage
+            
+            # Do not give coverage reward if it has not moved camera check first will ensure to not start the agent task in a real scenario
+            if self.step_counter > 0:
+                coveragereward = self.get_coverage() # output percentage
             
             # If it says it is done but it isn't it fails (truncate)
             # If agent says it is done and it is the it has success (terminate)
