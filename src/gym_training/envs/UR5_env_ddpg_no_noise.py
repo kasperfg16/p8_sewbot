@@ -36,7 +36,6 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         "render_fps": 100,
     }
 
-
     def __init__(self, **kwargs):
         
         filename = "ur5_no_noise.xml"
@@ -44,59 +43,60 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.model_path = find_file(filename, search_path)
         self.img_width = 64
         self.img_height = 64
-        self.observation_space = spaces.Box(0, 255, shape=(self.img_width, self.img_height, 3), dtype=np.uint8)
+        self.observation_space = spaces.Box(0, 255, shape=(self.img_width*self.img_height*3+8, ), dtype=np.float32)
+
+        # Action space (In this case - joint limits)
+        # note: The action space has dtype=uint16. The first 6 values are divided with 1000 in the step() to create a set of joint angles with precision of 0.001 between high and low values
+        self.act_space_low = np.array([
+            -np.deg2rad(160)*1000,
+            -np.deg2rad(45)*1000,
+            -np.deg2rad(-90)*1000,
+            -np.pi*1000,
+            -np.pi*1000,
+            -np.pi*1000,
+            0,
+            0]).astype(np.int16)
+        
+        self.act_space_high = np.array([
+            np.deg2rad(-110)*1000,
+            np.deg2rad(0)*1000,
+            np.deg2rad(90+70)*1000,
+            np.pi*1000,
+            np.pi*1000,
+            np.pi*1000,
+            2,
+            1]).astype(np.int16)
+            
+        self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.int16)
 
         MujocoEnv.__init__(
             self, self.model_path, 5, observation_space=self.observation_space, **kwargs
         )
-        EzPickle.__init__(self, **kwargs)
 
-        # Action space (In this case - joint limits)
-        # note: The action space has dtype=uint16. The first 6 values are divided with 1000 in the step() to create a set of joint angles with precision of 0.001 between high and low values
+        EzPickle.__init__(self, **kwargs)
+        
         # self.act_space_low = np.array([
-        #     -np.deg2rad(160)*1000,
-        #     -np.deg2rad(45)*1000,
-        #     -np.deg2rad(-90)*1000,
-        #     -np.pi*1000,
-        #     -np.pi*1000,
-        #     -np.pi*1000,
+        #     -np.deg2rad(160),
+        #     -np.deg2rad(45),
+        #     -np.deg2rad(-90),
+        #     -np.pi,
+        #     -np.pi,
+        #     -np.pi,
         #     0,
-        #     0]).astype(np.int16)
+        #     0]).astype(np.float16)
         
         # self.act_space_high = np.array([
-        #     np.deg2rad(-110)*1000,
-        #     np.deg2rad(0)*1000,
-        #     np.deg2rad(90+70)*1000,
-        #     np.pi*1000,
-        #     np.pi*1000,
-        #     np.pi*1000,
-        #     2,
-        #     1]).astype(np.int16)
-            
+        #     np.deg2rad(-110),
+        #     np.deg2rad(-20),
+        #     np.deg2rad(90+70),
+        #     np.pi,
+        #     np.pi,
+        #     np.pi,
+        #     1,
+        #     1]).astype(np.float16)
+        
+        # self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.float16)
 
-        # self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.int16)
-        
-        self.act_space_low = np.array([
-            -np.deg2rad(160),
-            -np.deg2rad(45),
-            -np.deg2rad(-90),
-            -np.pi,
-            -np.pi,
-            -np.pi,
-            0,
-            0]).astype(np.float16)
-        
-        self.act_space_high = np.array([
-            np.deg2rad(-110),
-            np.deg2rad(0),
-            np.deg2rad(90+70),
-            np.pi,
-            np.pi,
-            np.pi,
-            1,
-            1]).astype(np.float16)
-        
-        self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.float16)
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
         self.stepcount = 0
@@ -108,15 +108,16 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.in_home_pose = False
 
         # Do not show renders?
-        self.headless_mode = True
+        self.headless_mode = False
 
         # Do not print output in terminal?
-        self.quiet = True
+        self.quiet = False
 
         self.max_step = 20
 
         if not self.quiet:
-            self.controller.show_model_info()
+            #self.controller.show_model_info()
+            1
 
     def step(self, action):
         
@@ -127,7 +128,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.info = {}
         self.gripper_state = self.get_gripper_state(action[6])
         self.done_signal = self.to_bool(action[7])
-        #action = np.float32(action/1000)
+        action = np.float32(action/1000)
         self.joint_position = action[:6]
 
         if not self.quiet:
@@ -159,28 +160,37 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
     def _get_obs(self):
         image = self.mujoco_renderer.render("rgb_array", camera_name="RealSense")
 
-        # # Resize img to be in observation space (For memory-efficiency)
+        # Resize image to match observation space dimensions (For memory-efficiency)
         new_size = (self.img_width, self.img_width)
-        obs = cv2.resize(image, new_size)
+        image = cv2.resize(image, new_size)
 
-        # show image if headless mode is not activated
+        # Show image if headless mode is not activated
         if not self.headless_mode:
-            cv2.imshow('Img used in observation space', obs)
+            cv2.imshow('Img used in observation space', image)
             cv2.waitKey(1)
 
         # Convert to a more memory-efficient format
-        obs = obs.astype(np.uint8)
+        image = image.astype(np.uint8)
 
-        return obs
+        # Flatten the image
+        flattened_image = image.reshape(-1)
+
+        # Joint positions
+        joint_pos = self.data.qpos[self.controller.actuated_joint_ids].copy()
+
+        # Concatenate joint_pos and image arrays along axis 0
+        concatenated_array = np.concatenate([joint_pos, flattened_image]).astype(np.float32)
+
+        return concatenated_array
 
     def reset_model(self):
 
         self.move_reward = 0
         self.step_counter = 0
-        observation = self._get_obs()
 
         # Initialize manipulator in home pose
         self.data.qpos[self.controller.actuated_joint_ids] = self.home_pose
+        observation = self._get_obs()
 
         return observation
 
@@ -382,3 +392,6 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         target = [self.act_space_low[0], self.act_space_high[1], self.act_space_high[2], self.act_space_high[3], self.act_space_high[4], self.act_space_high[5]]
         self.result_move = self.controller.move_group_to_joint_target(target=target, quiet=self.quiet, render=not self.headless_mode, group="Arm")
         self.controller.stay(1000, render=not self.headless_mode)
+    
+    def _set_action_space(self):
+        self.action_space = self.action_space

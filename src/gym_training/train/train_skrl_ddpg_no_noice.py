@@ -129,7 +129,7 @@ for model in models_ddpg.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
-cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=0.4, device=device)
+cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=1000, device=device)
 cfg_ddpg["batch_size"] = 20
 cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 20
