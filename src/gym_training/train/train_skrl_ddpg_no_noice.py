@@ -86,7 +86,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Note: the environment version may change depending on the gym version
 
 #env = gym.vector.make("InvertedPendulum-v4", num_envs=3, asynchronous=True)
-env = gym.vector.make("UR5_ddpg_no_noise", num_envs=3, asynchronous=True)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=3k, asynchronous=True)
 
 env = wrap_env(env)
 
@@ -138,7 +138,7 @@ cfg_ddpg["learning_starts"] = 20
 cfg_ddpg["experiment"]["write_interval"] = 21
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 cfg_ddpg["experiment"]["directory"] = 'runs_for_report'
-cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_5'
+cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_6'
 #cfg_ddpg["experiment"]["experiment_name"] = 'InvertedPendulum-v4_test_config_1'
 
 dir = cfg_ddpg["experiment"]["directory"] + '/' + cfg_ddpg["experiment"]["experiment_name"]

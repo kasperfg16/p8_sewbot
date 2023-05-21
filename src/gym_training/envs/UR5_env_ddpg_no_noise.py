@@ -46,23 +46,24 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
 
         # Action space (In this case - joint limits)
         # note: The action space has dtype=uint16. The first 6 values are divided with 1000 in the step() to create a set of joint angles with precision of 0.001 between high and low values
+        self.descretization = 100
         self.act_space_low = np.array([
-            -np.deg2rad(160)*1000,
-            -np.deg2rad(45)*1000,
-            -np.deg2rad(-90)*1000,
-            -np.pi*1000,
-            -np.pi*1000,
-            -np.pi*1000,
+            -np.deg2rad(160)*self.descretization,
+            -np.deg2rad(45)*self.descretization,
+            -np.deg2rad(-90)*self.descretization,
+            -np.pi*self.descretization,
+            -np.pi*self.descretization,
+            -np.pi*self.descretization,
             0,
             0]).astype(np.int16)
         
         self.act_space_high = np.array([
-            np.deg2rad(-110)*1000,
-            np.deg2rad(0)*1000,
-            np.deg2rad(90+70)*1000,
-            np.pi*1000,
-            np.pi*1000,
-            np.pi*1000,
+            np.deg2rad(-110)*self.descretization,
+            np.deg2rad(0)*self.descretization,
+            np.deg2rad(90+70)*self.descretization,
+            np.pi*self.descretization,
+            np.pi*self.descretization,
+            np.pi*self.descretization,
             2,
             1]).astype(np.int16)
         
@@ -129,7 +130,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.info = {}
         self.gripper_state = self.get_gripper_state(action[6])
         self.done_signal = self.to_bool(action[7])
-        action = np.float32(action/1000)
+        action = np.float32(action/self.descretization)
         self.joint_position = action[:6]
 
         if not self.quiet:

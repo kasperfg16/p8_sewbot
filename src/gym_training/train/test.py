@@ -2,13 +2,8 @@ import decimal
 import numpy as np
 
 # Create a float16 number
-number = np.int16(-np.deg2rad(160)*1000)
-
-number = np.float32(number/1000)
-
+number = np.int16(1.11*100)
 print(number)
 
-print(-np.deg2rad(160))
-
-number = np.float32(1989)
+number = np.float32(number/100)
 print(number)
