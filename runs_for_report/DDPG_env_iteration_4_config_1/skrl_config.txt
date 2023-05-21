@@ -33,3 +33,5 @@ iteration 4:
     # Do not give coverage reward if it has not moved camera check first will ensure to not start the agent task in a real scenario
                 if self.step_counter > 0:
                     coveragereward = self.get_coverage() # output percentage
+
+    This is due to the agent not willing to move before just sending done signal and getting coverage reward right away.
