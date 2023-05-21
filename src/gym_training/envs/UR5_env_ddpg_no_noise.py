@@ -43,7 +43,6 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.model_path = find_file(filename, search_path)
         self.img_width = 64
         self.img_height = 64
-        self.observation_space = spaces.Box(0, 255, shape=(self.img_width*self.img_height*3+8, ), dtype=np.float32)
 
         # Action space (In this case - joint limits)
         # note: The action space has dtype=uint16. The first 6 values are divided with 1000 in the step() to create a set of joint angles with precision of 0.001 between high and low values
@@ -66,6 +65,8 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             np.pi*1000,
             2,
             1]).astype(np.int16)
+        
+        self.observation_space = spaces.Box(min(self.act_space_low), max(self.act_space_high), shape=(self.img_width*self.img_height*3+8, ), dtype=np.float32)
             
         self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.int16)
 
