@@ -1,0 +1,37 @@
+gradient\_steps:1\\
+batch\_size:20\\
+discount\_factor:0.99\\
+polyak:0.005\\
+actor\_learning\_rate:0.001\\
+critic\_learning\_rate:0.001\\
+learning\_rate\_scheduler:None\\
+learning\_rate\_scheduler\_kwargs:\\
+state\_preprocessor:None\\
+state\_preprocessor\_kwargs:\\
+random\_timesteps:0\\
+learning\_starts:20\\
+grad\_norm\_clip:0\\
+exploration:\\
+{ \phantom - } noise:skrl.resources.noises.torch.gaussian.GaussianNoise\\
+{ \phantom - } initial\_scale:1.0\\
+{ \phantom - } final\_scale:0.001\\
+{ \phantom - } timesteps:10000\\
+rewards\_shaper:None\\
+experiment:\\
+{ \phantom - } directory:runs_for_report\\
+{ \phantom - } experiment\_name:DDPG_env_iteration_5_config_1\\
+{ \phantom - } write\_interval:21\\
+{ \phantom - } checkpoint\_interval:500\\
+{ \phantom - } store\_separately:False\\
+{ \phantom - } wandb:False\\
+{ \phantom - } wandb\_kwargs:\\
+
+iteration 5:
+
+action space is now int16 which is devided to get float. This enables boolean action in the action space for done signal and gripper action
+
+action space is set right and not in the standard way that gymnasuim sets it.
+This is done by defining our own _set_action space function. Before the actionspace was set purely based on the number of actuators and the ctrl range defined in the ur5.xml.
+This also fixes the problem we had where the random timesteps where creating an error. this was because the action space we want is joint spaces and not just the ctrl range from the ur5.xml. This is the case for e.g. the pendulum. and that was why it worked with that example and not in our case.
+
+Joint pos has been added to obs space
