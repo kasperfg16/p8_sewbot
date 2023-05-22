@@ -129,8 +129,7 @@ for model in models_ddpg.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
-cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=2000, device=device)
-cfg_ddpg["exploration"]["timesteps"] = 10000
+cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=100, device=device)
 cfg_ddpg["batch_size"] = 20
 cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 20
@@ -138,7 +137,7 @@ cfg_ddpg["learning_starts"] = 20
 cfg_ddpg["experiment"]["write_interval"] = 21
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 cfg_ddpg["experiment"]["directory"] = 'runs_for_report'
-cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_6'
+cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_7'
 #cfg_ddpg["experiment"]["experiment_name"] = 'InvertedPendulum-v4_test_config_1'
 
 dir = cfg_ddpg["experiment"]["directory"] + '/' + cfg_ddpg["experiment"]["experiment_name"]

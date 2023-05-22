@@ -280,7 +280,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         done_reward = 0
 
         # Reward weights
-        w1 = 1
+        w1 = 0
         w2 = 100
 
         if self.done_signal:
