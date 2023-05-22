@@ -176,7 +176,7 @@
             </composite>
     -->
 
-        <body name="B3_5" pos="-0.2 0.4 0.6" euler="0 1.2 0">
+        <body name="B3_5" pos="-0.2 0.4 0.6" euler="0 1.3 0">
             
             <freejoint/>
             <composite type="cloth" count="9 9 1" spacing=" 0.02" flatinertia="0.0001">
