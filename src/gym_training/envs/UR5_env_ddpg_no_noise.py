@@ -83,7 +83,6 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             1,
             1]).astype(np.int16)
         
-
         # Example usage:
         result = index_difference(self.act_space_low, self.act_space_high)
 
@@ -209,6 +208,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
 
     def reset_model(self):
 
+        #self.randomizationSparse()
         self.move_reward = 0
         self.step_counter = 0
 
@@ -280,8 +280,11 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         done_reward = 0
 
         # Reward weights
-        w1 = 1
+        w1 = 0
         w2 = 100
+
+        camcenter = [-0.2, 0.4, 0.5]
+        distancetocamcenter = math.dist(np.ndarray.tolist(self.data.xpos[7]),  camcenter)
 
         if self.done_signal:
             
@@ -303,7 +306,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         step_penalty = self.step_counter/2
 
         # Summarize all rewards
-        self.reward = self.move_reward*w1 + coveragereward*w2 + done_reward - step_penalty
+        self.reward = self.move_reward*w1 + coveragereward*w2 + done_reward - step_penalty + 10 - math.pow(distancetocamcenter, 2)
 
         if not self.quiet:
             print('done_reward: ', done_reward)
@@ -417,3 +420,36 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
     
     def _set_action_space(self):
         self.action_space = self.action_space
+
+    def randomizationSparse(self): # Randomization between trainings
+
+        """
+        Cloth randomization:
+            Cloth color (randomizing hue, saturation, value, and colors, along with lighting and glossiness.)
+            Mechanical properties of cloth
+                Here we use the default value and perturbates with <=+-15%
+        | Name   | Number | Mass | Friction | Stiffness | Damping |
+        |--------|--------|------|----------|---------- |---------|
+        | Denim  |   7    | 
+        | Nylon  |   8    |      |          |           |         |
+        | Poly   |   9    |      |          |           |         |
+        | Cotton |   10   |      |          |           |         |
+        | Cotton |   11   |      |          |           |         |
+
+            matdenim = 7, matwhite1 = 8, matwhite2 = 9, matwhite4 = 10, matblack = 11
+        """
+        
+        cloth_id = []
+        for i in range(self.model.nbody):
+            if mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i).startswith('B') is True:
+                cloth_id.append(i)
+
+        # Material type
+        # Mass properties: src/gym_training/envs/mesh/textile_properties.csv
+        # Stiffness and damping properties: src/gym_training/envs/mesh/ur5.xml
+        materials = 7
+        self.model.skin_matid = random.choice(materials)
+        if self.model.skin_matid == 7: # Textile 2 (denim)
+            self.model.body_mass[min(cloth_id):1+max(cloth_id)] = 2.29630627176258e-05
+            self.model.jnt_stiffness[min(cloth_id):1+max(cloth_id)] = 0.00001
+            self.model.dof_damping[min(cloth_id):1+max(cloth_id)] = 0.00001

@@ -131,14 +131,16 @@ for model in models_ddpg.values():
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
 cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=2000, device=device)
 cfg_ddpg["exploration"]["timesteps"] = 10000
-cfg_ddpg["batch_size"] = 20
+cfg_ddpg["batch_size"] = 32
 cfg_ddpg["random_timesteps"] = 0
-cfg_ddpg["learning_starts"] = 20
+cfg_ddpg["learning_starts"] = 32
+cfg_ddpg["actor_learning_rate"] = 1e-3
+cfg_ddpg["critic_learning_rate"] = 1e-3
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
 cfg_ddpg["experiment"]["write_interval"] = 21
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 cfg_ddpg["experiment"]["directory"] = 'runs_for_report'
-cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_6'
+cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_7'
 #cfg_ddpg["experiment"]["experiment_name"] = 'InvertedPendulum-v4_test_config_1'
 
 dir = cfg_ddpg["experiment"]["directory"] + '/' + cfg_ddpg["experiment"]["experiment_name"]
@@ -170,12 +172,14 @@ if repository_path:
 else:
     print("Repository not found.")
 
-try:
-    subprocess.check_output(['git', 'pull'], cwd=repository_path)
-    print("Commands executed successfully.")
-except subprocess.CalledProcessError as e:
-    print("Command execution failed:", e.output.decode())
-    sys.exit(1)
+git_pull=True
+if git_pull:
+    try:
+        subprocess.check_output(['git', 'pull'], cwd=repository_path)
+        print("Commands executed successfully.")
+    except subprocess.CalledProcessError as e:
+        print("Command execution failed:", e.output.decode())
+        sys.exit(1)
 
 if not os.path.exists(path_experiment):
     path_experiment = os.path.join(directory, experiment_name + str(1))
@@ -207,34 +211,37 @@ if inferrence:
 cfg_trainer = {"timesteps": 150000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
 
-# Write some files with experiment description
-string = print_config(config=cfg_ddpg)
+write_and_push=True
 
-write_txt_file_from_str(str=string, file_path=output_file)
+if write_and_push:
+    # Write some files with experiment description
+    string = print_config(config=cfg_ddpg)
 
-output_file = os.path.join(path_experiment, "run_config_csvfile.csv")
+    write_txt_file_from_str(str=string, file_path=output_file)
 
-with open(output_file, 'w') as f:  # You will need 'wb' mode in Python 2.x
-    w = csv.DictWriter(f, cfg_ddpg.keys())
-    w.writeheader()
-    w.writerow(cfg_ddpg)
+    output_file = os.path.join(path_experiment, "run_config_csvfile.csv")
 
-filename_to_add = os.path.join(path_experiment, 'checkpoints/best_agent.pt')
-filename_to_add = filename_to_add.replace("./", "")
-add_file_to_gitattributes(filename_to_add)
+    with open(output_file, 'w') as f:  # You will need 'wb' mode in Python 2.x
+        w = csv.DictWriter(f, cfg_ddpg.keys())
+        w.writeheader()
+        w.writerow(cfg_ddpg)
 
-# Auto git push the new expiriment to git repo
-try:
-    subprocess.check_output(['git', 'lfs', 'install'], stderr=subprocess.STDOUT, cwd=repository_path)
-    subprocess.check_output(['git', 'add', '.gitattributes'], cwd=repository_path)
-    subprocess.check_output(['git', 'commit', '-m', 'Add .gitattributes file'], cwd=repository_path)
-    subprocess.check_output(['git', 'add', output_file], cwd=repository_path)
-    subprocess.check_output(['git', 'commit', '-m', 'Add .gitattributes file'], cwd=repository_path)
-    subprocess.check_output(['git', 'push'], cwd=repository_path)
-    print("Commands executed successfully.")
-except subprocess.CalledProcessError as e:
-    print("Command execution failed:", e.output.decode())
-    sys.exit(1)
+    filename_to_add = os.path.join(path_experiment, 'checkpoints/best_agent.pt')
+    filename_to_add = filename_to_add.replace("./", "")
+    add_file_to_gitattributes(filename_to_add)
+
+    # Auto git push the new expiriment to git repo
+    try:
+        subprocess.check_output(['git', 'lfs', 'install'], stderr=subprocess.STDOUT, cwd=repository_path)
+        subprocess.check_output(['git', 'add', '.gitattributes'], cwd=repository_path)
+        subprocess.check_output(['git', 'commit', '-m', 'Add .gitattributes file'], cwd=repository_path)
+        subprocess.check_output(['git', 'add', output_file], cwd=repository_path)
+        subprocess.check_output(['git', 'commit', '-m', 'Add .gitattributes file'], cwd=repository_path)
+        subprocess.check_output(['git', 'push'], cwd=repository_path)
+        print("Commands executed successfully.")
+    except subprocess.CalledProcessError as e:
+        print("Command execution failed:", e.output.decode())
+        sys.exit(1)
 
 # start training
 trainer.train()
