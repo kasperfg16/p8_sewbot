@@ -132,7 +132,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.in_home_pose = False
 
         # Do not show renders?
-        self.headless_mode = True
+        self.headless_mode = False
 
         # Do not print output in terminal?
         self.quiet = True
