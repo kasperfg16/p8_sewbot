@@ -283,6 +283,9 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         w1 = 0
         w2 = 100
 
+        camcenter = [-0.2, 0.4, 0.5]
+        distancetocamcenter = math.dist(np.ndarray.tolist(self.data.xpos[7]),  camcenter)
+
         if self.done_signal:
             
             # Do not give coverage reward if it has not moved camera check first will ensure to not start the agent task in a real scenario
@@ -303,7 +306,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         step_penalty = self.step_counter/2
 
         # Summarize all rewards
-        self.reward = self.move_reward*w1 + coveragereward*w2 + done_reward - step_penalty
+        self.reward = self.move_reward*w1 + coveragereward*w2 + done_reward - step_penalty + 10 - math.pow(distancetocamcenter, 2)
 
         if not self.quiet:
             print('done_reward: ', done_reward)
