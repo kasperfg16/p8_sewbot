@@ -140,7 +140,7 @@ cfg_ddpg["critic_learning_rate"] = 1e-3
 cfg_ddpg["experiment"]["write_interval"] = 21
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 cfg_ddpg["experiment"]["directory"] = 'runs_for_report'
-cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_6'
+cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_7'
 #cfg_ddpg["experiment"]["experiment_name"] = 'InvertedPendulum-v4_test_config_1'
 
 dir = cfg_ddpg["experiment"]["directory"] + '/' + cfg_ddpg["experiment"]["experiment_name"]
