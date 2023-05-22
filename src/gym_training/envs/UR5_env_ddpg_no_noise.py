@@ -80,7 +80,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             -np.deg2rad(0)*self.descretization,
             np.pi*self.descretization,
             np.pi*self.descretization,
-            2,
+            1,
             1]).astype(np.int16)
         
 
@@ -230,16 +230,14 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             print('Number should be a uint between 0 and 1')
     
     def get_gripper_state(self, number):
-        if 0 <= number <= 2:
+        if 0 <= number <= 1:
 
             if number == 0:
                 return 0
             elif number == 1:
                 return 1
-            else:
-                return 2
         else:
-            print('Number should be a uint between 0 and 2')
+            print('Number should be a uint between 0 and 1')
     
     def check(self):
         self.get_coverage()
