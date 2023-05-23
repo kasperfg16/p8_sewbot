@@ -136,7 +136,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         # Do not print output in terminal?
         self.quiet = True
 
-        self.max_step = 20
+        self.max_step = 5
 
         if not self.quiet:
             #self.controller.show_model_info()
@@ -150,7 +150,8 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.reward = 0
         self.info = {}
         self.gripper_state = self.get_gripper_state(action[6])
-        self.done_signal = self.to_bool(action[7])
+        #self.done_signal = self.to_bool(action[7])
+        self.done_signal = False
         action = np.float32(action/self.descretization)
         self.joint_position = action[:6]
 
@@ -167,13 +168,18 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         # Perform 'self.max_steps' movements based on action guesses from agent and then move to home pose
         self.unfold()
 
-        # Compute reward after operation
-        self.compute_reward()
-
         self.step_counter += 1
 
         if self.max_step <= self.step_counter:
+            self.controller.open_gripper(render=not self.headless_mode)
+            self.controller.stay(1000, render=not self.headless_mode)
+
+            result_move = self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode)
+            self.move_reward += result_move
             self.truncated = True
+        
+        # Compute reward after operation
+        self.compute_reward()
 
         # Recive observation after action - Before taking next action
         self.observation  = self._get_obs()
@@ -286,7 +292,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         camcenter = [-0.2, 0.4, 0.5]
         distancetocamcenter = math.dist(np.ndarray.tolist(self.data.xpos[7]),  camcenter)
 
-        if self.done_signal:
+        if self.truncated: #self.done_signal or self.truncated:
             
             # Do not give coverage reward if it has not moved camera check first will ensure to not start the agent task in a real scenario
             if self.step_counter > 0:
@@ -295,18 +301,20 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
             # If it says it is done but it isn't it fails (truncate)
             # If agent says it is done and it is the it has success (terminate)
             if not self.goalcoverage:
-                self.truncated = True
-                done_reward = -10
+                #self.truncated = True
+                done_reward = 0
                 
             else:
                 self.terminated = True
+                self.truncated = False
                 done_reward = 1000
         
         # Incentivice to do it faster
         step_penalty = self.step_counter/2
 
         # Summarize all rewards
-        self.reward = self.move_reward*w1 + coveragereward*w2 + done_reward - step_penalty + 10 - math.pow(distancetocamcenter, 2)
+        #elf.reward = self.move_reward*w1 + coveragereward*w2 + done_reward - step_penalty - distancetocamcenter
+        self.reward = coveragereward*w2 + done_reward
 
         if not self.quiet:
             print('done_reward: ', done_reward)
