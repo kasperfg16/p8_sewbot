@@ -1,10 +1,10 @@
 import decimal
 import numpy as np
 
-descretizetion = 0.5
+descretizetion = 10
 
 # Create a float16 number
-number = np.int16(153.0*descretizetion)
+number = np.int16(0+0.5)
 print(number)
 
 number = np.float32(number/descretizetion)

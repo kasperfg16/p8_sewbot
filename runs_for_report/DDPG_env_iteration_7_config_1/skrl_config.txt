@@ -1,5 +1,5 @@
 gradient\_steps:1\\
-batch\_size:20\\
+batch\_size:32\\
 discount\_factor:0.99\\
 polyak:0.005\\
 actor\_learning\_rate:0.001\\
@@ -9,13 +9,13 @@ learning\_rate\_scheduler\_kwargs:\\
 state\_preprocessor:None\\
 state\_preprocessor\_kwargs:\\
 random\_timesteps:0\\
-learning\_starts:20\\
+learning\_starts:32\\
 grad\_norm\_clip:0\\
 exploration:\\
 { \phantom - } noise:skrl.resources.noises.torch.gaussian.GaussianNoise\\
 { \phantom - } initial\_scale:1.0\\
 { \phantom - } final\_scale:0.001\\
-{ \phantom - } timesteps:None\\
+{ \phantom - } timesteps:10000\\
 rewards\_shaper:None\\
 experiment:\\
 { \phantom - } directory:runs_for_report\\
@@ -30,3 +30,4 @@ iteration 7
 Move reward is 0
 w1 = 0
 variable 7 in action space (gripper state) int16 range from [low high] [0 2] to [0 1]
+reset function includes reset with validated parameters
