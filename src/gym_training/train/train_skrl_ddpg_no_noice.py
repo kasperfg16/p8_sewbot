@@ -134,7 +134,7 @@ cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=2000, device=device
 cfg_ddpg["batch_size"] = 32
 cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 32
-cfg_ddpg["actor_learning_rate"] = 1e-3
+cfg_ddpg["actor_learning_rate"] = 1e-2
 cfg_ddpg["critic_learning_rate"] = 1e-2
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
 cfg_ddpg["experiment"]["write_interval"] = 21

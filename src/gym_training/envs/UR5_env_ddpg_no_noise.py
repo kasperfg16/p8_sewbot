@@ -98,28 +98,6 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
 
         EzPickle.__init__(self, **kwargs)
         
-        # self.act_space_low = np.array([
-        #     -np.deg2rad(160),
-        #     -np.deg2rad(45),
-        #     -np.deg2rad(-90),
-        #     -np.pi,
-        #     -np.pi,
-        #     -np.pi,
-        #     0,
-        #     0]).astype(np.float16)
-        
-        # self.act_space_high = np.array([
-        #     np.deg2rad(-110),
-        #     np.deg2rad(-20),
-        #     np.deg2rad(90+70),
-        #     np.pi,
-        #     np.pi,
-        #     np.pi,
-        #     1,
-        #     1]).astype(np.float16)
-        
-        # self.action_space = spaces.Box(low=self.act_space_low, high=self.act_space_high, shape=(8,), seed=42, dtype=np.float16)
-
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
         self.stepcount = 0
@@ -131,7 +109,7 @@ class UR5Env_ddpg_no_noise(MujocoEnv, EzPickle):
         self.in_home_pose = False
 
         # Do not show renders?
-        self.headless_mode = False
+        self.headless_mode = True
 
         # Do not print output in terminal?
         self.quiet = True
