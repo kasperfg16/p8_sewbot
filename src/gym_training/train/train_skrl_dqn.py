@@ -19,12 +19,7 @@ def report_gpu():
 # Note: the environment version may change depending on the gymnasium version
 display = False
 
-if display:
-    render_mode = 'human'
-else:
-    render_mode = None
-
-env = gym.vector.make("UR5_dqn", num_envs=1, asynchronous=False, render_mode=render_mode)
+env = gym.vector.make("train_skrl_ddpg_no_noice", num_envs=1, asynchronous=False)
 
 env = wrap_env(env)
 
@@ -32,11 +27,11 @@ env = wrap_env(env)
 device = torch.cuda.current_device()
 #print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
 
-env.device = 'cpu'
+#env.device = 'cpu'
 device = env.device
 
 # Instantiate a RandomMemory (without replacement) as experience replay memory
-memory = RandomMemory(memory_size=5000, num_envs=env.num_envs, device=device, replacement=False)
+memory = RandomMemory(memory_size=20000, num_envs=env.num_envs, device=device, replacement=False)
 
 # Instantiate the agent's models (function approximators) using the model instantiator utility
 # DQN requires 2 models, visit its documentation for more details
