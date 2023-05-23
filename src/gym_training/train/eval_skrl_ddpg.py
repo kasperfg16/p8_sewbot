@@ -163,7 +163,7 @@ agent_ddpg = DDPG(models=models_ddpg,
                   device=device)
 
 # load checkpoint
-agent_ddpg.load("./runs_for_report/DDPG_env_iteration_5_config_1/checkpoints/best_agent.pt")
+agent_ddpg.load("./runs_for_report/DDPG_env_iteration_7_config_21/checkpoints/best_agent.pt")
 
 # Configure and instantiate the RL trainer
 cfg_trainer = {"timesteps": 150000, "headless": True}
