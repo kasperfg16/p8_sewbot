@@ -19,7 +19,7 @@ def report_gpu():
 # Note: the environment version may change depending on the gymnasium version
 display = False
 
-env = gym.vector.make("train_skrl_ddpg_no_noice", num_envs=1, asynchronous=False)
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=1, asynchronous=False)
 
 env = wrap_env(env)
 
@@ -33,6 +33,8 @@ device = env.device
 # Instantiate a RandomMemory (without replacement) as experience replay memory
 memory = RandomMemory(memory_size=20000, num_envs=env.num_envs, device=device, replacement=False)
 
+print('env.action_space', env.action_space)
+
 # Instantiate the agent's models (function approximators) using the model instantiator utility
 # DQN requires 2 models, visit its documentation for more details
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.dqn.html#spaces-and-models
@@ -40,7 +42,7 @@ models_dqn = {}
 models_dqn["q_network"] = deterministic_model(observation_space=env.observation_space,
                                               action_space=env.action_space,
                                               device=device,
-                                              clip_actions=False,
+                                              clip_actions=True,
                                               input_shape=Shape.OBSERVATIONS,
                                               hiddens=[64, 64],
                                               hidden_activation=["relu", "relu"],
@@ -50,7 +52,7 @@ models_dqn["q_network"] = deterministic_model(observation_space=env.observation_
 models_dqn["target_q_network"] = deterministic_model(observation_space=env.observation_space,
                                                      action_space=env.action_space,
                                                      device=device,
-                                                     clip_actions=False,
+                                                     clip_actions=True,
                                                      input_shape=Shape.OBSERVATIONS,
                                                      hiddens=[64, 64],
                                                      hidden_activation=["relu", "relu"],
@@ -70,6 +72,7 @@ cfg_dqn = DQN_DEFAULT_CONFIG.copy()
 cfg_dqn["learning_starts"] = 10
 cfg_dqn["exploration"]["final_epsilon"] = 0.04
 cfg_dqn["exploration"]["timesteps"] = 1500
+
 # logging to TensorBoard and write checkpoints each 1000 and 5000 timesteps respectively
 cfg_dqn["experiment"]["write_interval"] = 1000
 cfg_dqn["experiment"]["checkpoint_interval"] = 5000
@@ -82,7 +85,7 @@ agent_dqn = DQN(models=models_dqn,
                 device=device)
 
 # Configure and instantiate the RL trainer
-cfg_trainer = {"timesteps": 500, "headless": True}
+cfg_trainer = {"timesteps": 15000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_dqn)
 
 # start training

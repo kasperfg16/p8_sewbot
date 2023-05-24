@@ -1,4 +1,5 @@
-import isaacgym
+import gymnasium as gym
+import gym_training
 
 import torch
 import torch.nn as nn
@@ -65,15 +66,14 @@ class Critic(DeterministicMixin, Model):
 
 
 # Load and wrap the Isaac Gym environment
-env = load_isaacgym_env_preview4(task_name="Cartpole")   # preview 3 and 4 use the same loader
+env = gym.vector.make("UR5_ddpg_no_noise", num_envs=3, asynchronous=True)
 env = wrap_env(env)
 
 device = env.device
 
 # Instantiate a RandomMemory (without replacement) as shared experience replay memory
 
-memory = RandomMemory(memory_size=8000, num_envs=env.num_envs, device=device, replacement=True)
-
+memory = RandomMemory(memory_size=8000, num_envs=env.num_envs, device=device, replacement=True, export=True)
 
 
 # Instantiate the agent's models (function approximators).
@@ -115,25 +115,26 @@ for model in models_sac.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
-cfg_ddpg["exploration"]["noise"] = OrnsteinUhlenbeckNoise(theta=0.15, sigma=0.1, base_scale=0.5, device=device)
+cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=0.5, device=device)
+cfg_ddpg["exploration"]["timesteps"] = 1000
 cfg_ddpg["gradient_steps"] = 1
-cfg_ddpg["batch_size"] = 512
+cfg_ddpg["batch_size"] = 20
 cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 0
 # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
 cfg_ddpg["experiment"]["write_interval"] = 25
-cfg_ddpg["experiment"]["checkpoint_interval"] = 1000
+cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.td3.html#configuration-and-hyperparameters
 cfg_td3 = TD3_DEFAULT_CONFIG.copy()
-cfg_td3["exploration"]["noise"] = GaussianNoise(0, 0.2, device=device)
+cfg_td3["exploration"]["noise"] = GaussianNoise(0, 10, device=device)
 cfg_td3["smooth_regularization_noise"] = GaussianNoise(0, 0.1, device=device)
 cfg_td3["smooth_regularization_clip"] = 0.1
 cfg_td3["gradient_steps"] = 1
-cfg_td3["batch_size"] = 512
+cfg_td3["batch_size"] = 3
 cfg_td3["random_timesteps"] = 0
 cfg_td3["learning_starts"] = 0
 # logging to TensorBoard and write checkpoints each 25 and 1000 timesteps respectively
-cfg_td3["experiment"]["write_interval"] = 25
+cfg_td3["experiment"]["write_interval"] = 3*5
 cfg_td3["experiment"]["checkpoint_interval"] = 1000
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.sac.html#configuration-and-hyperparameters
 cfg_sac = SAC_DEFAULT_CONFIG.copy()
@@ -175,11 +176,11 @@ agent_sac = SAC(models=models_sac,
 
 
 # Configure and instantiate the RL trainer
-cfg = {"timesteps": 8000, "headless": True}
+cfg = {"timesteps": 10000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg,
                             env=env,
 
-                            agents=[agent_ddpg, agent_td3, agent_sac],
+                            agents=[agent_td3],
 
                             agents_scope=[])
 
