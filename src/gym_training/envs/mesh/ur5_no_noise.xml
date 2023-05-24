@@ -186,7 +186,7 @@
             </composite>
         </body>
         
-        <!--
+        <!--          
             <body name="B3_5" pos="-0.2 0.4 0.8" euler="1 1 1">
             <composite type="grid" count="9 9 1" spacing="0.05" offset="0 0 1">
                 <skin material="matdenim" inflate="0.001" subgrid="3" texcoord="true"/>
