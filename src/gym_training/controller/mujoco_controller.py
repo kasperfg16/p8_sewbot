@@ -144,7 +144,7 @@ class MJ_Controller(object):
         self.controller_list = []
 
         # Values for training
-        sample_time = 0.002
+        sample_time = 0.002 # https://www.universal-robots.com/articles/ur/programming/servoj-command/
         # p_scale = 1
         p_scale = 150
         i_scale = 1

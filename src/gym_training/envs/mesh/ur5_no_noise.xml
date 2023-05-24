@@ -206,8 +206,8 @@
         <motor name="joint3_motor" joint="joint3" ctrllimited="true" ctrlrange="-28 28" />
         <motor name="joint4_motor" joint="joint4" ctrllimited="true" ctrlrange="-28 28" />
         <motor name="joint5_motor" joint="joint5" ctrllimited="true" ctrlrange="-28 28" />
-        <motor name="joint6_rf" joint="joint_lf" ctrllimited="true" ctrlrange="-50 50"/>
-        <motor name="joint7_rf" joint="joint_rf" ctrllimited="true" ctrlrange="-50 50"/>
+        <motor name="joint6_rf" joint="joint_lf" ctrllimited="true" ctrlrange="-44 44"/>
+        <motor name="joint7_rf" joint="joint_rf" ctrllimited="true" ctrlrange="-44 44"/>
     </actuator>
 
     <equality>
