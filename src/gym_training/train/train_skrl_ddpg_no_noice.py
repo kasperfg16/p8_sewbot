@@ -90,17 +90,7 @@ env = gym.vector.make("UR5_ddpg_no_noise", num_envs=3, asynchronous=True)
 
 env = wrap_env(env)
 
-# See the used grafics card
-device = torch.cuda.current_device()
-print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
-#env.device  ='cpu'
-device = env.device
-
-nvidia_smi.nvmlInit()
-
-handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
-# card id 0 hardcoded here, there is also a call to get all available card ids, so we could iterate
-
+# See the used grafics cardCartPoleEnv_kasper
 info = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
 
 print("Total memory:", info.total)

@@ -62,7 +62,7 @@ class UR5Env_ddpg_no_noise_simplified(MujocoEnv, EzPickle):
 
         # Action space (In this case -d joint limits)
         # note: The action space has dtype=uint16. The first 6 values are divided with 1000 in the step() to create a set of joint angles with precision of 0.001 between high and low values
-        self.descretization = 100
+        
         self.act_space_low = np.array([
             -np.deg2rad(150)*self.descretization
             ]).astype(np.int16)

@@ -41,7 +41,7 @@ def find_file(filename, search_path):
             return os.path.abspath(os.path.join(root, filename))
     return None
 
-class CartPoleEnv_kasper(gym.Env[np.ndarray, Union[int, np.ndarray]]):
+class CartPoleEnv_kasper(MujocoEnv, EzPickle):
     """
     ### Description
 
@@ -109,8 +109,12 @@ class CartPoleEnv_kasper(gym.Env[np.ndarray, Union[int, np.ndarray]]):
     """
 
     metadata = {
-        "render_modes": ["human", "rgb_array"],
-        "render_fps": 50,
+        "render_modes": [
+            "human",
+            "rgb_array",
+            "depth_array",
+        ],
+        "render_fps": 100,
     }
 
     def __init__(self, render_mode: Optional[str] = None, **kwargs):
@@ -120,8 +124,18 @@ class CartPoleEnv_kasper(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.model_path = find_file(filename, search_path)
         self.img_width = 64
         self.img_height = 64
+
+        self.descretization = 100
+
+        self.act_space_low = np.array([
+            -np.deg2rad(150)*self.descretization
+            ]).astype(np.int16)
+        
+        self.act_space_high = np.array([
+            np.deg2rad(-110)*self.descretization
+            ]).astype(np.int16)
                 
-        self.observation_space = spaces.Box(min(self.act_space_low), max(self.act_space_high), shape=(self.img_width*self.img_height*3+8, ), dtype=np.float32)
+        self.observation_space = spaces.Box(min(self.act_space_low), max(-self.act_space_high), shape=(self.img_width*self.img_height*3+8, ), dtype=np.float32)
             
         # Move robot clockwise or counter-clockwise
         self.action_space = spaces.Discrete(2)
@@ -162,19 +176,21 @@ class CartPoleEnv_kasper(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.reward = 0
         self.info = {}
 
+        increase = 5
+
         if action == 0:
             # current joint pos -
             current_pos = self.data.qpos[self.controller.actuated_joint_ids].copy()
-            print(current_pos)
-            self.joint_position = np.array([action[0], 0, np.pi/2, 0, np.pi/2, 0])
-            self.controller.move_group_to_joint_target(target=self.home_pose, quiet=self.quiet, render=not self.headless_mode, tolerance=0.02)
-            pass
+            joint1_pos = current_pos[0]+np.deg2rad(-increase)
         elif action == 1:
             # current joint pos +
-            #self.joint_position = np.array([action[0], 0, np.pi/2, 0, np.pi/2, 0])
-            pass
+            current_pos = self.data.qpos[self.controller.actuated_joint_ids].copy()
+            joint1_pos = current_pos[0]+np.deg2rad(increase)
         else:
             print('Something went wrong!')
+
+        self.joint_position = np.array([joint1_pos, 0, np.pi/2, 0, np.pi/2, 0])
+        self.result_move = self.controller.move_group_to_joint_target(target=self.joint_position, quiet=self.quiet, render=not self.headless_mode, group="Arm")
 
         self.step_counter += 1
 
@@ -198,7 +214,7 @@ class CartPoleEnv_kasper(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         # Get joint positions and image as observation
         observation = self._get_obs()
 
-        return observation
+        return observation, {}
     
     def compute_reward(self):# Define all the rewards possible           
         # Get the coordinates of Cloth
@@ -246,3 +262,6 @@ class CartPoleEnv_kasper(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         concatenated_array = np.concatenate([joint_pos, flattened_image]).astype(np.float32)
 
         return concatenated_array
+    
+    def _set_action_space(self):
+        self.action_space = self.action_space
