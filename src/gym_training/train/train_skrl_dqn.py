@@ -19,7 +19,7 @@ def report_gpu():
 # Note: the environment version may change depending on the gymnasium version
 display = False
 
-env = gym.vector.make("UR5_ddpg_no_noise", num_envs=1, asynchronous=False)
+env = gym.vector.make("CartPole-v1", num_envs=1, asynchronous=False)
 
 env = wrap_env(env)
 
