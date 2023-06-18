@@ -65,7 +65,7 @@ class DeterministicActor(DeterministicMixin, Model):
     def compute(self, inputs, role):
         x = F.relu(self.linear_layer_1(inputs["states"]))
         x = F.relu(self.linear_layer_2(x))
-        return 314 * torch.tanh(self.action_layer(x)), {}  # Pendulum-v1 action_space is -2 to 2
+        return 2 * torch.tanh(self.action_layer(x)), {}  # Pendulum-v1 action_space is -2 to 2
 
 class DeterministicCritic(DeterministicMixin, Model):
     def __init__(self, observation_space, action_space, device, clip_actions=False):
@@ -90,17 +90,7 @@ env = gym.vector.make("UR5_ddpg_no_noise", num_envs=3, asynchronous=True)
 
 env = wrap_env(env)
 
-# See the used grafics card
-device = torch.cuda.current_device()
-print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
-#env.device  ='cpu'
-device = env.device
-
-nvidia_smi.nvmlInit()
-
-handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
-# card id 0 hardcoded here, there is also a call to get all available card ids, so we could iterate
-
+# See the used grafics cardCartPoleEnv_kasper
 info = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
 
 print("Total memory:", info.total)
@@ -110,7 +100,7 @@ print("Used memory:", info.used)
 nvidia_smi.nvmlShutdown()
 
 # Instantiate a RandomMemory (without replacement) as experience replay memory
-memory = RandomMemory(memory_size=1000, num_envs=env.num_envs, device=device, replacement=False, export=True)
+memory = RandomMemory(memory_size=15000, num_envs=env.num_envs, device=device, replacement=False, export=True)
 
 # Instantiate the agent's models (function approximators).
 # DDPG requires 4 models, visit its documentation for more details
@@ -129,18 +119,18 @@ for model in models_ddpg.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
-cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=20, device=device)
+cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=2000, device=device)
 cfg_ddpg["exploration"]["timesteps"] = 10000
 cfg_ddpg["batch_size"] = 32
 cfg_ddpg["random_timesteps"] = 0
 cfg_ddpg["learning_starts"] = 32
-cfg_ddpg["actor_learning_rate"] = 1e-5
-cfg_ddpg["critic_learning_rate"] = 1e-5
+cfg_ddpg["actor_learning_rate"] = 1e-3
+cfg_ddpg["critic_learning_rate"] = 1e-3
 # logging to TensorBoard and write checkpoints each 1000 and 1000 timesteps respectively
 cfg_ddpg["experiment"]["write_interval"] = 21
 cfg_ddpg["experiment"]["checkpoint_interval"] = 500
 cfg_ddpg["experiment"]["directory"] = 'runs_for_report'
-cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_critLR1e-2'
+cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_env_iteration_7'
 #cfg_ddpg["experiment"]["experiment_name"] = 'InvertedPendulum-v4_test_config_1'
 
 dir = cfg_ddpg["experiment"]["directory"] + '/' + cfg_ddpg["experiment"]["experiment_name"]
@@ -208,7 +198,7 @@ if inferrence:
     agent_ddpg.load("./runs_for_report/DDPG_env_iteration_1_config_1/checkpoints/best_agent.pt")
 
 # Configure and instantiate the RL trainer
-cfg_trainer = {"timesteps": 10000, "headless": True}
+cfg_trainer = {"timesteps": 150000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
 
 write_and_push=True

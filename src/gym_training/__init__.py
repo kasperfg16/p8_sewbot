@@ -19,3 +19,8 @@ register(
     id='UR5_ddpg_touch',
     entry_point='gym_training.envs:UR5Env_ddpg_touch'
 )
+
+register(
+    id='CartPole_kasper',
+    entry_point='gym_training.envs:CartPoleEnv_kasper'
+)

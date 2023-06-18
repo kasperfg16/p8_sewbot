@@ -1,37 +1,30 @@
 import gymnasium as gym
 import gym_training
 
-
 # Import the skrl components to build the RL system
 from skrl.utils.model_instantiators import deterministic_model, Shape
 from skrl.memories.torch import RandomMemory
 from skrl.agents.torch.dqn import DQN, DQN_DEFAULT_CONFIG
 from skrl.trainers.torch import SequentialTrainer
 from skrl.envs.torch import wrap_env
-import torch
-import gc
 
-def report_gpu():
-   print(torch.cuda.list_gpu_processes())
-   gc.collect()
-   torch.cuda.empty_cache()
+
 # Load and wrap the Gymnasium environment.
 # Note: the environment version may change depending on the gymnasium version
-display = False
-
-env = gym.vector.make("train_skrl_ddpg_no_noice", num_envs=1, asynchronous=False)
-
+try:
+    env = gym.vector.make("CartPole_kasper", num_envs=2, asynchronous=True, export=True)
+except (gym.error.DeprecatedEnv, gym.error.VersionNotFound) as e:
+    env_id = [spec for spec in gym.envs.registry if spec.startswith("CartPole-v")][0]
+    print("CartPole-v0 not found. Trying {}".format(env_id))
+    env = gym.vector.make(env_id, num_envs=5, asynchronous=False)
 env = wrap_env(env)
 
-# See the used grafics card
-device = torch.cuda.current_device()
-#print(f"Using CUDA device {device}: {torch.cuda.get_device_name(device)}")
-
-#env.device = 'cpu'
 device = env.device
 
+
 # Instantiate a RandomMemory (without replacement) as experience replay memory
-memory = RandomMemory(memory_size=20000, num_envs=env.num_envs, device=device, replacement=False)
+memory = RandomMemory(memory_size=20000, num_envs=env.num_envs, device=device, replacement=False, )
+
 
 # Instantiate the agent's models (function approximators) using the model instantiator utility
 # DQN requires 2 models, visit its documentation for more details
@@ -67,7 +60,7 @@ for model in models_dqn.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.dqn.html#configuration-and-hyperparameters
 cfg_dqn = DQN_DEFAULT_CONFIG.copy()
-cfg_dqn["learning_starts"] = 10
+cfg_dqn["learning_starts"] = 100
 cfg_dqn["exploration"]["final_epsilon"] = 0.04
 cfg_dqn["exploration"]["timesteps"] = 1500
 # logging to TensorBoard and write checkpoints each 1000 and 5000 timesteps respectively
@@ -81,8 +74,9 @@ agent_dqn = DQN(models=models_dqn,
                 action_space=env.action_space,
                 device=device)
 
+
 # Configure and instantiate the RL trainer
-cfg_trainer = {"timesteps": 500, "headless": True}
+cfg_trainer = {"timesteps": 50000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_dqn)
 
 # start training
