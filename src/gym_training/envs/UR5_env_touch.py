@@ -87,7 +87,7 @@ class UR5Env_ddpg_touch(MujocoEnv, EzPickle):
         self.in_home_pose = False
 
         # Do not show renders?
-        self.headless_mode = True
+        self.headless_mode = False
 
         # Do not print output in terminal?
         self.quiet = True
@@ -166,25 +166,30 @@ class UR5Env_ddpg_touch(MujocoEnv, EzPickle):
             print("\n################################################")
             print("TOUCHING TEXTILE WITH GRIPPER")
             print("##################################################\n")
-            done_reward = 1000
-            self.done_signal = True
+            self.terminated = True
             
         elif 1 in np.ndarray.tolist(self.data.contact.geom1) and 28 in np.ndarray.tolist(self.data.contact.geom2):
-            touchreward = 50
+            touchreward = 100
             print("Touch one gripper 28")
         elif 1 in np.ndarray.tolist(self.data.contact.geom1) and 30 in np.ndarray.tolist(self.data.contact.geom2):
-            touchreward = 50
+            touchreward = 100
             print("Touch one gripper 30")
-        elif len(np.ndarray.tolist(self.data.contact.geom1))>0:
-            step_penalty = -25
+        elif len(np.ndarray.tolist(self.data.contact.geom1))==0 and len(np.ndarray.tolist(self.data.contact.geom2))==0:
+            None
+        #elif len(np.ndarray.tolist(self.data.contact.geom1))>1:
+        else:
             print("Collision!")
             self.truncated = True
 
         # Summarize all rewardser
-        self.reward = done_reward + (70 - pow(distancetodummycenter*10, 2)) + step_penalty + touchreward #+ orientationreward
+        if self.truncated == True:
+            self.reward =  -500
+        elif self.terminated == True:
+            self.reward = 1000
+        else:
+            self.reward = (50 - pow(distancetodummycenter*10, 2)) + touchreward #+ orientationreward
+
         print("Reward: ", self.reward)
-        if self.terminated:
-            self.truncated = True
     
     def _set_action_space(self):
         self.action_space = self.action_space
