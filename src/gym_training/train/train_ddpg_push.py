@@ -65,7 +65,7 @@ class DeterministicActor(DeterministicMixin, Model):
     def compute(self, inputs, role):
         x = F.relu(self.linear_layer_1(inputs["states"]))
         x = F.relu(self.linear_layer_2(x))
-        return 180 * torch.tanh(self.action_layer(x)), {}  # Pendulum-v1 action_space is -2 to 2
+        return 314 * torch.tanh(self.action_layer(x)), {}  # Pendulum-v1 action_space is -2 to 2
 
 class DeterministicCritic(DeterministicMixin, Model):
     def __init__(self, observation_space, action_space, device, clip_actions=False):
@@ -86,7 +86,7 @@ class DeterministicCritic(DeterministicMixin, Model):
 # Note: the environment version may change depending on the gym version
 
 #env = gym.vector.make("InvertedPendulum-v4", num_envs=3, asynchronous=True)
-env = gym.vector.make("UR5_ddpg_touch", num_envs=1, asynchronous=True)
+env = gym.vector.make("UR5_ddpg_push", num_envs=10, asynchronous=True)
 
 env = wrap_env(env)
 
@@ -129,7 +129,7 @@ for model in models_ddpg.values():
 # Only modify some of the default configuration, visit its documentation to see all the options
 # https://skrl.readthedocs.io/en/latest/modules/skrl.agents.ddpg.html#configuration-and-hyperparameters
 cfg_ddpg = DDPG_DEFAULT_CONFIG.copy()
-cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=90, device=device)
+cfg_ddpg["exploration"]["noise"] = GaussianNoise(mean=0, std=60, device=device)
 #cfg_ddpg["exploration"]["timesteps"] = 1000
 cfg_ddpg["batch_size"] = 32
 cfg_ddpg["random_timesteps"] = 0
@@ -140,7 +140,7 @@ cfg_ddpg["critic_learning_rate"] = 1e-5
 cfg_ddpg["experiment"]["write_interval"] = 21
 cfg_ddpg["experiment"]["checkpoint_interval"] = 200
 cfg_ddpg["experiment"]["directory"] = 'Maries_runs'
-cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_touch_v4'
+cfg_ddpg["experiment"]["experiment_name"] = 'DDPG_push_v1'
 #cfg_ddpg["experiment"]["experiment_name"] = 'InvertedPendulum-v4_test_config_1'
 
 dir = cfg_ddpg["experiment"]["directory"] + '/' + cfg_ddpg["experiment"]["experiment_name"]
@@ -152,7 +152,7 @@ cfg_ddpg["experiment"]["experiment_name"] = experiment_name
 experiment_name = cfg_ddpg["experiment"]["experiment_name"]
 path_experiment = os.path.join(directory, experiment_name)
 
-# Run the git pull command
+# # Run the git pull command
 repo_name = 'p8_sewbot'
 
 # Find the repository path
@@ -171,15 +171,6 @@ if repository_path:
     print("Repository path:", repository_path)
 else:
     print("Repository not found.")
-
-git_pull=False
-if git_pull:
-    try:
-        subprocess.check_output(['git', 'pull'], cwd=repository_path)
-        print("Commands executed successfully.")
-    except subprocess.CalledProcessError as e:
-        print("Command execution failed:", e.output.decode())
-        sys.exit(1)
 
 if not os.path.exists(path_experiment):
     path_experiment = os.path.join(directory, experiment_name + str(1))
@@ -202,46 +193,9 @@ agent_ddpg = DDPG(models=models_ddpg,
                   action_space=env.action_space,
                   device=device)
 
-# load checkpoint
-inferrence = False
-if inferrence:
-    agent_ddpg.load("./runs_for_report/DDPG_touch_config_2/checkpoints/best_agent.pt")
-
 # Configure and instantiate the RL trainer
-cfg_trainer = {"timesteps": 2000, "headless": True}
+cfg_trainer = {"timesteps": 15000, "headless": True}
 trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent_ddpg)
-
-write_and_push=True
-
-if write_and_push:
-    # Write some files with experiment description
-    string = print_config(config=cfg_ddpg)
-
-    write_txt_file_from_str(str=string, file_path=output_file)
-
-    output_file = os.path.join(path_experiment, "run_config_csvfile.csv")
-
-    with open(output_file, 'w') as f:  # You will need 'wb' mode in Python 2.x
-        w = csv.DictWriter(f, cfg_ddpg.keys())
-        w.writeheader()
-        w.writerow(cfg_ddpg)
-
-    # filename_to_add = os.path.join(path_experiment, 'checkpoints/best_agent.pt')
-    # filename_to_add = filename_to_add.replace("./", "")
-    # add_file_to_gitattributes(filename_to_add)
-
-    # # Auto git push the new expiriment to git repo
-    # try:
-    #     subprocess.check_output(['git', 'lfs', 'install'], stderr=subprocess.STDOUT, cwd=repository_path)
-    #     subprocess.check_output(['git', 'add', '.gitattributes'], cwd=repository_path)
-    #     subprocess.check_output(['git', 'commit', '-m', 'Add .gitattributes file'], cwd=repository_path)
-    #     subprocess.check_output(['git', 'add', output_file], cwd=repository_path)
-    #     subprocess.check_output(['git', 'commit', '-m', 'Add .gitattributes file'], cwd=repository_path)
-    #     subprocess.check_output(['git', 'push'], cwd=repository_path)
-    #     print("Commands executed successfully.")
-    # except subprocess.CalledProcessError as e:
-    #     print("Command execution failed:", e.output.decode())
-    #     sys.exit(1)
 
 # start training
 trainer.train()

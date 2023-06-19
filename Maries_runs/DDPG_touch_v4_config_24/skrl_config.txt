@@ -15,13 +15,13 @@ exploration:\\
 { \phantom - } noise:skrl.resources.noises.torch.gaussian.GaussianNoise\\
 { \phantom - } initial\_scale:1.0\\
 { \phantom - } final\_scale:0.001\\
-{ \phantom - } timesteps:100\\
+{ \phantom - } timesteps:None\\
 rewards\_shaper:None\\
 experiment:\\
-{ \phantom - } directory:runs_for_report\\
-{ \phantom - } experiment\_name:DDPG_env_MarieTest_config_140\\
+{ \phantom - } directory:Maries_runs\\
+{ \phantom - } experiment\_name:DDPG_touch_v4_config_24\\
 { \phantom - } write\_interval:21\\
-{ \phantom - } checkpoint\_interval:100\\
+{ \phantom - } checkpoint\_interval:200\\
 { \phantom - } store\_separately:False\\
 { \phantom - } wandb:False\\
 { \phantom - } wandb\_kwargs:\\

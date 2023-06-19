@@ -82,7 +82,7 @@ agent_ddpg = DDPG(models=models_ddpg,
 
 # load checkpoint
 
-agent_ddpg.load("./Maries_runs/DDPG_touch_v4_config_3/checkpoints/best_agent.pt")
+agent_ddpg.load("./Maries_runs/DDPG_touch_v4_config_24/checkpoints/best_agent.pt")
 
 
 

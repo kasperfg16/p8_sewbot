@@ -27,7 +27,7 @@ def find_file(filename, search_path):
             return os.path.abspath(os.path.join(root, filename))
     return None
 
-class UR5Env_ddpg_touch(MujocoEnv, EzPickle):
+class UR5Env_ddpg_push(MujocoEnv, EzPickle):
     metadata = {
         "render_modes": [
             "human",
@@ -61,11 +61,6 @@ class UR5Env_ddpg_touch(MujocoEnv, EzPickle):
             np.deg2rad(45)*self.descretization,#np.deg2rad(90+60)*self.descretization,
             np.deg2rad(30)*self.descretization#-np.deg2rad(0)*self.descretization
             ]).astype(np.int16)
-        
-        # Example usage:
-        # result = index_difference(self.act_space_low, self.act_space_high)
-
-        # print('posible actions: ', calculate_product(result))
                 
         self.observation_space = spaces.Box(min(self.act_space_low), max(self.act_space_high), shape=(7,), dtype=np.float32)
             
@@ -79,6 +74,7 @@ class UR5Env_ddpg_touch(MujocoEnv, EzPickle):
         
         self.controller = MJ_Controller(model=self.model, data=self.data, mujoco_renderer=self.mujoco_renderer)
         self.step_counter = 0
+        self.distance_goal = 0
         self.goalcoverage = False
         self.area_stack = [0]*2
         self.move_reward = 0
@@ -87,7 +83,7 @@ class UR5Env_ddpg_touch(MujocoEnv, EzPickle):
         self.in_home_pose = False
 
         # Do not show renders?
-        self.headless_mode = False
+        self.headless_mode = True
 
         # Do not print output in terminal?
         self.quiet = True
@@ -97,18 +93,16 @@ class UR5Env_ddpg_touch(MujocoEnv, EzPickle):
     def step(self, action):
 
         self.info = {}
-        #action = action/self.descretization
         self.do_simulation(action, self.frame_skip)
-        time.sleep(0.2)
+        time.sleep(0.1)
         if not self.headless_mode:
             self.mujoco_renderer.render("human")
         self.step_counter += 1
 
         # ### Forstå hvorfor dette er nødvendigt
-        # if self.max_step == self.step_counter:
-        #     print("\n max steps")
-        #     #self.controller.stay(10, render=not self.headless_mode)
-        #     self.truncated = True
+        if self.max_step == self.step_counter:
+            print("max steps")
+            self.truncated = True
         
         # Compute reward after operation
         self.compute_reward()
@@ -120,10 +114,10 @@ class UR5Env_ddpg_touch(MujocoEnv, EzPickle):
     def _get_obs(self):
         # Joint positions
         joint_pos = self.data.qpos[self.controller.actuated_joint_ids].copy()
-        #print("controller joints:", self.controller.actuated_joint_ids)
 
         ## Textile pos
-        textile_pos = [-0.2, 0.4, 0.51]
+        textile_pos = self.model.geom_pos[1] #[-0.2, 0.4, 0.51]
+        
 
         # Concatenate joint_pos and image arrays along axis 0
         concatenated_array = np.concatenate([joint_pos, textile_pos]).astype(np.float32)
@@ -148,50 +142,43 @@ class UR5Env_ddpg_touch(MujocoEnv, EzPickle):
 
         return observation
 
-    # def reset(self, *, seed=None, options = None):
-    #     return super().reset(seed=seed, options=options)
-
     def compute_reward(self):# Define all the rewards possible      
         touchreward = 0
 
-        dummycenter = [-0.2, 0.4, 0.51]
-        distancetodummycenter = abs(math.dist(np.ndarray.tolist(self.data.xpos[12]),  dummycenter))
+        #textile_center = [-0.2, 0.4, 0.51]
+        goal_distance = [-0.4, 0.4, 0.51]
+        self.distance_goal = abs(math.dist(np.ndarray.tolist(self.model.geom_pos[1]), goal_distance))
 
-        print("Pos of gripper: ", distancetodummycenter)
-        # for i in range(self.model.ngeom):
-        #     print("Geom ID: {}, Geom Name: {}".format(i, mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_GEOM, i)))
-        #print(mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_GEOM, 'Textile'))
-        ## Touch reward
-        print("\n Contact geometries: ", np.ndarray.tolist(self.data.contact.geom1), np.ndarray.tolist(self.data.contact.geom2))
+        distance_edge = abs(math.dist(np.ndarray.tolist(self.data.xpos[12]), (np.subtract(np.ndarray.tolist(self.model.geom_pos[1]), [0.1, 0, 0]))))
 
-        if 2 in np.ndarray.tolist(self.data.contact.geom1) and all(x in np.ndarray.tolist(self.data.contact.geom2) for x in [28, 30]): #and len(np.ndarray.tolist(self.data.contact.geom1))<=2 
+        if self.distance_goal == 0:
             print("\n################################################")
-            print("TOUCHING TEXTILE WITH GRIPPER")
+            print("MOVED TEXTILE")
             print("##################################################\n")
             self.terminated = True
+
+        elif 1 in np.ndarray.tolist(self.data.contact.geom1) and all(x in np.ndarray.tolist(self.data.contact.geom2) for x in [28, 30]):
+            touchreward = 100
+
+        elif 1 in np.ndarray.tolist(self.data.contact.geom1) and 28 in np.ndarray.tolist(self.data.contact.geom2):
+            touchreward = 100
             
-        elif 2 in np.ndarray.tolist(self.data.contact.geom1) and 28 in np.ndarray.tolist(self.data.contact.geom2):#all(x in np.ndarray.tolist(self.data.contact.geom1) for x in [2]) 
-            touchreward = 200
-            print("Touch one gripper 28")
-        elif  2 in np.ndarray.tolist(self.data.contact.geom1) and 30 in np.ndarray.tolist(self.data.contact.geom2):
-            touchreward = 200
-            print("Touch one gripper 30")
+        elif 1 in np.ndarray.tolist(self.data.contact.geom1) and 30 in np.ndarray.tolist(self.data.contact.geom2):
+            touchreward = 100
+            
         elif len(np.ndarray.tolist(self.data.contact.geom1))==0 and len(np.ndarray.tolist(self.data.contact.geom2))==0:
             None
         else:
             print("Collision!")
             self.truncated = True
-
+        
+        # Summarize all rewardser
         if self.truncated == True:
             self.reward =  -500
         elif self.terminated == True:
             self.reward = 1000
-        elif self.max_step == self.step_counter:
-            print("\n max steps")
-            self.reward = -500 + touchreward  #100*(1/pow((distancetodummycenter*10), 3))
-            self.truncated = True
         else:
-            self.reward = 500*(1/pow((distancetodummycenter*10), 3)) + touchreward #+ orientationreward
+            self.reward = (20 - pow(self.distance_goal*10, 2)) + (20-pow(distance_edge*10, 2)) + touchreward #+ orientationreward
 
         print("Reward: ", self.reward)
     
